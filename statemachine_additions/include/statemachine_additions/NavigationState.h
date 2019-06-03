@@ -18,8 +18,10 @@
 #include <std_srvs/Trigger.h>
 #include <std_srvs/SetBool.h>
 #include <tf/transform_datatypes.h>
+#include <std_msgs/Bool.h>
 
 #define POSE_TOLERANCE 0.05
+#define WAIT_TIME 3.0
 
 namespace statemachine {
 
@@ -101,22 +103,24 @@ private:
 	tf::Pose _last_pose;
 	ros::Timer _idle_timer;
 	int _comparison_counter;
+	bool _exploration_mode;
 
+	ros::NodeHandle _nh;
 	ros::ServiceClient _get_navigation_goal_service;
 	ros::ServiceClient _add_failed_goal_service;
 	ros::ServiceClient _reset_failed_goals_service;
 	ros::ServiceClient _waypoint_visited_service;
 	ros::ServiceClient _waypoint_unreachable_service;
 	ros::ServiceClient _get_robot_pose_service;
-	ros::ServiceClient _start_stop_cmd_vel_recording_service;
-	ros::ServiceClient _request_reverse_path_usage_service;
-	ros::ServiceClient _reset_reverse_path_usage_service;
+	ros::ServiceClient _get_exploration_mode;
+	ros::Subscriber _get_goal_obsolete;
 
 	/**
 	 * @brief Callback for idle timer
 	 * @param event
 	 */
 	void timerCallback(const ros::TimerEvent& event);
+	void goalObsoleteCallback(const std_msgs::Bool::ConstPtr& msg);
 	void abortNavigation();
 	void comparePose();
 };

@@ -27,22 +27,13 @@ void NavigationState::onSetup() {
 			statemachine_msgs::WaypointUnreachable>("waypointUnreachable");
 	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
 			"getRobotPose");
-	_start_stop_cmd_vel_recording_service = nh.serviceClient<std_srvs::SetBool>(
-			"startStopCmdVelRecording");
 
 	_waypoint_following = false;
 	_goal_active = false;
 
-	_cmd_vel_recording = false;
-
-	_idle_timer = nh.createTimer(ros::Duration(10.0),
-			&NavigationState::timerCallback, this, true); //15 seconds idle timer
-	_idle_timer.stop();
-	_comparison_counter = 0;
-	_request_reverse_path_usage_service = nh.serviceClient<std_srvs::Trigger>(
-			"requestReversePathUsage");
-	_reset_reverse_path_usage_service = nh.serviceClient<std_srvs::Trigger>(
-			"resetReversePathUsage");
+	_get_exploration_mode = nh.serviceClient<std_srvs::Trigger>(
+			"getExplorationMode");
+	_exploration_mode = 1; //finish goals
 }
 
 void NavigationState::onEntry() {
@@ -64,12 +55,18 @@ void NavigationState::onEntry() {
 		abortNavigation();
 	}
 	_idle_timer.start();
-	std_srvs::SetBool srv2;
-	srv2.request.data = true;
-	if (_start_stop_cmd_vel_recording_service.call(srv2)) {
-		_cmd_vel_recording = true;
-	} else {
-		ROS_ERROR("Failed to call Cmd Vel Recording service");
+	if (!_waypoint_following) {
+		std_srvs::Trigger srv2;
+		if (_get_exploration_mode.call(srv2)) {
+			_exploration_mode = srv2.response.success;
+			if (_exploration_mode) {
+				_get_goal_obsolete = _nh.subscribe("statemachine/goalObsolete",
+						1, &NavigationState::goalObsoleteCallback, this);
+			}
+		} else {
+			ROS_ERROR("Failed to call Get Exploration Mode service");
+			abortNavigation();
+		}
 	}
 }
 
@@ -80,11 +77,6 @@ void NavigationState::onActive() {
 			if (_move_base_client.getState().isDone()) {
 				if (_move_base_client.getState().state_
 						== actionlib::SimpleClientGoalState::SUCCEEDED) {
-					std_srvs::Trigger srv;
-					if (!_reset_reverse_path_usage_service.call(srv)) {
-						ROS_ERROR(
-								"Failed to call Reset Reverse Path Usage service");
-					}
 					if (!_interrupt_occured) {
 						if (_waypoint_following) {
 							statemachine_msgs::WaypointVisited srv;
@@ -100,7 +92,7 @@ void NavigationState::onActive() {
 							} else {
 								_stateinterface->transitionToVolatileState(
 										_stateinterface->getPluginState(
-												ROUTINE_STATE, _routine));
+										ROUTINE_STATE, _routine));
 							}
 						} else {
 							std_srvs::Trigger srv;
@@ -110,7 +102,7 @@ void NavigationState::onActive() {
 							}
 							_stateinterface->transitionToVolatileState(
 									_stateinterface->getPluginState(
-											MAPPING_STATE));
+									MAPPING_STATE));
 						}
 					}
 				} else {
@@ -134,7 +126,7 @@ void NavigationState::onActive() {
 							}
 							_stateinterface->transitionToVolatileState(
 									_stateinterface->getPluginState(
-											CALCULATEGOAL_STATE));
+									CALCULATEGOAL_STATE));
 						}
 					}
 				}
@@ -156,11 +148,6 @@ void NavigationState::onExit() {
 	ROS_INFO("NavigationState exited");
 	if (_goal_active) {
 		_move_base_client.cancelGoal();
-	}
-	std_srvs::SetBool srv;
-	srv.request.data = false;
-	if (!_start_stop_cmd_vel_recording_service.call(srv)) {
-		ROS_ERROR("Failed to call Cmd Vel Recording service");
 	}
 }
 
@@ -224,19 +211,7 @@ void NavigationState::onInterrupt(int interrupt) {
 
 void NavigationState::timerCallback(const ros::TimerEvent& event) {
 	ROS_INFO("Navigation Timeout!");
-	std_srvs::Trigger srv;
-	if (_request_reverse_path_usage_service.call(srv)) {
-		if (srv.response.success) {
-			if (!_interrupt_occured) {
-				_stateinterface->transitionToVolatileState(
-						boost::make_shared<ReversePathState>());
-			}
-		} else {
-			abortNavigation();
-		}
-	} else {
-		ROS_ERROR("Failed to call Request Reverse Path Usage service");
-	}
+	abortNavigation();
 }
 
 void NavigationState::comparePose() {
@@ -262,6 +237,15 @@ void NavigationState::comparePose() {
 		} else {
 			ROS_ERROR("Failed to call Get Robot Pose service");
 		}
+	}
+}
+
+void NavigationState::goalObsoleteCallback(
+		const std_msgs::Bool::ConstPtr& msg) {
+	if (msg->data && !_interrupt_occured) {
+		_stateinterface->transitionToVolatileState(
+				_stateinterface->getPluginState(
+				CALCULATEGOAL_STATE));
 	}
 }
 

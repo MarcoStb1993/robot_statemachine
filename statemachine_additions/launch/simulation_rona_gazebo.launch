@@ -225,7 +225,7 @@
 	<!-- RViz für Exploration -->
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
 		args="-d $(find statemachine_additions)/config/gazebo_sim/rona_gazebo_simulation.rviz">
-		<remap from="/rona/exploration/target" to="/move_base_simple/goal" />
+		<remap from="/move_base_simple/goal" to="/rona/exploration/target" />
 	</node>
 	<include if="$(arg rviz)"
 		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">
