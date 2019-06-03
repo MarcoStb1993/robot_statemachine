@@ -1,0 +1,15 @@
+<library path="lib/libstatemachine_rviz_plugins">
+	<class type="statemachine::PlantWaypointTool"
+		base_class_type="rviz::Tool">
+		<description>
+			Tool for planting waypoints on the ground plane in rviz.
+		</description>
+	</class>
+	<class type="statemachine::StatemachineControlPanel"
+		base_class_type="rviz::Panel">
+		<description>
+			A panel widget for controlling the robot statemachine in
+			rviz.
+		</description>
+	</class>
+</library>

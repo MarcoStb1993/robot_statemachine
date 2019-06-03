@@ -1,0 +1,7 @@
+geometry_msgs/Pose goal 			# Goal for navigation
+bool waypointFollowing				# Waypoint following (=true) or exploration (=false)
+int64 waypointPosition				# Position of waypoint in array
+string routine						# Routine plugin name to be executed at waypoint
+---
+bool success                        # Indicate successful run of triggered service
+string message                      # Informational, e.g. for error messages

@@ -1,0 +1,6 @@
+---
+geometry_msgs/Pose goal 			# Goal for navigation
+geometry_msgs/PoseArray failedGoals # List of previously failed goals
+bool waypointFollowing				# Waypoint following (=true) or exploration (=false)
+int64 waypointPosition				# Position of waypoint in array
+string routine						# Routine plugin name to be executed at waypoint

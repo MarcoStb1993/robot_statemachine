@@ -1,0 +1,5 @@
+statemachine_msgs/Waypoint waypoint # Waypoint to be added
+int64 position                      # Position in array where to add waypoint (-1 defaults to end of array)
+---
+bool success                        # Indicate successful run of triggered service
+string message                      # Informational, e.g. for error messages

@@ -1,0 +1,2 @@
+---
+geometry_msgs/PoseArray failedGoals   # Array of all recently failed goals

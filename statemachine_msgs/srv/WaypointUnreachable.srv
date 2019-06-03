@@ -1,0 +1,4 @@
+int64 position                      # Position in array of visited waypoint
+---
+bool success                        # Indicate successful run of triggered service
+string message                      # Informational, e.g. for error messages

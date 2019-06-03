@@ -1,0 +1,3 @@
+---
+geometry_msgs/Twist[] cmdVelMsgs 	# Recorded cmd_vel messages
+bool waypointFollowing				# Waypoint following (=true) or exploration (=false)

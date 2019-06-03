@@ -1,0 +1,65 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(statemachine_rqt_plugins)
+
+add_compile_options(-std=c++11)
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rqt_gui
+  rqt_gui_cpp
+  statemachine_msgs
+)
+
+set(CMAKE_AUTORCC ON)
+find_package(cmake_modules REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+
+###################################
+## catkin specific configuration ##
+###################################
+
+catkin_package(
+  INCLUDE_DIRS ${INC_DIR}
+  LIBRARIES ${PROJECT_NAME}
+  ${CMAKE_CURRENT_BINARY_DIR}/..
+  ${CMAKE_CURRENT_BINARY_DIR}
+  CATKIN_DEPENDS roscpp rqt_gui rqt_gui_cpp
+)
+
+###########
+## Build ##
+###########
+
+## set variables for Statemachine Control node
+set(SRCS_CONTROLS
+  src/StatemachineControls.cpp
+)
+set(HDRS_CONTROLS
+  src/StatemachineControls.h
+)
+set(UIS_CONTROLS
+  src/statemachine_controls.ui
+)
+
+set(INC_DIR
+  include
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+##########################################################################################
+# qt5_wrap_cpp produces moc files for all headers listed
+# qt5_wrap_ui produces .h files for all .ui files listed
+
+## Statemachine Control:
+qt5_wrap_cpp(MOCS_SRCS_CONTROLS ${HDRS_CONTROLS})
+qt5_wrap_ui(UI_HEADER_CONTROLS ${UIS_CONTROLS})
+
+##########################################################################################
+
+include_directories(${INC_DIR} ${catkin_INCLUDE_DIRS})
+
+## Statemachine Control:
+add_library(statemachine_rqt_plugins ${SRCS_CONTROLS} ${MOCS_SRCS_CONTROLS} ${UI_HEADER_CONTROLS})
+target_link_libraries(statemachine_rqt_plugins ${catkin_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+add_dependencies(statemachine_rqt_plugins ${catkin_EXPORTED_TARGETS})

@@ -1,0 +1,2 @@
+---
+statemachine_msgs/WaypointArray waypointArray   # Array of all waypoints

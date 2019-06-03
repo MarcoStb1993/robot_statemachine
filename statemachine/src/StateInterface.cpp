@@ -1,0 +1,170 @@
+#include <statemachine/StateInterface.h>
+
+namespace statemachine {
+
+StateInterface::StateInterface() :
+		_plugin_loader("statemachine", "statemachine::BaseState") {
+	ros::NodeHandle private_nh("~");
+	private_nh.param<std::string>("calculate_goal_plugin",
+			_calculate_goal_plugin, "statemachine::CalculateGoalState");
+	private_nh.param<std::string>("navigation_plugin", _navigation_plugin,
+			"statemachine::NavigationState");
+	private_nh.param<std::string>("mapping_goal_plugin", _mapping_plugin,
+			"statemachine::MappingState");
+
+	ros::NodeHandle nh("statemachine");
+	_operation_mode_sub = nh.subscribe<statemachine_msgs::OperationMode>(
+			"operationMode", 1, &StateInterface::operationModeCallback, this);
+	_start_stop_exploration_service = nh.advertiseService(
+			"startStopExploration",
+			&StateInterface::startStopExplorationService, this);
+	_start_stop_waypoint_following_service = nh.advertiseService(
+			"startStopWaypointFollowing",
+			&StateInterface::startStopWaypointFollowingService, this);
+	_state_info_publisher = nh.advertise<std_msgs::String>("stateInfo", 10);
+
+	_current_state = NULL;
+	_next_state = NULL;
+	_on_interrupt = false;
+}
+
+StateInterface::~StateInterface() {
+	if (_current_state) {
+		_current_state->onExit();
+	}
+}
+
+boost::shared_ptr<statemachine::BaseState> StateInterface::getPluginState(
+		int plugin_type, std::string routine) {
+	switch (plugin_type) {
+	case 1: {
+		return _plugin_loader.createInstance(_calculate_goal_plugin);
+		break;
+	}
+	case 2: {
+		return _plugin_loader.createInstance(_navigation_plugin);
+		break;
+	}
+	case 3: {
+		return _plugin_loader.createInstance(_mapping_plugin);
+		break;
+	}
+	case 4: {
+		std::ostringstream s;
+		s << "statemachine::" << routine << "RoutineState";
+		return _plugin_loader.createInstance(s.str());
+		break;
+	}
+	default: {
+		ROS_INFO("No matching plugin type found, return to Idle State");
+		return boost::make_shared<IdleState>();
+		break;
+	}
+	}
+}
+
+void StateInterface::awake() {
+	// check 1st time awake
+	if (!_current_state && _next_state) {
+		_current_state = _next_state;
+		_current_state->onEntry();
+		_next_state = NULL;
+	}
+
+	if (_current_state) {
+		_current_state->onActive();
+
+		if (_next_state) // do transition
+		{
+			// do de-initialization of current state
+			_current_state->onExit();
+		}
+	}
+
+	if (_next_state) // do transition
+	{
+		// do transition to next state
+		_current_state = _next_state;
+		_next_state = NULL;
+
+		_current_state->onEntry();
+		std_msgs::String state_info;
+		state_info.data = _current_state->getName();
+		_state_info_publisher.publish(state_info);
+	}
+}
+
+void StateInterface::transitionToVolatileState(
+		boost::shared_ptr<statemachine::BaseState> nextState) {
+	if (_current_state != nextState) {
+		if (nextState != NULL && nextState->getStateInterface() == NULL) {
+			_next_state = nextState;
+			_next_state->setStateInterface(this);
+			_next_state->onSetup();
+		} else {
+			ROS_INFO(
+					"Next state instance invalid. Either NULL or already assigned state passed.");
+		}
+	}
+}
+
+void StateInterface::operationModeCallback(
+		const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
+	if (operation_mode->emergencyStop) {
+		_on_interrupt = true;
+		_current_state->onInterrupt(EMERGENCY_STOP_INTERRUPT);
+	} else if (operation_mode->mode == 2) {
+		_on_interrupt = true;
+		_current_state->onInterrupt(TELEOPERATION_INTERRUPT);
+	} else {
+		if (_on_interrupt) {
+			_on_interrupt = false;
+			_current_state->onInterrupt(INTERRUPT_END);
+		}
+	}
+
+}
+
+bool StateInterface::startStopExplorationService(
+		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+	ROS_INFO("Start/Stop exploration command received with request: %s",
+			req.data ? "true" : "false");
+	if (_current_state) {
+		bool success;
+		std::string message;
+		if (req.data) {
+			_current_state->onExplorationStart(success, message);
+		} else {
+			_current_state->onExplorationStop(success, message);
+		}
+		res.success = success;
+		res.message = message;
+	} else {
+		res.success = false;
+		res.message = "No active state";
+	}
+	return true;
+}
+
+bool StateInterface::startStopWaypointFollowingService(
+		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+	ROS_INFO("Start/Stop wayfollowing command received with request: %s",
+			req.data ? "true" : "false");
+	if (_current_state) {
+		bool success;
+		std::string message;
+		if (req.data) {
+			_current_state->onWaypointFollowingStart(success, message);
+		} else {
+			_current_state->onWaypointFollowingStop(success, message);
+		}
+		res.success = success;
+		res.message = message;
+	} else {
+		res.success = false;
+		res.message = "No active state";
+	}
+	return true;
+}
+
+}

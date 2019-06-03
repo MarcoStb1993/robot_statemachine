@@ -1,0 +1,41 @@
+controller_frequency: 5.0
+recovery_behaviour_enabled: true
+clearing_rotation_allowed: false
+max_planning_retries: 1
+planner_patience: 1
+base_local_planner: dwa_local_planner/DWAPlannerROS
+
+TrajectoryPlannerROS:
+  max_vel_x: -0.3
+  min_vel_x: -0.1
+  max_vel_theta: 1.0
+  min_in_place_vel_theta: 0.4
+
+  acc_lim_theta: 3.2
+  acc_lim_x: 2.5
+  acc_lim_y: 2.5
+
+  holonomic_robot: false
+  
+DWAPlannerROS:
+  # Robot configuration parameters  
+  acc_lim_x: 2.5
+  acc_lim_y: 0
+  acc_lim_th: 3.2
+
+  max_vel_x: 0.5
+  min_vel_x: 0.0
+  max_vel_y: 0
+  min_vel_y: 0
+
+  max_trans_vel: 0.5
+  min_trans_vel: 0.1
+  max_rot_vel: 1.0
+  min_rot_vel: 0.2
+
+  # Goal Tolerance Parameters
+  yaw_goal_tolerance: 0.2
+  xy_goal_tolerance: 0.2
+  latch_xy_goal_tolerance: false
+  
+  holonomic_robot: false

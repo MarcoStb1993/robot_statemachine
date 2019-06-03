@@ -1,0 +1,8 @@
+<!-- launch state machine rviz plugins-->
+<launch>
+    <arg name="update_frequency" default="20" />
+
+    <node pkg="statemachine_rviz_plugins" type="waypointFollowingVisualizationNode" name="waypointFollowingVisualizationNode" output="screen">
+        <param name="update_frequency" type="double" value="$(arg update_frequency)" />
+    </node>
+</launch>

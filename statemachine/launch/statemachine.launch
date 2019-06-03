@@ -1,0 +1,53 @@
+<!-- launch state machine -->
+<launch>
+	<arg name="update_frequency" default="20" />
+	<arg name="robot_frame" default="/base_footprint" />
+	<arg name="mapping_plugin" default="statemachine::MappingState" />
+	<arg name="calculate_goal_plugin"
+		default="statemachine::CalculateGoalState" />
+	<arg name="navigation_plugin"
+		default="statemachine::NavigationState" />
+	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
+	<arg name="teleoperation_cmd_vel_topic"
+		default="/teleoperation/cmd_vel" />
+	<arg name="cmd_vel_topic" default="/cmd_vel" />
+	<arg name="teleoperation_idle_timer" default="0.5" />"
+	<arg name="waypoint_routines" default="[]" />
+
+	<node pkg="statemachine" type="statemachineNode"
+		name="statemachineNode" output="screen">
+		<param name="update_frequency" type="double"
+			value="$(arg update_frequency)" />
+		<param name="calculate_goal_plugin" type="string"
+			value="$(arg calculate_goal_plugin)" />
+		<param name="navigation_plugin" type="string"
+			value="$(arg navigation_plugin)" />
+		<param name="mapping_plugin" type="string"
+			value="$(arg mapping_plugin)" />
+	</node>
+
+	<node pkg="statemachine" type="serviceProviderNode"
+		name="serviceProviderNode" output="screen">
+		<param name="update_frequency" type="double"
+			value="$(arg update_frequency)" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
+		<param name="autonomy_cmd_vel_topic" type="string"
+			value="$(arg autonomy_cmd_vel_topic)" />
+		<rosparam param="waypoint_routines" subst_value="True">$(arg waypoint_routines)</rosparam>
+	</node>
+
+	<node pkg="statemachine" type="robotControlMuxNode"
+		name="robotControlMuxNode" output="screen">
+		<param name="update_frequency" type="double"
+			value="$(arg update_frequency)" />
+		<param name="autonomy_cmd_vel_topic" type="string"
+			value="$(arg autonomy_cmd_vel_topic)" />
+		<param name="teleoperation_cmd_vel_topic" type="string"
+			value="$(arg teleoperation_cmd_vel_topic)" />
+		<param name="cmd_vel_topic" type="string"
+			value="$(arg cmd_vel_topic)" />
+		<param name="teleoperation_idle_timer" type="double"
+			value="$(arg teleoperation_idle_timer)" />
+	</node>
+</launch>

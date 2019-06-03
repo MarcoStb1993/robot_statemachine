@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(statemachine)
+
+add_compile_options(-std=c++11)
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  pluginlib
+  actionlib
+  actionlib_msgs
+  pcl_conversions
+  pcl_ros
+  statemachine_msgs
+)
+
+catkin_package(
+    INCLUDE_DIRS include
+)
+
+include_directories(include
+  ${catkin_INCLUDE_DIRS}
+)
+
+add_executable(statemachineNode
+	src/StatemachineNode.cpp
+    src/StateInterface.cpp
+    src/BaseState.cpp
+    src/BootState.cpp
+    src/IdleState.cpp
+    src/EmergencyStopState.cpp
+    src/WaypointFollowingState.cpp
+    src/TeleoperationState.cpp)
+    
+add_executable(serviceProviderNode
+	src/ServiceProviderNode.cpp
+	src/ServiceProvider.cpp)
+	
+add_executable(robotControlMuxNode
+	src/RobotControlMuxNode.cpp
+	src/RobotControlMux.cpp)
+
+target_link_libraries(statemachineNode
+  ${catkin_LIBRARIES}
+  )
+target_link_libraries(serviceProviderNode
+  ${catkin_LIBRARIES}
+  )
+target_link_libraries(robotControlMuxNode
+  ${catkin_LIBRARIES}
+  )
+  
+add_dependencies(statemachineNode ${catkin_EXPORTED_TARGETS})
+add_dependencies(serviceProviderNode ${catkin_EXPORTED_TARGETS})
+add_dependencies(robotControlMuxNode ${catkin_EXPORTED_TARGETS})
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

@@ -1,0 +1,5 @@
+uint8 mode							# Waypoint following mode
+bool reverse						# Driving from start to end (=false) or end to start (=true)
+---
+bool success                        # Indicate successful run of triggered service
+string message                      # Informational, e.g. for error messages
