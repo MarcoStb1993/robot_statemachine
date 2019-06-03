@@ -5,8 +5,6 @@ namespace statemachine {
 ServiceProvider::ServiceProvider() {
 	ros::NodeHandle private_nh("~");
 	private_nh.param<std::string>("robot_frame", _robot_frame, "/base_link");
-	private_nh.param<std::string>("autonomy_cmd_vel_topic",
-			_autonomy_cmd_vel_topic, "/cmd_vel");
 	private_nh.param<std::vector<std::string>>("waypoint_routines",
 			_waypoint_routines, std::vector<std::string>());
 
@@ -46,29 +44,18 @@ ServiceProvider::ServiceProvider() {
 	_reset_failed_goals_service = nh.advertiseService("resetFailedGoals",
 			&ServiceProvider::resetFailedGoals, this);
 
-	_start_stop_cmd_vel_recording_service = nh.advertiseService(
-			"startStopCmdVelRecording",
-			&ServiceProvider::startStopCmdVelRecording, this);
-	_get_cmd_vel_recording_service = nh.advertiseService("getCmdVelRecording",
-			&ServiceProvider::getCmdVelRecording, this);
-	_request_reverse_path_usage_service = nh.advertiseService(
-			"requestReversePathUsage",
-			&ServiceProvider::requestReversePathUsage, this);
-	_reset_reverse_path_usage_service = nh.advertiseService(
-			"resetReversePathUsage", &ServiceProvider::resetReversePathUsage,
-			this);
-	_reset_cmd_vel_recording_service = nh.advertiseService(
-			"resetCmdVelRecording", &ServiceProvider::resetCmdVelRecording,
-			this);
-
-	_set_reverse_mode_service = nh.advertiseService("setReverseMode",
-			&ServiceProvider::setReverseMode, this);
-	_get_reverse_mode_service = nh.advertiseService("getReverseMode",
-			&ServiceProvider::getReverseMode, this);
-	_reverse_mode_publisher = nh.advertise<std_msgs::Bool>("reverseMode", 10);
-
 	_get_robot_pose_service = nh.advertiseService("getRobotPose",
 			&ServiceProvider::getRobotPose, this);
+
+	_set_exploration_mode_service = nh.advertiseService("setExplorationMode",
+			&ServiceProvider::setExplorationMode, this);
+	_get_exploration_mode_service = nh.advertiseService("getExplorationMode",
+			&ServiceProvider::getExplorationMode, this);
+	_frontier_goals_subscriber = nh.subscribe("frontiers", 1,
+			&ServiceProvider::frontiersCallback, this);
+	_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete", 1);
+	_exploration_mode_publisher = nh.advertise<std_msgs::Bool>(
+			"explorationMode", 1);
 
 	_waypoint_array.header.seq = 0;
 	_waypoint_array.header.stamp = ros::Time::now();
@@ -80,18 +67,18 @@ ServiceProvider::ServiceProvider() {
 	_waypoint_following = false;
 	_waypoint_position = -1;
 
-	double controller_frequency;
-	_nh.param("/move_base/controller_frequency", controller_frequency, 20.0);
-	_msg_buffer_size = controller_frequency * 2; //2 seconds recorded cmd vel messages
-	_cmd_vel_msgs.set_capacity(_msg_buffer_size);
-	_reverse_path_used = false;
-
-	_reverse_mode_active = false;
-
+	_goal_obsolete = false;
+	_exploration_mode = 0;
 }
 
 ServiceProvider::~ServiceProvider() {
 
+}
+
+void ServiceProvider::publishTopics() {
+	publishWaypoints();
+	publishGoalObsolete();
+	publishExplorationModes();
 }
 
 bool ServiceProvider::addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
@@ -266,121 +253,6 @@ bool ServiceProvider::resetFailedGoals(std_srvs::Trigger::Request &req,
 	res.message = "Failed goals reset";
 	return true;
 }
-
-bool ServiceProvider::startStopCmdVelRecording(std_srvs::SetBool::Request &req,
-		std_srvs::SetBool::Response &res) {
-	if (req.data) {
-		ros::NodeHandle nh;
-		_cmd_vel_subscriber = nh.subscribe(_autonomy_cmd_vel_topic, 10,
-				&ServiceProvider::cmdVelCallback, this);
-		res.message = "Started Cmd Vel recording";
-	} else {
-		_cmd_vel_subscriber.shutdown();
-		res.message = "Stopped Cmd Vel recording";
-	}
-	res.success = 1;
-	return true;
-}
-
-bool ServiceProvider::getCmdVelRecording(
-		statemachine_msgs::GetCmdVelRecording::Request &req,
-		statemachine_msgs::GetCmdVelRecording::Response &res) {
-	std::vector<geometry_msgs::Twist> cmd_vel_msgs;
-	for (int i = 0; i < _cmd_vel_msgs.size(); i++) {
-		cmd_vel_msgs.push_back(_cmd_vel_msgs[i]);
-	}
-	res.cmdVelMsgs = cmd_vel_msgs;
-	res.waypointFollowing = _waypoint_following;
-	return true;
-}
-
-bool ServiceProvider::resetCmdVelRecording(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	_cmd_vel_msgs.clear();
-	res.success = 1;
-	res.message = "Cmd Vel recording reset";
-	return true;
-}
-
-bool ServiceProvider::requestReversePathUsage(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	if (!_reverse_path_used) {
-		res.success = 1;
-		res.message = "Reverse Path available, used now";
-		_reverse_path_used = true;
-		ROS_INFO("Reverse Path Used");
-	} else {
-		res.success = 0;
-		res.message = "Reverse Path not available";
-	}
-	return true;
-}
-
-bool ServiceProvider::resetReversePathUsage(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	if (_reverse_path_used) {
-		res.success = 1;
-		res.message = "Reverse Path Usage reset";
-		_reverse_path_used = false;
-		ROS_INFO("Reverse Path Available");
-	} else {
-		res.success = 0;
-		res.message = "Reverse Path was available";
-	}
-	return true;
-}
-
-void ServiceProvider::cmdVelCallback(
-		const geometry_msgs::Twist::ConstPtr& msg) {
-	if (msg->linear.x != 0 || msg->linear.y != 0 || msg->linear.z != 0
-			|| msg->angular.x != 0 || msg->angular.y != 0
-			|| msg->angular.z != 0) {
-		_cmd_vel_msgs.push_back(*msg);
-	}
-}
-
-bool ServiceProvider::setReverseMode(std_srvs::SetBool::Request &req,
-		std_srvs::SetBool::Response &res) {
-	if (req.data) {
-		if (_reverse_mode_active) {
-			res.success = 0;
-			res.message = "Already in reverse mode";
-		} else {
-			_reverse_mode_active = true;
-			res.success = 1;
-			res.message = "Set to reverse mode";
-		}
-	} else {
-		if (_reverse_mode_active) {
-			res.success = 1;
-			res.message = "Set to forward mode";
-			_reverse_mode_active = false;
-		} else {
-			res.success = 0;
-			res.message = "Already in forward mode";
-		}
-	}
-	return true;
-}
-
-bool ServiceProvider::getReverseMode(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	if (_reverse_mode_active) {
-		res.success = true;
-		res.message = "Reverse mode active";
-	} else {
-		res.success = false;
-		res.message = "Forward mode active";
-	}
-	return true;
-}
-
-void ServiceProvider::publishReverseMode() {
-	std_msgs::Bool msg;
-	msg.data = _reverse_mode_active;
-	_reverse_mode_publisher.publish(msg);
-}
-
 bool ServiceProvider::getRobotPose(
 		statemachine_msgs::GetRobotPose::Request &req,
 		statemachine_msgs::GetRobotPose::Response &res) {
@@ -398,9 +270,53 @@ bool ServiceProvider::getRobotPose(
 	return true;
 }
 
-void ServiceProvider::publishTopics() {
-	publishWaypoints();
-	publishReverseMode();
+bool ServiceProvider::getExplorationMode(std_srvs::Trigger::Request &req,
+		std_srvs::Trigger::Response &res) {
+	res.success = _exploration_mode;
+	res.message = "Exploration mode returned";
+	return true;
+}
+
+bool ServiceProvider::setExplorationMode(std_srvs::SetBool::Request &req,
+		std_srvs::SetBool::Response &res) {
+	_exploration_mode = req.data;
+	res.success = 1;
+	res.message = "Exploration mode set";
+	return true;
+}
+
+void ServiceProvider::frontiersCallback(
+		const geometry_msgs::PoseArray::ConstPtr& frontiers) {
+	_frontiers = *frontiers;
+}
+
+bool ServiceProvider::navGoalIncludedInFrontiers() {
+	double tolerance = 0.05;
+	for (auto iterator : _frontiers.poses) {
+		double x_dif = abs(_navigation_goal.position.x - iterator.position.x);
+		double y_dif = abs(_navigation_goal.position.y - iterator.position.y);
+		if (x_dif <= tolerance && y_dif <= tolerance) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void ServiceProvider::publishGoalObsolete() {
+	if (_exploration_mode == 1 && !navGoalIncludedInFrontiers()) {
+		_goal_obsolete = true;
+	} else {
+		_goal_obsolete = false;
+	}
+	std_msgs::Bool msg;
+	msg.data = _goal_obsolete;
+	_goal_obsolete_publisher.publish(msg);
+}
+
+void ServiceProvider::publishExplorationModes() {
+	std_msgs::Bool msg;
+	msg.data = _exploration_mode;
+	_exploration_mode_publisher.publish(msg);
 }
 
 }

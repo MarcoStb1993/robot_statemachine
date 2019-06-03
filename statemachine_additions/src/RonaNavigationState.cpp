@@ -14,18 +14,18 @@ RonaNavigationState::~RonaNavigationState() {
 void RonaNavigationState::onSetup() {
 	ROS_INFO("RonaNavigationState setup");
 	ros::NodeHandle nh("statemachine");
-	_get_navigation_goal_service = nh.serviceClient
-			< statemachine_msgs::GetNavigationGoal > ("getNavigationGoal");
-	_add_failed_goal_service = nh.serviceClient
-			< statemachine_msgs::AddFailedGoal > ("addFailedGoal");
-	_reset_failed_goals_service = nh.serviceClient < std_srvs::Trigger
-			> ("resetFailedGoals");
-	_waypoint_visited_service = nh.serviceClient
-			< statemachine_msgs::WaypointVisited > ("waypointVisited");
-	_waypoint_unreachable_service = nh.serviceClient
-			< statemachine_msgs::WaypointUnreachable > ("waypointUnreachable");
-	_get_robot_pose_service = nh.serviceClient < statemachine_msgs::GetRobotPose
-			> ("getRobotPose");
+	_get_navigation_goal_service = nh.serviceClient<
+			statemachine_msgs::GetNavigationGoal>("getNavigationGoal");
+	_add_failed_goal_service =
+			nh.serviceClient<statemachine_msgs::AddFailedGoal>("addFailedGoal");
+	_reset_failed_goals_service = nh.serviceClient<std_srvs::Trigger>(
+			"resetFailedGoals");
+	_waypoint_visited_service = nh.serviceClient<
+			statemachine_msgs::WaypointVisited>("waypointVisited");
+	_waypoint_unreachable_service = nh.serviceClient<
+			statemachine_msgs::WaypointUnreachable>("waypointUnreachable");
+	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
+			"getRobotPose");
 
 	_waypoint_following = false;
 	_goal_active = false;
@@ -39,10 +39,15 @@ void RonaNavigationState::onSetup() {
 
 	_sirona_state_subscriber = _nh.subscribe("rona/sirona/state", 1,
 			&RonaNavigationState::sironaStateCallback, this);
-	_nav_goal_publisher = _nh.advertise < geometry_msgs::PoseStamped
-			> ("rona/exploration/target", 1, true);
-	_nav_stop_publisher = _nh.advertise < std_msgs::Bool
-			> ("rona/move/pause", 1, true);
+	_nav_goal_publisher = _nh.advertise<geometry_msgs::PoseStamped>(
+			"rona/exploration/target", 1, true);
+	_nav_stop_publisher = _nh.advertise<std_msgs::Bool>("rona/move/pause", 1,
+			true);
+
+	_get_exploration_mode = nh.serviceClient<std_srvs::Trigger>(
+			"getExplorationMode");
+	_exploration_mode = 1; //finish goals
+
 }
 
 void RonaNavigationState::onEntry() {
@@ -64,10 +69,23 @@ void RonaNavigationState::onEntry() {
 		abortNavigation();
 	}
 	_idle_timer.start();
+	if (!_waypoint_following) {
+		std_srvs::Trigger srv2;
+		if (_get_exploration_mode.call(srv2)) {
+			_exploration_mode = srv2.response.success;
+			if (_exploration_mode) {
+				_get_goal_obsolete = _nh.subscribe("statemachine/goalObsolete",
+						1, &RonaNavigationState::goalObsoleteCallback, this);
+			}
+		} else {
+			ROS_ERROR("Failed to call Get Exploration Mode service");
+			abortNavigation();
+		}
+	}
 }
 
 void RonaNavigationState::onActive() {
-	//ROS_INFO("RonaNavigationState active");
+//ROS_INFO("RonaNavigationState active");
 	if (_goal_active) {
 		double passed_time = (ros::Time::now() - _nav_start_time).toSec();
 		if (passed_time > WAIT_TIME) {
@@ -86,7 +104,7 @@ void RonaNavigationState::onActive() {
 						} else {
 							_stateinterface->transitionToVolatileState(
 									_stateinterface->getPluginState(
-											ROUTINE_STATE, _routine));
+									ROUTINE_STATE, _routine));
 						}
 					} else {
 						std_srvs::Trigger srv;
@@ -95,7 +113,8 @@ void RonaNavigationState::onActive() {
 									"Failed to call Reset Failed Goals service");
 						}
 						_stateinterface->transitionToVolatileState(
-								_stateinterface->getPluginState(MAPPING_STATE));
+								_stateinterface->getPluginState(
+								MAPPING_STATE));
 					}
 				}
 			} else if (_sirona_state.state == _sirona_state.ABORTED
@@ -119,7 +138,7 @@ void RonaNavigationState::onActive() {
 						}
 						_stateinterface->transitionToVolatileState(
 								_stateinterface->getPluginState(
-										CALCULATEGOAL_STATE));
+								CALCULATEGOAL_STATE));
 					}
 				}
 			} else {
@@ -238,6 +257,15 @@ void RonaNavigationState::comparePose() {
 
 void RonaNavigationState::sironaStateCallback(const rona_msgs::State& msg) {
 	_sirona_state = msg;
+}
+
+void RonaNavigationState::goalObsoleteCallback(
+		const std_msgs::Bool::ConstPtr& msg) {
+	if (msg->data && !_interrupt_occured) {
+		_stateinterface->transitionToVolatileState(
+				_stateinterface->getPluginState(
+				CALCULATEGOAL_STATE));
+	}
 }
 
 void RonaNavigationState::abortNavigation() {

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>416</width>
-    <height>474</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -176,6 +176,20 @@ color: rgba(255,255,255,1);</string>
             <property name="text">
              <string>Start</string>
             </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="exploration_mode_box">
+            <item>
+             <property name="text">
+              <string>Finish</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Interrupt</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

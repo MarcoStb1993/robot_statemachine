@@ -46,7 +46,6 @@ protected slots:
 	void startStopExploration();
 	void startStopWaypointFollowing();
 	void resetWaypoints();
-	void setWaypointFollowingMode();
 	void addWaypoint();
 	void setReverseMode();
 	void emergencyStop();
@@ -71,9 +70,11 @@ private:
 	ros::ServiceClient _set_rona_reverse_off;
 	ros::ServiceClient _get_robot_pose_client;
 	ros::ServiceClient _set_operation_mode_client;
+	ros::ServiceClient _set_exploration_mode_client;
 	ros::Subscriber _state_info_subscriber;
 	ros::Subscriber _reverse_mode_subscriber;
 	ros::Subscriber _operation_mode_subcriber;
+	ros::Subscriber _exploration_mode_subscriber;
 
 	/**
 	 * @brief Is the exploration currently running
@@ -99,6 +100,10 @@ private:
 	 * List of all available waypoint routines
 	 */
 	std::vector<std::string> _waypoint_routines;
+	/**
+	 * Mode of exploration (0=complete goal, 1=interrupt goal when frontier vanished)
+	 */
+	bool _exploration_mode;
 
 	void callSetOperationMode();
 	void stateInfoCallback(const std_msgs::String::ConstPtr& state_info);
@@ -108,6 +113,8 @@ private:
 	void initCommunications();
 	void connectSlots();
 	void initRoutineComboBox();
+	void setWaypointFollowingMode();
+	void setExplorationMode();
 	void updateOperationModeGUI();
 
 };

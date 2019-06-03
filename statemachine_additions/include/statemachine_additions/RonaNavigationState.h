@@ -103,6 +103,7 @@ private:
 	rona_msgs::State _sirona_state;
 	ros::Time _nav_start_time;
 	int _nav_goal_published_counter;
+	bool _exploration_mode;
 
 	ros::ServiceClient _get_navigation_goal_service;
 	ros::ServiceClient _add_failed_goal_service;
@@ -110,6 +111,8 @@ private:
 	ros::ServiceClient _waypoint_visited_service;
 	ros::ServiceClient _waypoint_unreachable_service;
 	ros::ServiceClient _get_robot_pose_service;
+	ros::ServiceClient _get_exploration_mode;
+	ros::Subscriber _get_goal_obsolete;
 
 	ros::NodeHandle _nh;
 	ros::Subscriber _sirona_state_subscriber;
@@ -122,6 +125,7 @@ private:
 	 */
 	void timerCallback(const ros::TimerEvent& event);
 	void sironaStateCallback(const rona_msgs::State& msg);
+	void goalObsoleteCallback(const std_msgs::Bool::ConstPtr& msg);
 	void abortNavigation();
 	void comparePose();
 };

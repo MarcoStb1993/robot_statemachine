@@ -11,6 +11,7 @@
 #include <statemachine_msgs/SetWaypointFollowingMode.h>
 #include <statemachine_msgs/SetWaypointRoutine.h>
 #include <statemachine_msgs/GetWaypointRoutines.h>
+#include <std_srvs/Trigger.h>
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
@@ -18,17 +19,12 @@
 #include <statemachine_msgs/GetNavigationGoal.h>
 #include <statemachine_msgs/AddFailedGoal.h>
 #include <statemachine_msgs/GetFailedGoals.h>
-#include <statemachine_msgs/GetCmdVelRecording.h>
-#include <std_srvs/Trigger.h>
-#include <std_srvs/SetBool.h>
-#include <geometry_msgs/Twist.h>
-#include <std_srvs/Empty.h>
-#include <std_msgs/Bool.h>
-#include <boost/circular_buffer.hpp>
 
 #include <statemachine_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
-#include <geometry_msgs/Pose.h>
+
+#include <std_srvs/SetBool.h>
+#include <std_msgs/Bool.h>
 
 namespace statemachine {
 
@@ -59,19 +55,14 @@ private:
 	ros::ServiceServer _get_failed_goals_service;
 	ros::ServiceServer _reset_failed_goals_service;
 
-	ros::ServiceServer _start_stop_cmd_vel_recording_service;
-	ros::ServiceServer _get_cmd_vel_recording_service;
-	ros::ServiceServer _reset_cmd_vel_recording_service;
-	ros::ServiceServer _request_reverse_path_usage_service;
-	ros::ServiceServer _reset_reverse_path_usage_service;
-	ros::Subscriber _cmd_vel_subscriber;
-
-	ros::ServiceServer _set_reverse_mode_service;
-	ros::ServiceServer _get_reverse_mode_service;
-	ros::Publisher _reverse_mode_publisher;
-
 	ros::ServiceServer _get_robot_pose_service;
 	tf::TransformListener _transform_listener;
+
+	ros::ServiceServer _set_exploration_mode_service;
+	ros::ServiceServer _get_exploration_mode_service;
+	ros::Subscriber _frontier_goals_subscriber;
+	ros::Publisher _goal_obsolete_publisher;
+	ros::Publisher _exploration_mode_publisher;
 
 	/**
 	 * Current navigation goal
@@ -103,15 +94,6 @@ private:
 	 */
 	std::vector<std::string> _waypoint_routines;
 
-	bool _reverse_path_used;
-	boost::circular_buffer<geometry_msgs::Twist> _cmd_vel_msgs;
-	int _msg_buffer_size;
-	std::string _autonomy_cmd_vel_topic;
-
-	/**
-	 * Is currently driving in reverse
-	 */
-	bool _reverse_mode_active;
 	/**
 	 * @brief ROS transform from map to robot frame
 	 */
@@ -121,6 +103,18 @@ private:
 	 * @brief Robot frame id
 	 */
 	std::string _robot_frame;
+	/**
+	 * List of all extracted frontier centers
+	 */
+	geometry_msgs::PoseArray _frontiers;
+	/**
+	 * Is navigation goal still a frontier
+	 */
+	bool _goal_obsolete;
+	/**
+	 * Mode of exploration (0=complete goal, 1=interrupt goal when frontier vanished)
+	 */
+	bool _exploration_mode;
 
 	bool addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
 			statemachine_msgs::AddWaypoint::Response &res);
@@ -158,26 +152,17 @@ private:
 	bool resetFailedGoals(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 
-	bool startStopCmdVelRecording(std_srvs::SetBool::Request &req,
-			std_srvs::SetBool::Response &res);
-	bool getCmdVelRecording(statemachine_msgs::GetCmdVelRecording::Request &req,
-			statemachine_msgs::GetCmdVelRecording::Response &res);
-	bool resetCmdVelRecording(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	bool requestReversePathUsage(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	bool resetReversePathUsage(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg);
-
-	bool setReverseMode(std_srvs::SetBool::Request &req,
-			std_srvs::SetBool::Response &res);
-	bool getReverseMode(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	void publishReverseMode();
-
 	bool getRobotPose(statemachine_msgs::GetRobotPose::Request &req,
 			statemachine_msgs::GetRobotPose::Response &res);
+
+	bool getExplorationMode(std_srvs::Trigger::Request &req,
+			std_srvs::Trigger::Response &res);
+	bool setExplorationMode(std_srvs::SetBool::Request &req,
+			std_srvs::SetBool::Response &res);
+	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
+	bool navGoalIncludedInFrontiers();
+	void publishGoalObsolete();
+	void publishExplorationModes();
 };
 
 }

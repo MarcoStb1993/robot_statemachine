@@ -8,12 +8,12 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   actionlib
   actionlib_msgs
-  pcl_conversions
-  pcl_ros
   statemachine
   statemachine_msgs
   visualization_msgs
   rona_msgs
+  pcl_conversions
+  pcl_ros
   #exploration_msgs
 )
 
@@ -35,8 +35,9 @@ add_library(statemachine_plugins
 
 add_executable(unboundExplorationNode src/UnboundExplorationNode.cpp)
 add_executable(bootUpNode src/BootUpNode.cpp)
-add_executable(goalInterceptNode src/GoalInterceptNode.cpp)
-add_executable(frontiersMarkerToPointcloudNode src/FrontiersMarkerToPointcloudNode.cpp)
+add_executable(additionsServiceProviderNode
+	src/AdditionsServiceProviderNode.cpp
+	src/AdditionsServiceProvider.cpp)
 
 target_link_libraries(statemachine_plugins
   ${catkin_LIBRARIES}
@@ -47,15 +48,11 @@ target_link_libraries(unboundExplorationNode
 target_link_libraries(bootUpNode
   ${catkin_LIBRARIES}
   )
-target_link_libraries(goalInterceptNode
-  ${catkin_LIBRARIES}
-  )
-  target_link_libraries(frontiersMarkerToPointcloudNode
+  target_link_libraries(additionsServiceProviderNode
   ${catkin_LIBRARIES}
   )
 
 add_dependencies(statemachine_plugins ${catkin_EXPORTED_TARGETS})
 add_dependencies(unboundExplorationNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(bootUpNode ${catkin_EXPORTED_TARGETS})
-add_dependencies(goalInterceptNode ${catkin_EXPORTED_TARGETS})
-add_dependencies(frontiersMarkerToPointcloudNode ${catkin_EXPORTED_TARGETS})
+add_dependencies(additionsServiceProviderNode ${catkin_EXPORTED_TARGETS})

@@ -7,9 +7,6 @@
 #include <statemachine/EmergencyStopState.h>
 #include <statemachine/TeleoperationState.h>
 #include <statemachine/StateInterface.h>
-#include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
-#include <boost/foreach.hpp>
 #include <geometry_msgs/PoseArray.h>
 #include <statemachine_msgs/SetNavigationGoal.h>
 #include <statemachine_msgs/GetFailedGoals.h>
@@ -86,15 +83,14 @@ public:
 	 * @brief Called when new frontiers are received
 	 * @param PointCloud2 with all frontier points
 	 */
-	void frontiersCallback(
-			const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& frontiers);
+	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
 
 	/**
 	 * @brief Checks if a point is different from a previously failed goals including a small tolerance
 	 * @param Point that is checked against previously failed goals
 	 * @return Returns if the given point is different from the previously failed goals
 	 */
-	bool differentFromFailedGoals(pcl::PointXYZ point);
+	bool differentFromFailedGoals(geometry_msgs::Point point);
 
 private:
 
@@ -102,7 +98,7 @@ private:
 	ros::Subscriber _frontiers_sub;
 	std::vector<geometry_msgs::Pose> _failed_goals;
 	geometry_msgs::Pose _goal;
-	std::vector<pcl::PointXYZ> _frontier_points;
+	geometry_msgs::PoseArray _frontier_points;
 	bool _frontiers_received;
 
 	ros::ServiceClient _get_failed_goals_service;

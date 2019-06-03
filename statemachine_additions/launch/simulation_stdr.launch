@@ -50,6 +50,13 @@
 
 	<node pkg="statemachine_additions" type="bootUpNode"
 		name="bootUpNode" output="screen" />
+	
+	<node pkg="statemachine_additions" type="additionsServiceProviderNode"
+		name="additionsServiceProviderNode" >
+		<param name="update_frequency" value="20" />
+		<param name="autonomy_cmd_vel_topic"
+			value="$(arg autonomy_cmd_vel_topic)" />
+	</node>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
 		<param name="base_frame" value="$(arg robot_frame)" />
@@ -99,16 +106,6 @@
 			<param name="min_frontier_size" value="0.75" />
 			<remap from="/move_base" to="/frontier_move_base" />
 		</node>
-
-		<node
-			if="$(eval goal_plugin == 'statemachine::CalculateGoalState')"
-			pkg="statemachine_additions" type="frontiersMarkerToPointcloudNode"
-			name="frontiersMarkerToPointcloudNode" />
-
-		<node
-			if="$(eval goal_plugin == 'statemachine::CalculateGoalState')"
-			pkg="statemachine_additions" type="goalInterceptNode"
-			name="goalInterceptNode" output="screen" />
 	</group>
 
 	<!-- Frontier Exploration -->
@@ -142,11 +139,6 @@
 			<param name="goalx" value="5.0" />
 			<param name="goaly" value="5.0" />
 		</node>
-
-		<node
-			if="$(eval goal_plugin == 'statemachine::CalculateGoalState')"
-			pkg="statemachine_additions" type="goalInterceptNode"
-			name="goalInterceptNode" output="screen" />
 	</group>
 
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
