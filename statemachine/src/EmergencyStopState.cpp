@@ -58,8 +58,8 @@ void EmergencyStopState::onInterrupt(int interrupt) {
 	if (interrupt == INTERRUPT_END) {
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<IdleState>());
+		_interrupt_occured = true;
 	}
-	_interrupt_occured = true;
 }
 
 } /* namespace statemachine */

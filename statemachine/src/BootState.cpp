@@ -26,9 +26,6 @@ void BootState::onActive() {
 	std_srvs::SetBool srv;
 	srv.request.data = true;
 	if (_bootupClient.call(srv)) {
-		ROS_INFO("Bootup %s -> message: %s",
-				srv.response.success ? "finished" : "running",
-				srv.response.message.c_str());
 		if (srv.response.success) {
 			_stateinterface->transitionToVolatileState(
 					boost::make_shared<IdleState>());
@@ -65,8 +62,8 @@ void BootState::onInterrupt(int interrupt) {
 	if (interrupt == EMERGENCY_STOP_INTERRUPT) {
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<EmergencyStopState>());
+		_interrupt_occured = true;
 	}
-	_interrupt_occured = true;
 }
 
 }

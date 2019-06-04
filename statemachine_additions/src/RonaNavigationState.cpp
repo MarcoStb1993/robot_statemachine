@@ -27,7 +27,7 @@ void RonaNavigationState::onSetup() {
 	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
 			"getRobotPose");
 
-	_waypoint_following = false;
+	_navigation_mode = -1;
 	_goal_active = false;
 	_comparison_counter = 0;
 	_sirona_state.state = -1;
@@ -56,20 +56,29 @@ void RonaNavigationState::onEntry() {
 	if (_get_navigation_goal_service.call(srv)) {
 		_nav_goal = srv.response.goal;
 		_failed_goals = srv.response.failedGoals.poses;
-		_waypoint_following = srv.response.waypointFollowing;
+		_navigation_mode = srv.response.navigationMode;
 		_waypoint_position = srv.response.waypointPosition;
 		_routine = srv.response.routine;
-		if (_waypoint_following) {
-			_name = "Navigation: Waypoint Following";
-		} else {
+		switch (_navigation_mode) {
+		case EXPLORATION:
 			_name = "Navigation: Exploration";
+			break;
+		case WAYPOINT_FOLLOWING:
+			_name = "Navigation: Waypoint Following";
+			break;
+		case SIMPLE_GOAL:
+			_name = "Navigation: Simple Goal";
+			break;
+		default:
+			_name = "Navigation";
+			break;
 		}
 	} else {
 		ROS_ERROR("Failed to call Get Navigation Goal service");
 		abortNavigation();
 	}
 	_idle_timer.start();
-	if (!_waypoint_following) {
+	if (_navigation_mode == EXPLORATION) {
 		std_srvs::Trigger srv2;
 		if (_get_exploration_mode.call(srv2)) {
 			_exploration_mode = srv2.response.success;
@@ -91,7 +100,19 @@ void RonaNavigationState::onActive() {
 		if (passed_time > WAIT_TIME) {
 			if (_sirona_state.state == _sirona_state.ARRIVED) {
 				if (!_interrupt_occured) {
-					if (_waypoint_following) {
+					switch (_navigation_mode) {
+					case EXPLORATION: {
+						std_srvs::Trigger srv;
+						if (!_reset_failed_goals_service.call(srv)) {
+							ROS_ERROR(
+									"Failed to call Reset Failed Goals service");
+						}
+						_stateinterface->transitionToVolatileState(
+								_stateinterface->getPluginState(
+								MAPPING_STATE));
+						break;
+					}
+					case WAYPOINT_FOLLOWING: {
 						statemachine_msgs::WaypointVisited srv;
 						srv.request.position = _waypoint_position;
 						if (!_waypoint_visited_service.call(srv)) {
@@ -106,39 +127,53 @@ void RonaNavigationState::onActive() {
 									_stateinterface->getPluginState(
 									ROUTINE_STATE, _routine));
 						}
-					} else {
-						std_srvs::Trigger srv;
-						if (!_reset_failed_goals_service.call(srv)) {
-							ROS_ERROR(
-									"Failed to call Reset Failed Goals service");
-						}
-						_stateinterface->transitionToVolatileState(
-								_stateinterface->getPluginState(
-								MAPPING_STATE));
+						break;
 					}
-				}
-			} else if (_sirona_state.state == _sirona_state.ABORTED
-					|| _sirona_state.state == _sirona_state.UNREACHABLE) {
-				if (!_interrupt_occured) {
-					if (_waypoint_following) {
-						statemachine_msgs::WaypointUnreachable srv;
-						srv.request.position = _waypoint_position;
-						if (!_waypoint_unreachable_service.call(srv)) {
-							ROS_ERROR(
-									"Failed to call Waypoint Visited service");
+					case SIMPLE_GOAL: {
+						abortNavigation();
+						break;
+					}
+					default: {
+						abortNavigation();
+						break;
+					}
+					}
+				} else if (_sirona_state.state == _sirona_state.ABORTED
+						|| _sirona_state.state == _sirona_state.UNREACHABLE) {
+					if (!_interrupt_occured) {
+						switch (_navigation_mode) {
+						case EXPLORATION: {
+							statemachine_msgs::AddFailedGoal srv;
+							srv.request.failedGoal = _nav_goal;
+							if (!_add_failed_goal_service.call(srv)) {
+								ROS_ERROR(
+										"Failed to call Add Failed Goal service");
+							}
+							_stateinterface->transitionToVolatileState(
+									_stateinterface->getPluginState(
+									CALCULATEGOAL_STATE));
+							break;
 						}
-						_stateinterface->transitionToVolatileState(
-								boost::make_shared<WaypointFollowingState>());
-					} else {
-						//ROS_INFO("Leave RonaNavigationState with %lu failed goals",_failed_goals.size());
-						statemachine_msgs::AddFailedGoal srv;
-						srv.request.failedGoal = _nav_goal;
-						if (!_add_failed_goal_service.call(srv)) {
-							ROS_ERROR("Failed to call Add Failed Goal service");
+						case WAYPOINT_FOLLOWING: {
+							statemachine_msgs::WaypointUnreachable srv;
+							srv.request.position = _waypoint_position;
+							if (!_waypoint_unreachable_service.call(srv)) {
+								ROS_ERROR(
+										"Failed to call Waypoint Visited service");
+							}
+							_stateinterface->transitionToVolatileState(
+									boost::make_shared<WaypointFollowingState>());
+							break;
 						}
-						_stateinterface->transitionToVolatileState(
-								_stateinterface->getPluginState(
-								CALCULATEGOAL_STATE));
+						case SIMPLE_GOAL: {
+							abortNavigation();
+							break;
+						}
+						default: {
+							abortNavigation();
+							break;
+						}
+						}
 					}
 				}
 			} else {
@@ -165,63 +200,109 @@ void RonaNavigationState::onExit() {
 
 void RonaNavigationState::onExplorationStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Exploration Start called in RonaRonaNavigationState");
-	if (_waypoint_following) {
-		success = false;
-		message = "Waypoint following running";
-	} else {
+	switch (_navigation_mode) {
+	case EXPLORATION:
 		success = false;
 		message = "Exploration running";
+		break;
+	case WAYPOINT_FOLLOWING:
+		success = false;
+		message = "Waypoint following running";
+		break;
+	case SIMPLE_GOAL:
+		success = false;
+		message = "Simple Goal running";
+		break;
+	default:
+		success = false;
+		message = "Nothing running";
+		break;
 	}
 }
 
 void RonaNavigationState::onExplorationStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Exploration Stop called in RonaRonaNavigationState");
-	if (_waypoint_following) {
-		success = false;
-		message = "Waypoint following running";
-	} else {
+	switch (_navigation_mode) {
+	case EXPLORATION:
 		success = true;
 		message = "Exploration stopped";
 		abortNavigation();
+		break;
+	case WAYPOINT_FOLLOWING:
+		success = false;
+		message = "Waypoint following running";
+		break;
+	case SIMPLE_GOAL:
+		success = false;
+		message = "Simple Goal running";
+		break;
+	default:
+		success = false;
+		message = "Nothing running";
+		break;
 	}
 }
 
 void RonaNavigationState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
-	ROS_INFO(
-			"Waypoint following start/pause called in RonaRonaNavigationState");
 	success = false;
-	if (_waypoint_following) {
-		message = "Waypoint following running";
-	} else {
+	switch (_navigation_mode) {
+	case EXPLORATION:
 		message = "Exploration running";
+		break;
+	case WAYPOINT_FOLLOWING:
+		message = "Waypoint following running";
+		break;
+	case SIMPLE_GOAL:
+		message = "Simple Goal running";
+		break;
+	default:
+		message = "Nothing running";
+		break;
 	}
 }
 
 void RonaNavigationState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following stop called in RonaRonaNavigationState");
-	if (_waypoint_following) {
+	switch (_navigation_mode) {
+	case EXPLORATION:
+		success = false;
+		message = "Exploration running";
+		break;
+	case WAYPOINT_FOLLOWING:
 		success = true;
 		message = "Waypoint following stopped";
 		abortNavigation();
-	} else {
+		break;
+	case SIMPLE_GOAL:
 		success = false;
-		message = "Exploration running";
+		message = "Simple Goal running";
+		break;
+	default:
+		success = false;
+		message = "Nothing running";
+		break;
 	}
 }
 
 void RonaNavigationState::onInterrupt(int interrupt) {
-	if (interrupt == EMERGENCY_STOP_INTERRUPT) {
+	switch (interrupt) {
+	case EMERGENCY_STOP_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<EmergencyStopState>());
-	} else {
+		_interrupt_occured = true;
+		break;
+	case TELEOPERATION_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<TeleoperationState>());
+		_interrupt_occured = true;
+		break;
+	case SIMPLE_GOAL_INTERRUPT:
+		_stateinterface->transitionToVolatileState(
+				_stateinterface->getPluginState(NAVIGATION_STATE));
+		_interrupt_occured = true;
+		break;
 	}
-	_interrupt_occured = true;
 }
 
 void RonaNavigationState::timerCallback(const ros::TimerEvent& event) {

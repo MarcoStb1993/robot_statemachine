@@ -312,7 +312,8 @@ QString text = QString("Current state: %1").arg(state_info->data.c_str());
 _gui->current_state_text->setText(text);
 if (state_info->data.compare("Idle") == 0
 		|| state_info->data.compare("Teleoperation") == 0
-		|| state_info->data.compare("Emergency Stop") == 0) {
+		|| state_info->data.compare("Emergency Stop") == 0
+		|| state_info->data.compare("Navigation: Simple Goal") == 0) {
 	_gui->start_exploration_button->setText("Start");
 	_exploration_running = false;
 	_gui->exploration_info_text->setText("");

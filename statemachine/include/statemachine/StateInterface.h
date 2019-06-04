@@ -4,8 +4,10 @@
 #include <statemachine/BaseState.h>
 #include <statemachine/IdleState.h>
 #include <statemachine_msgs/OperationMode.h>
+#include <statemachine_msgs/SetNavigationGoal.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/String.h>
 #include <std_srvs/SetBool.h>
 #include <pluginlib/class_loader.h>
@@ -60,8 +62,10 @@ public:
 private:
 	ros::NodeHandle _nh;
 	ros::Subscriber _operation_mode_sub;
+	ros::Subscriber _simple_goal_sub;
 	ros::ServiceServer _start_stop_exploration_service;
 	ros::ServiceServer _start_stop_waypoint_following_service;
+	ros::ServiceClient _set_navigation_goal_client;
 	ros::Publisher _state_info_publisher;
 
 	/**
@@ -96,6 +100,7 @@ private:
 
 	void operationModeCallback(
 			const statemachine_msgs::OperationMode::ConstPtr& operation_mode);
+	void simpleGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
 	bool startStopExplorationService(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
 	bool startStopWaypointFollowingService(std_srvs::SetBool::Request &req,

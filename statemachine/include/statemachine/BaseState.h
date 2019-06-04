@@ -10,6 +10,11 @@ namespace statemachine {
 #define INTERRUPT_END 0
 #define EMERGENCY_STOP_INTERRUPT 1
 #define TELEOPERATION_INTERRUPT 2
+#define SIMPLE_GOAL_INTERRUPT 3
+
+#define EXPLORATION 0
+#define WAYPOINT_FOLLOWING 1
+#define SIMPLE_GOAL 2
 
 class StateInterface;
 

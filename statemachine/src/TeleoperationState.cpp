@@ -59,11 +59,13 @@ void TeleoperationState::onInterrupt(int interrupt) {
 	if (interrupt == EMERGENCY_STOP_INTERRUPT) {
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<EmergencyStopState>());
+		_interrupt_occured = true;
 	} else if (interrupt == INTERRUPT_END) {
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<IdleState>());
+		_interrupt_occured = true;
 	}
-	_interrupt_occured = true;
+
 }
 
 }

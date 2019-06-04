@@ -82,7 +82,7 @@ void CalculateGoalState::onExit() {
 	ROS_INFO("CalculateGoalState exited");
 	statemachine_msgs::SetNavigationGoal srv;
 	srv.request.goal = _goal;
-	srv.request.waypointFollowing = false;
+	srv.request.navigationMode = EXPLORATION;
 	if (_set_navigation_goal_service.call(srv)) {
 	} else {
 		ROS_ERROR("Failed to call Set Navigation Goal service");
@@ -119,14 +119,23 @@ void CalculateGoalState::onWaypointFollowingStop(bool &success,
 }
 
 void CalculateGoalState::onInterrupt(int interrupt) {
-	if (interrupt == EMERGENCY_STOP_INTERRUPT) {
+	switch (interrupt) {
+	case EMERGENCY_STOP_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<EmergencyStopState>());
-	} else {
+		_interrupt_occured = true;
+		break;
+	case TELEOPERATION_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<TeleoperationState>());
+		_interrupt_occured = true;
+		break;
+	case SIMPLE_GOAL_INTERRUPT:
+		_stateinterface->transitionToVolatileState(
+				_stateinterface->getPluginState(NAVIGATION_STATE));
+		_interrupt_occured = true;
+		break;
 	}
-	_interrupt_occured = true;
 }
 
 void CalculateGoalState::frontiersCallback(
@@ -152,8 +161,6 @@ void CalculateGoalState::timerCallback(const ros::TimerEvent& event) {
 	ROS_ERROR("Calculate Goal State received no goals");
 	abortCalculateGoal();
 }
-
-
 
 void CalculateGoalState::abortCalculateGoal() {
 	if (!_interrupt_occured) {

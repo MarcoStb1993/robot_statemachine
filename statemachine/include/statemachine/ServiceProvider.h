@@ -26,6 +26,8 @@
 #include <std_srvs/SetBool.h>
 #include <std_msgs/Bool.h>
 
+#include <geometry_msgs/PoseStamped.h>
+
 namespace statemachine {
 
 class ServiceProvider {
@@ -77,9 +79,9 @@ private:
 	 */
 	statemachine_msgs::WaypointArray _waypoint_array;
 	/**
-	 * Is waypoint following active
+	 * Mode of navigation (Exploration=0, Waypoint following=1 and Simple Goal=2)
 	 */
-	bool _waypoint_following;
+	int _navigation_mode;
 	/**
 	 * Routine to be executed when reaching the current waypoint
 	 */

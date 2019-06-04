@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   rona_msgs
   pcl_conversions
   pcl_ros
-  #exploration_msgs
 )
 
 catkin_package(
@@ -33,16 +32,12 @@ add_library(statemachine_plugins
     src/ReversePathState.cpp
     src/ReversingRoutineState.cpp)
 
-add_executable(unboundExplorationNode src/UnboundExplorationNode.cpp)
 add_executable(bootUpNode src/BootUpNode.cpp)
 add_executable(additionsServiceProviderNode
 	src/AdditionsServiceProviderNode.cpp
 	src/AdditionsServiceProvider.cpp)
 
 target_link_libraries(statemachine_plugins
-  ${catkin_LIBRARIES}
-  )
-target_link_libraries(unboundExplorationNode
   ${catkin_LIBRARIES}
   )
 target_link_libraries(bootUpNode
@@ -53,6 +48,5 @@ target_link_libraries(bootUpNode
   )
 
 add_dependencies(statemachine_plugins ${catkin_EXPORTED_TARGETS})
-add_dependencies(unboundExplorationNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(bootUpNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(additionsServiceProviderNode ${catkin_EXPORTED_TARGETS})

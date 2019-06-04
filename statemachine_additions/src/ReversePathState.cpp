@@ -14,13 +14,13 @@ ReversePathState::~ReversePathState() {
 void ReversePathState::onSetup() {
 	ROS_INFO("ReversePathState setup");
 	ros::NodeHandle private_nh("~");
-	private_nh.param < std::string
-			> ("autonomy_cmd_vel_topic", _autonomy_cmd_vel_topic, "/cmd_vel");
+	private_nh.param<std::string>("autonomy_cmd_vel_topic",
+			_autonomy_cmd_vel_topic, "/cmd_vel");
 	ros::NodeHandle nh("statemachine");
-	_get_cmd_vel_recording_service = nh.serviceClient
-			< statemachine_msgs::GetCmdVelRecording > ("getCmdVelRecording");
-	_reset_cmd_vel_recording_service = nh.serviceClient < std_srvs::Trigger
-			> ("resetCmdVelRecording");
+	_get_cmd_vel_recording_service = nh.serviceClient<
+			statemachine_msgs::GetCmdVelRecording>("getCmdVelRecording");
+	_reset_cmd_vel_recording_service = nh.serviceClient<std_srvs::Trigger>(
+			"resetCmdVelRecording");
 	_cmd_vel_publisher = _nh.advertise<geometry_msgs::Twist>(
 			_autonomy_cmd_vel_topic, 10);
 
@@ -35,11 +35,20 @@ void ReversePathState::onSetup() {
 	statemachine_msgs::GetCmdVelRecording srv;
 	if (_get_cmd_vel_recording_service.call(srv)) {
 		_cmd_vel_msgs = srv.response.cmdVelMsgs;
-		_waypoint_following = srv.response.waypointFollowing;
-		if (_waypoint_following) {
-			_name = "Reverse Path: Waypoint Following";
-		} else {
+		_navigation_mode = srv.response.navigationMode;
+		switch (_navigation_mode) {
+		case EXPLORATION:
 			_name = "Reverse Path: Exploration";
+			break;
+		case WAYPOINT_FOLLOWING:
+			_name = "Reverse Path: Waypoint Following";
+			break;
+		case SIMPLE_GOAL:
+			_name = "Reverse Path: Simple Goal";
+			break;
+		default:
+			_name = "Reverse Path";
+			break;
 		}
 	} else {
 		ROS_ERROR("Failed to call Get Cmd Vel Msgs service");
@@ -66,61 +75,108 @@ void ReversePathState::onExit() {
 }
 
 void ReversePathState::onExplorationStart(bool &success, std::string &message) {
-	ROS_INFO("Exploration Start called in ReversePathState");
-	if (_waypoint_following) {
-		success = false;
-		message = "Waypoint following running";
-	} else {
+	switch (_navigation_mode) {
+	case EXPLORATION:
 		success = false;
 		message = "Exploration running";
+		break;
+	case WAYPOINT_FOLLOWING:
+		success = false;
+		message = "Waypoint following running";
+		break;
+	case SIMPLE_GOAL:
+		success = false;
+		message = "Simple Goal running";
+		break;
+	default:
+		success = false;
+		message = "Nothing running";
+		break;
 	}
 }
 
 void ReversePathState::onExplorationStop(bool &success, std::string &message) {
-	ROS_INFO("Exploration Stop called in ReversePathState");
-	if (_waypoint_following) {
-		success = false;
-		message = "Waypoint following running";
-	} else {
+	switch (_navigation_mode) {
+	case EXPLORATION:
 		success = true;
 		message = "Exploration stopped";
 		abortNavigation();
+		break;
+	case WAYPOINT_FOLLOWING:
+		success = false;
+		message = "Waypoint following running";
+		break;
+	case SIMPLE_GOAL:
+		success = false;
+		message = "Simple Goal running";
+		break;
+	default:
+		success = false;
+		message = "Nothing running";
+		break;
 	}
 }
 
 void ReversePathState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following start/pause called in ReversePathState");
 	success = false;
-	if (_waypoint_following) {
-		message = "Waypoint following running";
-	} else {
+	switch (_navigation_mode) {
+	case EXPLORATION:
 		message = "Exploration running";
+		break;
+	case WAYPOINT_FOLLOWING:
+		message = "Waypoint following running";
+		break;
+	case SIMPLE_GOAL:
+		message = "Simple Goal running";
+		break;
+	default:
+		message = "Nothing running";
+		break;
 	}
 }
 
 void ReversePathState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following stop called in ReversePathState");
-	if (_waypoint_following) {
+	switch (_navigation_mode) {
+	case EXPLORATION:
+		success = false;
+		message = "Exploration running";
+		break;
+	case WAYPOINT_FOLLOWING:
 		success = true;
 		message = "Waypoint following stopped";
 		abortNavigation();
-	} else {
+		break;
+	case SIMPLE_GOAL:
 		success = false;
-		message = "Exploration running";
+		message = "Simple Goal running";
+		break;
+	default:
+		success = false;
+		message = "Nothing running";
+		break;
 	}
 }
 
 void ReversePathState::onInterrupt(int interrupt) {
-	if (interrupt == EMERGENCY_STOP_INTERRUPT) {
+	switch (interrupt) {
+	case EMERGENCY_STOP_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<EmergencyStopState>());
-	} else {
+		_interrupt_occured = true;
+		break;
+	case TELEOPERATION_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<TeleoperationState>());
+		_interrupt_occured = true;
+		break;
+	case SIMPLE_GOAL_INTERRUPT:
+		_stateinterface->transitionToVolatileState(
+				_stateinterface->getPluginState(NAVIGATION_STATE));
+		_interrupt_occured = true;
+		break;
 	}
-	_interrupt_occured = true;
 }
 
 void ReversePathState::timerCallback(const ros::TimerEvent& event) {
@@ -131,12 +187,18 @@ void ReversePathState::timerCallback(const ros::TimerEvent& event) {
 		_cmd_vel_replaying = false;
 		_cmd_vel_replay_timer.stop();
 		if (!_interrupt_occured) {
-			if (_waypoint_following) {
-				_stateinterface->transitionToVolatileState(
-						boost::make_shared<WaypointFollowingState>());
-			} else {
+			switch (_navigation_mode) {
+			case EXPLORATION:
 				_stateinterface->transitionToVolatileState(
 						_stateinterface->getPluginState(CALCULATEGOAL_STATE));
+				break;
+			case WAYPOINT_FOLLOWING:
+				_stateinterface->transitionToVolatileState(
+						boost::make_shared<WaypointFollowingState>());
+				break;
+			case SIMPLE_GOAL:
+				abortNavigation();
+				break;
 			}
 		}
 	}

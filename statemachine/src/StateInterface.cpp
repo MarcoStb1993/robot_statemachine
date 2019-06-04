@@ -15,6 +15,8 @@ StateInterface::StateInterface() :
 	ros::NodeHandle nh("statemachine");
 	_operation_mode_sub = nh.subscribe<statemachine_msgs::OperationMode>(
 			"operationMode", 1, &StateInterface::operationModeCallback, this);
+	_simple_goal_sub = nh.subscribe<geometry_msgs::PoseStamped>("simpleGoal", 1,
+			&StateInterface::simpleGoalCallback, this);
 	_start_stop_exploration_service = nh.advertiseService(
 			"startStopExploration",
 			&StateInterface::startStopExplorationService, this);
@@ -22,6 +24,8 @@ StateInterface::StateInterface() :
 			"startStopWaypointFollowing",
 			&StateInterface::startStopWaypointFollowingService, this);
 	_state_info_publisher = nh.advertise<std_msgs::String>("stateInfo", 10);
+	_set_navigation_goal_client = nh.serviceClient<
+			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
 
 	_current_state = NULL;
 	_next_state = NULL;
@@ -122,7 +126,19 @@ void StateInterface::operationModeCallback(
 			_current_state->onInterrupt(INTERRUPT_END);
 		}
 	}
+}
 
+void StateInterface::simpleGoalCallback(
+		const geometry_msgs::PoseStamped::ConstPtr& goal) {
+	_on_interrupt = true;
+	_current_state->onInterrupt(SIMPLE_GOAL_INTERRUPT);
+	statemachine_msgs::SetNavigationGoal srv;
+	srv.request.goal = goal->pose;
+	srv.request.navigationMode = SIMPLE_GOAL;
+	if (_set_navigation_goal_client.call(srv)) {
+	} else {
+		ROS_ERROR("Failed to call Set Navigation Goal service");
+	}
 }
 
 bool StateInterface::startStopExplorationService(

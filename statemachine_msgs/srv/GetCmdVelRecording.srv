@@ -1,3 +1,3 @@
 ---
 geometry_msgs/Twist[] cmdVelMsgs 	# Recorded cmd_vel messages
-bool waypointFollowing				# Waypoint following (=true) or exploration (=false)
+int8 navigationMode					# Mode of navigation (Exploration=0, Waypoint following=1 and Simple Goal=2)

@@ -73,7 +73,7 @@ private:
 	ros::ServiceClient _reset_cmd_vel_recording_service;
 	ros::Publisher _cmd_vel_publisher;
 
-	bool _waypoint_following;
+	int _navigation_mode;
 	bool _cmd_vel_replaying;
 	std::vector<geometry_msgs::Twist> _cmd_vel_msgs;
 	int _current_cmd_vel_msg;

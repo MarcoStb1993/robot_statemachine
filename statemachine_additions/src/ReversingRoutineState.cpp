@@ -14,14 +14,14 @@ ReversingRoutineState::~ReversingRoutineState() {
 void ReversingRoutineState::onSetup() {
 	ROS_INFO("ReversingRoutineState setup");
 	ros::NodeHandle nh("statemachine");
-	_set_reverse_moving_service = nh.serviceClient < std_srvs::SetBool
-			> ("setReverseMode");
-	_get_reverse_moving_service = nh.serviceClient < std_srvs::Trigger
-			> ("getReverseMode");
-	_set_rona_reverse_on = _nh.serviceClient < std_srvs::Empty
-			> ("rona/move/set_reverse_on");
-	_set_rona_reverse_off = _nh.serviceClient < std_srvs::Empty
-			> ("rona/move/set_reverse_off");
+	_set_reverse_moving_service = nh.serviceClient<std_srvs::SetBool>(
+			"setReverseMode");
+	_get_reverse_moving_service = nh.serviceClient<std_srvs::Trigger>(
+			"getReverseMode");
+	_set_rona_reverse_on = _nh.serviceClient<std_srvs::Empty>(
+			"rona/move/set_reverse_on");
+	_set_rona_reverse_off = _nh.serviceClient<std_srvs::Empty>(
+			"rona/move/set_reverse_off");
 	_reverse_mode_active = false;
 }
 
@@ -107,14 +107,23 @@ void ReversingRoutineState::onWaypointFollowingStop(bool &success,
 }
 
 void ReversingRoutineState::onInterrupt(int interrupt) {
-	if (interrupt == EMERGENCY_STOP_INTERRUPT) {
+	switch (interrupt) {
+	case EMERGENCY_STOP_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<EmergencyStopState>());
-	} else {
+		_interrupt_occured = true;
+		break;
+	case TELEOPERATION_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<TeleoperationState>());
+		_interrupt_occured = true;
+		break;
+	case SIMPLE_GOAL_INTERRUPT:
+		_stateinterface->transitionToVolatileState(
+				_stateinterface->getPluginState(NAVIGATION_STATE));
+		_interrupt_occured = true;
+		break;
 	}
-	_interrupt_occured = true;
 }
 
 }

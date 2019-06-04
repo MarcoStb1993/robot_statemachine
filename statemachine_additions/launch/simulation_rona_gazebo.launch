@@ -3,9 +3,11 @@
 <launch>
 	<arg name="world"
 		default="$(find husky_gazebo)/launch/playpen.launch" />
-	<arg name="frontier_exploration" default="false" />
-	<arg name="explore_lite" default="false" />
-	<arg name="autonomy_cmd_vel_topic" default="/cmd_vel" />
+	<arg name="robot_frame" default="base_footprint" />
+	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
+	<arg name="teleoperation_cmd_vel_topic"
+		default="/teleoperation/cmd_vel" />
+	<arg name="cmd_vel_topic" default="/cmd_vel" />
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::RonaNavigationState" />
@@ -20,12 +22,13 @@
 
 	<include file="$(find statemachine)/launch/statemachine.launch">
 		<arg name="update_frequency" value="20" />
-		<arg name="teleop_topic" value="/joy/cmd_vel" />
-		<arg name="robot_frame" value="base_footprint" />
+		<arg name="robot_frame" value="$(arg robot_frame)" />
 		<arg name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
-		<arg name="calculate_goal_plugin"
-			value="statemachine::CalculateGoalState" />
+		<arg name="teleoperation_cmd_vel_topic"
+			value="$(arg teleoperation_cmd_vel_topic)" />
+		<arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
+		<arg name="calculate_goal_plugin" value="$(arg goal_plugin)" />
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
@@ -34,15 +37,24 @@
 	<node pkg="statemachine_additions" type="bootUpNode"
 		name="bootUpNode" output="screen" />
 
+	<node pkg="statemachine_additions"
+		type="additionsServiceProviderNode"
+		name="additionsServiceProviderNode">
+		<param name="update_frequency" value="20" />
+		<param name="autonomy_cmd_vel_topic"
+			value="$(arg autonomy_cmd_vel_topic)" />
+	</node>
+
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping"
 		output="screen">
 		<param name="base_frame" value="base_footprint" />
 	</node>
 
-	<!-- RONA -->
+	<!-- RONA Navigation -->
 	<!-- Path controller -->
 	<node name="rona_move_node" pkg="rona_move" type="rona_move_node">
-		<param name="pub_cmd_vel_topic" type="string" value="cmd_vel" />
+		<param name="pub_cmd_vel_topic" type="string"
+			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="pub_state_topic" type="string"
 			value="rona/move/state" />
 		<param name="pub_process_topic" type="string"
@@ -52,7 +64,8 @@
 		<param name="sub_ctrl_topic" type="string"
 			value="rona/move/ctrl" />
 		<param name="map_frame" type="string" value="map" />
-		<param name="robot_frame" type="string" value="base_footprint" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
 		<param name="vel_lin_max" type="double" value="0.5" />
 		<param name="vel_ang_max" type="double" value="0.5" />
 		<param name="target_radius" type="double" value="0.2" />
@@ -86,8 +99,9 @@
 		<param name="pub_grid_ob_topic" type="string"
 			value="rona/map/obstacles" />
 		<param name="map_frame" type="string" value="map" />
-		<param name="robot_frame" type="string" value="base_footprint" />
-		<param name="robot_radius" type="double" value="0.6" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
+		<param name="robot_radius" type="double" value="0.3" />
 		<param name="dt_radius" type="double" value="0.3" />
 		<param name="free_robot_pos_factor" type="double" value="0.2" />
 	</node>
@@ -121,7 +135,8 @@
 			value="rona/plan/path" />
 		<param name="sub_state_topic" type="string"
 			value="rona/move/state" />
-		<param name="robot_frame" type="string" value="base_footprint" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
 		<param name="map_frame" type="string" value="map" />
 		<param name="obstacle_block_time" type="double" value="2.0" />
 		<param name="ob_react_poly_0_x" type="double" value="0.0" />
@@ -145,87 +160,37 @@
 			value="rona/rm_obstacle" />
 		<param name="sub_obstacle_topic" type="string" value="obstacle" />
 		<param name="map_frame" type="string" value="map" />
-		<param name="robot_radius" type="double" value="0.6" />
+		<param name="robot_radius" type="double" value="0.3" />
 		<param name="duration_obstacle_valid" type="double"
 			value="3600 " />
 	</node>
 
 	<node pkg="tf" type="static_transform_publisher"
 		name="base_footprint_reverse"
-		args="0 0 0 3.1415 0 0             base_footprint          base_footprint_reverse		10" />
+		args="0 0 0 3.1415 0 0             $(arg robot_frame)          base_footprint_reverse		10" />
 
 	<!-- Explore Lite -->
-	<group if="$(arg explore_lite)">
-		<node pkg="explore_lite" type="explore" respawn="false"
-			name="explore">
-			<param name="robot_base_frame" value="base_footprint" />
-			<param name="costmap_topic" value="map" />
-			<param name="costmap_updates_topic" value="map_updates" />
-			<param name="visualize" value="true" />
-			<param name="planner_frequency" value="0.33" />
-			<param name="progress_timeout" value="30.0" />
-			<param name="potential_scale" value="3.0" />
-			<param name="orientation_scale" value="0.0" />
-			<param name="gain_scale" value="1.0" />
-			<param name="transform_tolerance" value="0.3" />
-			<param name="min_frontier_size" value="0.75" />
-			<remap from="/move_base" to="/frontier_move_base" />
-		</node>
-
-		<node
-			if="$(eval goal_plugin == 'statemachine::CalculateGoalState')"
-			pkg="statemachine_additions" type="frontiersMarkerToPointcloudNode"
-			name="frontiersMarkerToPointcloudNode" />
-
-		<node
-			if="$(eval goal_plugin == 'statemachine::CalculateGoalState')"
-			pkg="statemachine_additions" type="goalInterceptNode"
-			name="goalInterceptNode" output="screen" />
-	</group>
-
-	<!-- Frontier Exploration -->
-	<group if="$(arg frontier_exploration)">
-
-		<node if="$(arg frontier_exploration)" pkg="frontier_exploration"
-			type="explore_client" name="explore_client" output="screen" />
-
-		<node if="$(arg frontier_exploration)" pkg="frontier_exploration"
-			type="explore_server" name="explore_server" output="screen">
-			<param name="frequency" value="1.0" />
-			<!-- Should be less than sensor range -->
-			<param name="goal_aliasing" value="2.0" />
-			<remap from="/move_base" to="/frontier_move_base" />
-			<rosparam
-				file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
-				command="load" ns="explore_costmap" />
-			<rosparam
-				file="$(find statemachine_additions)/config/gazebo_sim/costmap_exploration.yaml"
-				command="load" ns="explore_costmap" />
-		</node>
-
-		<node pkg="statemachine_additions" type="unboundExplorationNode"
-			name="unboundExplorationNode" output="screen">
-			<param name="unbound" value="true" />
-			<param name="delay" value="10" />
-			<param name="xoffset" value="7.5" />
-			<param name="yoffset" value="7.5" />
-			<param name="xdim" value="15.0" />
-			<param name="ydim" value="15.0" />
-			<param name="goalx" value="5.0" />
-			<param name="goaly" value="5.0" />
-		</node>
-
-		<node
-			if="$(eval goal_plugin == 'statemachine::CalculateGoalState')"
-			pkg="statemachine_additions" type="goalInterceptNode"
-			name="goalInterceptNode" output="screen" />
-	</group>
-
+	<node pkg="explore_lite" type="explore" respawn="false"
+		name="explore">
+		<param name="robot_base_frame" value="base_footprint" />
+		<param name="costmap_topic" value="map" />
+		<param name="costmap_updates_topic" value="map_updates" />
+		<param name="visualize" value="true" />
+		<param name="planner_frequency" value="0.33" />
+		<param name="progress_timeout" value="30.0" />
+		<param name="potential_scale" value="3.0" />
+		<param name="orientation_scale" value="0.0" />
+		<param name="gain_scale" value="1.0" />
+		<param name="transform_tolerance" value="0.3" />
+		<param name="min_frontier_size" value="0.75" />
+		<remap from="/move_base" to="/frontier_move_base" />
+	</node>
 
 	<!-- RViz für Exploration -->
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
 		args="-d $(find statemachine_additions)/config/gazebo_sim/rona_gazebo_simulation.rviz">
-		<remap from="/move_base_simple/goal" to="/rona/exploration/target" />
+		<remap from="/move_base_simple/goal"
+			to="/statemachine/simpleGoal" />
 	</node>
 	<include if="$(arg rviz)"
 		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">

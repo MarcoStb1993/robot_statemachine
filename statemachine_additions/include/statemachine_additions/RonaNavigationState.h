@@ -94,7 +94,7 @@ private:
 	geometry_msgs::Pose _nav_goal;
 	bool _goal_active;
 	std::vector<geometry_msgs::Pose> _failed_goals;
-	bool _waypoint_following;
+	int _navigation_mode;
 	int _waypoint_position;
 	std::string _routine;
 	tf::Pose _last_pose;

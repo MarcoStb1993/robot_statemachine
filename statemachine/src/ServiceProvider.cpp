@@ -64,7 +64,7 @@ ServiceProvider::ServiceProvider() {
 	_waypoint_array.reverse = false;
 	_waypoint_array.waypoints_size = 0;
 
-	_waypoint_following = false;
+	_navigation_mode = -1;
 	_waypoint_position = -1;
 
 	_goal_obsolete = false;
@@ -211,7 +211,7 @@ bool ServiceProvider::setNavigationGoal(
 		statemachine_msgs::SetNavigationGoal::Request &req,
 		statemachine_msgs::SetNavigationGoal::Response &res) {
 	_navigation_goal = req.goal;
-	_waypoint_following = req.waypointFollowing;
+	_navigation_mode = req.navigationMode;
 	_waypoint_position = req.waypointPosition;
 	_routine = req.routine;
 	res.success = 1;
@@ -224,7 +224,7 @@ bool ServiceProvider::getNavigationGoal(
 		statemachine_msgs::GetNavigationGoal::Response &res) {
 	res.goal = _navigation_goal;
 	res.failedGoals = _failed_goals;
-	res.waypointFollowing = _waypoint_following;
+	res.navigationMode = _navigation_mode;
 	res.waypointPosition = _waypoint_position;
 	res.routine = _routine;
 	return true;
