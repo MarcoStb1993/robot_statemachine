@@ -12,9 +12,9 @@
 	<arg name="mapping_plugin" default="statemachine::MappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 
-	<node pkg="tf" type="static_transform_publisher"
+	<!--node pkg="tf" type="static_transform_publisher"
 		name="velodyne_32_to_laser_tf"
-		args="0 0 0 0 0 0 1  /laser /velodyne_32  20" />
+		args="0 0 0 0 0 0 1  /laser /velodyne_32  20" /-->
 
 	<include file="$(find statemachine)/launch/statemachine.launch">
 		<arg name="update_frequency" value="20" />
@@ -58,18 +58,18 @@
 		<param name="map_frame" type="string" value="map" />
 		<param name="robot_frame" type="string"
 			value="$(arg robot_frame)" />
-		<param name="vel_lin_max" type="double" value="0.5" />
-		<param name="vel_ang_max" type="double" value="0.5" />
-		<param name="target_radius" type="double" value="0.2" />
-		<param name="target_radius_final" type="double" value="0.2" />
+		<param name="vel_lin_max" type="double" value="0.87" />
+		<param name="vel_ang_max" type="double" value="0.3" />
+		<param name="target_radius" type="double" value="0.24" />
+		<param name="target_radius_final" type="double" value="0.1" />
 		<param name="cos_pwr_n" type="int" value="4 " />
-		<param name="cos_fac_n" type="double" value="3.5" />
+		<param name="cos_fac_n" type="double" value="5.2" />
 		<param name="ang_reached_range" type="double" value="0.05" />
 		<param name="lin_end_approach" type="double" value="1.0" />
 		<param name="lin_ctrl_scale" type="double" value="2.0" />
 		<param name="ang_ctrl_scale" type="double" value="8.0" />
 		<param name="min_vel_value" type="double" value="0.001" />
-		<param name="do_endrotate" type="bool" value="true" />
+		<param name="do_endrotate" type="bool" value="false" />
 	</node>
 
 	<!-- Path planner -->
@@ -93,9 +93,9 @@
 		<param name="map_frame" type="string" value="map" />
 		<param name="robot_frame" type="string"
 			value="$(arg robot_frame)" />
-		<param name="robot_radius" type="double" value="0.3" />
-		<param name="dt_radius" type="double" value="0.3" />
-		<param name="free_robot_pos_factor" type="double" value="0.2" />
+		<param name="robot_radius" type="double" value="0.1" />
+		<param name="dt_radius" type="double" value="0.7" />
+		<param name="free_robot_pos_factor" type="double" value="0.5" />
 	</node>
 
 	<!-- Sirona state statemachine -->
@@ -152,7 +152,7 @@
 			value="rona/rm_obstacle" />
 		<param name="sub_obstacle_topic" type="string" value="obstacle" />
 		<param name="map_frame" type="string" value="map" />
-		<param name="robot_radius" type="double" value="0.3" />
+		<param name="robot_radius" type="double" value="0.36" />
 		<param name="duration_obstacle_valid" type="double"
 			value="3600 " />
 	</node>
