@@ -204,7 +204,7 @@
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
 		args="-d $(find statemachine_additions)/config/stdr_sim/rona_statemachine_simulation.rviz">
 		<remap from="/move_base_simple/goal"
-			to="/rona/exploration/target" />
+			to="/statemachine/simpleGoal" />
 	</node>
 	<include if="$(arg rviz)"
 		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">

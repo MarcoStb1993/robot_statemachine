@@ -41,8 +41,7 @@ void RonaNavigationState::onSetup() {
 			&RonaNavigationState::sironaStateCallback, this);
 	_nav_goal_publisher = _nh.advertise<geometry_msgs::PoseStamped>(
 			"rona/exploration/target", 1, true);
-	_nav_stop_publisher = _nh.advertise<std_msgs::Bool>("rona/move/pause", 1,
-			true);
+	_nav_stop_client = _nh.serviceClient<std_srvs::SetBool>("/rona/move/pause");
 
 	_get_exploration_mode = nh.serviceClient<std_srvs::Trigger>(
 			"getExplorationMode");
@@ -193,9 +192,11 @@ void RonaNavigationState::onActive() {
 
 void RonaNavigationState::onExit() {
 	ROS_INFO("RonaNavigationState exited");
-	std_msgs::Bool msg;
-	msg.data = true;
-	_nav_stop_publisher.publish(msg);
+	std_srvs::SetBool srv;
+	srv.request.data = true;
+	if (!_nav_stop_client.call(srv)) {
+		ROS_ERROR("Failed to Pause Rona Move service");
+	}
 }
 
 void RonaNavigationState::onExplorationStart(bool &success,

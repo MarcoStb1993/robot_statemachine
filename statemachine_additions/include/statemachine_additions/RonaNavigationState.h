@@ -117,7 +117,7 @@ private:
 	ros::NodeHandle _nh;
 	ros::Subscriber _sirona_state_subscriber;
 	ros::Publisher _nav_goal_publisher;
-	ros::Publisher _nav_stop_publisher;
+	ros::ServiceClient _nav_stop_client;
 
 	/**
 	 * @brief Callback for idle timer
