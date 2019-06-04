@@ -12,9 +12,9 @@
 	<arg name="mapping_plugin" default="statemachine::MappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 
-	<!--node pkg="tf" type="static_transform_publisher"
+	<node pkg="tf" type="static_transform_publisher"
 		name="velodyne_32_to_laser_tf"
-		args="0 0 0 0 0 0 1  /laser /velodyne_32  20" /-->
+		args="0 0 0 0 0 0 1  /laser /velodyne_32  20" />
 
 	<include file="$(find statemachine)/launch/statemachine.launch">
 		<arg name="update_frequency" value="20" />
