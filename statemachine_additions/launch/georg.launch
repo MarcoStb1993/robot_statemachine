@@ -2,10 +2,10 @@
 
 <launch>
 	<arg name="robot_frame" default="base_footprint" />
-	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
+	<arg name="autonomy_cmd_vel_topic" default="/autonomy/vel/cmd" />
 	<arg name="teleoperation_cmd_vel_topic"
-		default="/teleoperation/cmd_vel" />
-	<arg name="cmd_vel_topic" default="/cmd_vel" />
+		default="/teleoperation/vel/cmd" />
+	<arg name="cmd_vel_topic" default="/vel/cmd" />
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::RonaNavigationState" />
