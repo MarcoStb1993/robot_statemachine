@@ -34,23 +34,58 @@ class ViewportMouseEvent;
 
 namespace statemachine {
 
+/**
+ * PlantWaypointTool class serves as a Tool plugin for RViz which enables planting waypoints
+ * on a desired location with an adjustable orientation.
+ */
 class PlantWaypointTool: public rviz::Tool {
 
 public:
+	/**
+	 * Constructor
+	 */
 	PlantWaypointTool();
+	/**
+	 * Destructor
+	 */
 	~PlantWaypointTool();
-
+	/**
+	 * Initializes plugin
+	 */
 	void onInitialize();
-
+	/**
+	 * Called when tool is activated
+	 */
 	void activate();
+	/**
+	 * Called when tool is deactivated
+	 */
 	void deactivate();
 
+	/**
+	 * Processing mouse events in RViz while tool is active
+	 * @param event Mouse event in RViz
+	 * @return Render or Finished
+	 */
 	int processMouseEvent(rviz::ViewportMouseEvent& event);
 
+	/**
+	 * Load config (not used)
+	 * @param config
+	 */
 	void load(const rviz::Config& config);
+	/**
+	 * Save config (not used)
+	 * @param config
+	 */
 	void save(rviz::Config config) const;
 
 private:
+	/**
+	 * Calls AddWaypoint service with the desired position and orientation for the new waypoint
+	 * @param position Position of the new waypoint
+	 * @param angle Yaw angle of the new waypoint
+	 */
 	void makeFlag(const Ogre::Vector3& position, double angle);
 
 	std::vector<Ogre::SceneNode*> flag_nodes_;
