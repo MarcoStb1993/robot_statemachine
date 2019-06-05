@@ -170,31 +170,9 @@ void PlantWaypointTool::makeFlag(const Ogre::Vector3& position, double angle) {
 	if (!_add_waypoint_client.call(srv)) {
 		ROS_ERROR("Failed to call Add Waypoint service");
 	}
-//	Ogre::SceneNode* node =
-//			scene_manager_->getRootSceneNode()->createChildSceneNode();
-//	Ogre::Entity* entity = scene_manager_->createEntity(flag_resource_);
-//	node->attachObject(entity);
-//	node->setVisible(true);
-//	node->setPosition(position);
-//	flag_nodes_.push_back(node);
 }
 
-// Loading and saving the flags
-// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-//
-// Tools with a fixed set of Property objects representing adjustable
-// parameters are typically just created in the tool's constructor and
-// added to the Property container (getPropertyContainer()).  In that
-// case, the Tool subclass does not need to override load() and save()
-// because the default behavior is to read all the Properties in the
-// container from the Config object.
-//
-// Here however, we have a list of named flag positions of unknown
-// length, so we need to implement save() and load() ourselves.
-//
-// We first save the class ID to the config object so the
-// rviz::ToolManager will know what to instantiate when the config
-// file is read back in.
+
 void PlantWaypointTool::save(rviz::Config config) const {
 //	config.mapSetValue("Class", getClassId());
 //

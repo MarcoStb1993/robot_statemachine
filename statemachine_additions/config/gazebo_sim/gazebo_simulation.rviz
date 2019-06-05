@@ -441,6 +441,7 @@ Visualization Manager:
     - Class: rviz/PublishPoint
       Single click: true
       Topic: /clicked_point
+    - Class: statemachine::PlantWaypointTool
     - ~
   Value: true
   Views:
