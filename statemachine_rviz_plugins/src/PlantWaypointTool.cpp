@@ -71,12 +71,14 @@ void PlantWaypointTool::onInitialize() {
 // is left as an exercise for the reader.
 void PlantWaypointTool::activate() {
 	if (moving_flag_node_) {
+		moving_flag_node_->setOrientation(Ogre::Quaternion());
 		moving_flag_node_->setVisible(true);
 
 		current_flag_property_ = new rviz::VectorProperty(
 				"Flag " + QString::number(flag_nodes_.size()));
 		current_flag_property_->setReadOnly(true);
 		getPropertyContainer()->addChild(current_flag_property_);
+		state_ = Moving;
 	}
 }
 
@@ -120,85 +122,49 @@ int PlantWaypointTool::processMouseEvent(rviz::ViewportMouseEvent& event) {
 	if (rviz::getPointOnPlaneFromWindowXY(event.viewport, ground_plane, event.x,
 			event.y, intersection)) {
 		moving_flag_node_->setVisible(true);
-		moving_flag_node_->setPosition(intersection);
-		current_flag_property_->setVector(intersection);
-
+		if (state_ == Moving) {
+			moving_flag_node_->setPosition(intersection);
+			current_flag_property_->setVector(intersection);
+		}
 		if (event.leftDown()) {
-			makeFlag(intersection);
-			current_flag_property_ = NULL; // Drop the reference so that deactivate() won't remove it.
-			return Render | Finished;
+			state_ == Position;
+			pos_ = intersection;
+			moving_flag_node_->setPosition(pos_);
+			state_ = Orientation;
+			return Render;
+		} else if (event.type == QEvent::MouseMove && event.left()
+				&& state_ == Orientation) {
+			//compute angle in x-y plane
+			double angle = atan2(intersection.y - pos_.y,
+					intersection.x - pos_.x);
+			moving_flag_node_->setVisible(true);
+
+			//we need base_orient, since the arrow goes along the -z axis by default (for historical reasons)
+			moving_flag_node_->setOrientation(
+					Ogre::Quaternion(Ogre::Radian(angle),
+							Ogre::Vector3::UNIT_Z));
+			return Render;
+		} else if (event.leftUp() && state_ == Orientation) {
+			//compute angle in x-y plane
+			double angle = atan2(intersection.y - pos_.y,
+					intersection.x - pos_.x);
+			makeFlag(pos_, angle);
+			return (Finished | Render);
 		}
 	} else {
 		moving_flag_node_->setVisible(false); // If the mouse is not pointing at the ground plane, don't show the flag.
+		return Render;
 	}
-	return Render;
-//	int flags = 0;
-//	if (event.leftDown()) {
-//		state_ == Position;
-//
-//		Ogre::Vector3 intersection;
-//		Ogre::Plane ground_plane(Ogre::Vector3::UNIT_Z, 0.0f);
-//		if (rviz::getPointOnPlaneFromWindowXY(event.viewport, ground_plane,
-//				event.x, event.y, intersection)) {
-//			pos_ = intersection;
-//			moving_flag_node_->setPosition(pos_);
-//
-//			state_ = Orientation;
-//			flags |= Render;
-//		}
-//	} else if (event.type == QEvent::MouseMove && event.left()) {
-//		if (state_ == Orientation) {
-//			//compute angle in x-y plane
-//			Ogre::Vector3 cur_pos;
-//			Ogre::Plane ground_plane(Ogre::Vector3::UNIT_Z, 0.0f);
-//			if (rviz::getPointOnPlaneFromWindowXY(event.viewport, ground_plane,
-//					event.x, event.y, cur_pos)) {
-//				double angle = atan2(cur_pos.y - pos_.y, cur_pos.x - pos_.x);
-//
-//				moving_flag_node_->setVisible(true);
-//
-//				//we need base_orient, since the arrow goes along the -z axis by default (for historical reasons)
-//				Ogre::Quaternion orient_x = Ogre::Quaternion(
-//						Ogre::Radian(-Ogre::Math::HALF_PI),
-//						Ogre::Vector3::UNIT_Y);
-//
-//				moving_flag_node_->setOrientation(
-//						Ogre::Quaternion(Ogre::Radian(angle),
-//								Ogre::Vector3::UNIT_Z) * orient_x);
-//
-//				flags |= Render;
-//			}
-//		}
-//	} else if (event.leftUp()) {
-//		if (state_ == Orientation) {
-//			//compute angle in x-y plane
-//			Ogre::Vector3 cur_pos;
-//			Ogre::Plane ground_plane(Ogre::Vector3::UNIT_Z, 0.0f);
-//			if (rviz::getPointOnPlaneFromWindowXY(event.viewport, ground_plane,
-//					event.x, event.y, cur_pos)) {
-//				double angle = atan2(cur_pos.y - pos_.y, cur_pos.x - pos_.x);
-//
-//				makeFlag(pos_, angle);
-//
-//				flags |= (Finished | Render);
-//			}
-//		}
-//	}
-//
-//	return flags;
 }
 
 // This is a helper function to create a new flag in the Ogre scene and save its scene node in a list.
-void PlantWaypointTool::makeFlag(const Ogre::Vector3& position) {
+void PlantWaypointTool::makeFlag(const Ogre::Vector3& position, double angle) {
 	statemachine_msgs::AddWaypoint srv;
 	statemachine_msgs::Waypoint waypoint;
 	waypoint.pose.position.x = position.x;
 	waypoint.pose.position.y = position.y;
 	waypoint.pose.position.z = position.z;
-	waypoint.pose.orientation.x = 0.0;
-	waypoint.pose.orientation.y = 0.0;
-	waypoint.pose.orientation.z = 0.0;
-	waypoint.pose.orientation.w = 1.0;
+	waypoint.pose.orientation = tf::createQuaternionMsgFromYaw(angle);
 	srv.request.waypoint = waypoint;
 	srv.request.position = -1;
 	if (!_add_waypoint_client.call(srv)) {
@@ -258,7 +224,7 @@ void PlantWaypointTool::save(rviz::Config config) const {
 // because that has already been read and used to instantiate the
 // object before this can have been called.
 void PlantWaypointTool::load(const rviz::Config& config) {
-	// Here we get the "Flags" sub-config from the tool config and loop over its entries:
+// Here we get the "Flags" sub-config from the tool config and loop over its entries:
 //	rviz::Config flags_config = config.mapGetChild("Flags");
 //	int num_flags = flags_config.listLength();
 //	for (int i = 0; i < num_flags; i++) {

@@ -11,8 +11,7 @@
 #include <OGRE/OgreSceneNode.h>
 #include <OGRE/OgreSceneManager.h>
 #include <OGRE/OgreEntity.h>
-
-//#include <QCursor>
+#include <tf/transform_datatypes.h>
 
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
@@ -52,7 +51,7 @@ public:
 	void save(rviz::Config config) const;
 
 private:
-	void makeFlag(const Ogre::Vector3& position);
+	void makeFlag(const Ogre::Vector3& position, double angle);
 
 	std::vector<Ogre::SceneNode*> flag_nodes_;
 	Ogre::SceneNode* moving_flag_node_;
@@ -61,11 +60,11 @@ private:
 
 	ros::ServiceClient _add_waypoint_client;
 
-//	enum State {
-//		Position, Orientation
-//	};
-//	State state_;
-//	Ogre::Vector3 pos_;
+	enum State {
+		Moving, Position, Orientation
+	};
+	State state_;
+	Ogre::Vector3 pos_;
 };
 
 }

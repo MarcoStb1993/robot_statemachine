@@ -58,8 +58,8 @@
 		<param name="map_frame" type="string" value="map" />
 		<param name="robot_frame" type="string"
 			value="$(arg robot_frame)" />
-		<param name="vel_lin_max" type="double" value="0.87" />
-		<param name="vel_ang_max" type="double" value="0.3" />
+		<param name="vel_lin_max" type="double" value="0.4" />
+		<param name="vel_ang_max" type="double" value="0.4" />
 		<param name="target_radius" type="double" value="0.24" />
 		<param name="target_radius_final" type="double" value="0.1" />
 		<param name="cos_pwr_n" type="int" value="4 " />
@@ -169,7 +169,7 @@
 		<param name="costmap_topic" value="map" />
 		<param name="costmap_updates_topic" value="map_updates" />
 		<param name="visualize" value="true" />
-		<param name="planner_frequency" value="0.33" />
+		<param name="planner_frequency" value="5" />
 		<param name="progress_timeout" value="30.0" />
 		<param name="potential_scale" value="3.0" />
 		<param name="orientation_scale" value="0.0" />
