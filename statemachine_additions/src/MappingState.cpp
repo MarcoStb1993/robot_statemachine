@@ -3,24 +3,19 @@
 namespace statemachine {
 
 MappingState::MappingState() {
-	ROS_INFO("MappingState constructed");
-	_name = "Mapping";
 }
 
 MappingState::~MappingState() {
-	ROS_INFO("MappingState destructed");
 }
 
 void MappingState::onSetup() {
-	ROS_INFO("MappingState setup");
+	_name = "Mapping";
 }
 
 void MappingState::onEntry() {
-	ROS_INFO("MappingState entered");
 }
 
 void MappingState::onActive() {
-	//ROS_INFO("MappingState active");
 	//do mapping stuff
 	if (!_interrupt_occured) {
 		_stateinterface->transitionToVolatileState(
@@ -29,17 +24,14 @@ void MappingState::onActive() {
 }
 
 void MappingState::onExit() {
-	ROS_INFO("MappingState exited");
 }
 
 void MappingState::onExplorationStart(bool &success, std::string &message) {
-	ROS_INFO("Exploration Start/Pause called in MappingState");
 	success = false;
 	message = "Exploration running";
 }
 
 void MappingState::onExplorationStop(bool &success, std::string &message) {
-	ROS_INFO("Exploration Stop called in MappingState");
 	success = true;
 	message = "Exploration stopped";
 	_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());
@@ -47,14 +39,12 @@ void MappingState::onExplorationStop(bool &success, std::string &message) {
 
 void MappingState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following start/pause called in MappingState");
 	success = false;
 	message = "Exploration running";
 }
 
 void MappingState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following stop called in MappingState");
 	success = false;
 	message = "Exploration running";
 }

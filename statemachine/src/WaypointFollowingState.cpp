@@ -3,16 +3,13 @@
 namespace statemachine {
 
 WaypointFollowingState::WaypointFollowingState() {
-	ROS_INFO("WaypointFollowingState constructed");
-	_name = "Waypoint Following";
 }
 
 WaypointFollowingState::~WaypointFollowingState() {
-	ROS_INFO("WaypointFollowingState destructed");
 }
 
 void WaypointFollowingState::onSetup() {
-	ROS_INFO("WaypointFollowingState setup");
+	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("statemachine");
 	_get_waypoints_service = nh.serviceClient<statemachine_msgs::GetWaypoints>(
 			"getWaypoints");
@@ -25,25 +22,16 @@ void WaypointFollowingState::onSetup() {
 			statemachine_msgs::WaypointVisited>("waypointVisited");
 	_set_navigation_goal_service = nh.serviceClient<
 			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
+	//initialize variables
+	_name = "Waypoint Following";
 	_next_waypoint_position = -1;
 }
 
 void WaypointFollowingState::onEntry() {
-	ROS_INFO("WaypointFollowingState entered");
-	statemachine_msgs::GetWaypoints srv;
-	if (_get_waypoints_service.call(srv)) {
-		_waypoint_array = srv.response.waypointArray;
-		if (!_waypoint_array.waypoints_size) {
-			ROS_INFO("No waypoints set");
-			abortWaypointFollowing();
-		}
-	} else {
-		ROS_ERROR("Failed to call Get Failed Goals service");
-	}
+	getWaypoints();
 }
 
 void WaypointFollowingState::onActive() {
-	//ROS_INFO("WaypointFollowingState active");
 	int next_reachable_unvisited_waypoint_position = -1;
 	if (_waypoint_array.reverse) {
 		for (int i = _waypoint_array.waypoints_size - 1; i >= 0; i--) {
@@ -103,7 +91,7 @@ void WaypointFollowingState::onActive() {
 }
 
 void WaypointFollowingState::onExit() {
-	ROS_INFO("WaypointFollowingState exited");
+	//Set Navigation goal
 	if (_next_waypoint_position >= 0) {
 		statemachine_msgs::SetNavigationGoal srv;
 		srv.request.goal =
@@ -121,28 +109,24 @@ void WaypointFollowingState::onExit() {
 
 void WaypointFollowingState::onExplorationStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Exploration Start called in WaypointFollowingState");
 	success = false;
 	message = "Waypoint following running";
 }
 
 void WaypointFollowingState::onExplorationStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Exploration Stop called in WaypointFollowingState");
 	success = false;
 	message = "Waypoint following running";
 }
 
 void WaypointFollowingState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following start/pause called in WaypointFollowingState");
 	success = false;
 	message = "Waypoint following running";
 }
 
 void WaypointFollowingState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following stop called in WaypointFollowingState");
 	success = true;
 	message = "Waypoint following stopped";
 	abortWaypointFollowing();
@@ -180,6 +164,8 @@ void WaypointFollowingState::getWaypoints() {
 	if (_get_waypoints_service.call(srv)) {
 		_waypoint_array = srv.response.waypointArray;
 		if (!_waypoint_array.waypoints_size) {
+			ROS_ERROR(
+					"Waypoint Following stopped because no waypoints are available");
 			abortWaypointFollowing();
 		}
 	} else {

@@ -41,7 +41,7 @@
 color: rgba(255,255,255,1);</string>
           </property>
           <property name="text">
-           <string>Emergency Stop</string>
+           <string>Software Stop</string>
           </property>
          </widget>
         </item>

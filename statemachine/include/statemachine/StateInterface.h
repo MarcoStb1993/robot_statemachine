@@ -21,8 +21,9 @@ namespace statemachine {
 #define ROUTINE_STATE 4
 
 /**
- * StateInterface class handles the statemachine transitions between the different state classes
- * and holds a reference to the current and the upcoming state class
+ * @class StateInterface
+ * @brief Handles the statemachine transitions between the different state classes
+ * 		  and holds a reference to the current and the upcoming state class
  */
 class StateInterface {
 
@@ -98,8 +99,17 @@ private:
 	 */
 	pluginlib::ClassLoader<statemachine::BaseState> _plugin_loader;
 
+	/**
+	 * Callback to receive the current operation mode and issue interrupts to the current state accordingly
+	 * @param operation_mode Mode of operation
+	 */
 	void operationModeCallback(
 			const statemachine_msgs::OperationMode::ConstPtr& operation_mode);
+	/**
+	 * Callback receiving goals issued in RViz GUI with the 2D Nav Goal Tool and calling the respective
+	 * interrupt in the current state
+	 * @param goal Navigaiton goal being set in RViz GUI
+	 */
 	void simpleGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
 	bool startStopExplorationService(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);

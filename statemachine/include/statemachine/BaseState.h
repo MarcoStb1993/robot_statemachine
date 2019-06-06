@@ -19,7 +19,8 @@ namespace statemachine {
 class StateInterface;
 
 /**
- * @class Abstract base state with virtual methods for implementation of states
+ * @class Base State
+ * @brief Abstract base state with virtual methods for implementation of states
  */
 class BaseState {
 public:

@@ -6,16 +6,13 @@
 #include <statemachine_msgs/OperationMode.h>
 #include <statemachine_msgs/SetOperationMode.h>
 
-#define STOPPED_OPERATION 0
-#define AUTONOMOUS_OPERATION 1
-#define TELEOPERATION 2
-
 namespace statemachine {
 
 /**
- * Class RobotControlMux handles all command velocities and only allows the robot to move
- * at all if no emergency stop is set and only move autonomous if autonomous operation is
- * active
+ * @class RobotControlMux
+ * @brief Handles all command velocities and only allows the robot to move
+ * 		  at all if no emergency stop is set and only move autonomous if autonomous operation is
+ * 		  active
  */
 class RobotControlMux {
 public:
@@ -27,7 +24,9 @@ public:
 	 * Destructor
 	 */
 	~RobotControlMux();
-
+	/**
+	 * Publishes msgs from all publishers in this class (cmd vel and operation mode)
+	 */
 	void publishTopics();
 
 private:
@@ -37,7 +36,6 @@ private:
 	ros::Subscriber _autonomy_cmd_vel_sub;
 	ros::Publisher _cmd_vel_pub;
 	ros::Publisher _operation_mode_pub;
-
 	ros::Timer _teleoperation_idle_timer;
 
 	std::string _teleoperation_cmd_vel_topic;
@@ -65,14 +63,32 @@ private:
 	 */
 	geometry_msgs::Twist _teleoperation_cmd_vel;
 
+	/**
+	 * Publish the cmd vel controlling the robot depending on the current operation mode
+	 */
 	void publishCmdVel();
+	/**
+	 * Publish current operation mode
+	 */
 	void publishOperationMode();
-	bool setOperationMode(statemachine_msgs::SetOperationMode::Request &req,
-			statemachine_msgs::SetOperationMode::Response &res);
+	/**
+	 * Callback for receiving the cmd vel produced by autonomous operation
+	 * @param cmd_vel Cmd vel from autonomous operation
+	 */
 	void autonomyCmdVelCallback(const geometry_msgs::Twist::ConstPtr& cmd_vel);
+	/**
+	 * Callback for receiving the cmd vel from teleoperation and checks if a command not equals zero was issued
+	 * @param cmd_vel Cmd vel from teleoperation
+	 */
 	void teleoperationCmdVelCallback(
 			const geometry_msgs::Twist::ConstPtr& cmd_vel);
+	/**
+	 * Timer callback for checking if teleoperation was stopped and robot is idle again
+	 * @param event
+	 */
 	void teleoperationIdleTimerCallback(const ros::TimerEvent& event);
+	bool setOperationMode(statemachine_msgs::SetOperationMode::Request &req,
+			statemachine_msgs::SetOperationMode::Response &res);
 
 };
 

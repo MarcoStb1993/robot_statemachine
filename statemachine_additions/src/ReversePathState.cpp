@@ -3,19 +3,19 @@
 namespace statemachine {
 
 ReversePathState::ReversePathState() {
-	ROS_INFO("ReversePathState constructed");
-	_name = "Reverse Path";
 }
 
 ReversePathState::~ReversePathState() {
-	ROS_INFO("ReversePathState destructed");
 }
 
 void ReversePathState::onSetup() {
-	ROS_INFO("ReversePathState setup");
+	//retrieve parameters
 	ros::NodeHandle private_nh("~");
 	private_nh.param<std::string>("autonomy_cmd_vel_topic",
 			_autonomy_cmd_vel_topic, "/cmd_vel");
+	double controller_frequency;
+	_nh.param("/move_base/controller_frequency", controller_frequency, 20.0);
+	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("statemachine");
 	_get_cmd_vel_recording_service = nh.serviceClient<
 			statemachine_msgs::GetCmdVelRecording>("getCmdVelRecording");
@@ -23,15 +23,16 @@ void ReversePathState::onSetup() {
 			"resetCmdVelRecording");
 	_cmd_vel_publisher = _nh.advertise<geometry_msgs::Twist>(
 			_autonomy_cmd_vel_topic, 10);
-
-	_cmd_vel_replaying = false;
-	double controller_frequency;
-	_nh.param("/move_base/controller_frequency", controller_frequency, 20.0);
 	_cmd_vel_replay_timer = _nh.createTimer(
 			ros::Duration(1 / controller_frequency),
-			&ReversePathState::timerCallback, this);
-	_cmd_vel_replay_timer.stop();
+			&ReversePathState::timerCallback, this, false, false);
+	//initialize variables
+	_name = "Reverse Path";
+	_cmd_vel_replaying = false;
+}
 
+void ReversePathState::onEntry() {
+	//Retrieve cmd vel recording from Additions Service Provider
 	statemachine_msgs::GetCmdVelRecording srv;
 	if (_get_cmd_vel_recording_service.call(srv)) {
 		_cmd_vel_msgs = srv.response.cmdVelMsgs;
@@ -54,21 +55,15 @@ void ReversePathState::onSetup() {
 		ROS_ERROR("Failed to call Get Cmd Vel Msgs service");
 		abortNavigation();
 	}
-}
-
-void ReversePathState::onEntry() {
-	ROS_INFO("ReversePathState entered");
 	_cmd_vel_replaying = true;
 	_current_cmd_vel_msg = _cmd_vel_msgs.size() - 1;
 	_cmd_vel_replay_timer.start();
 }
 
 void ReversePathState::onActive() {
-	//ROS_INFO("ReversePathState active");
 }
 
 void ReversePathState::onExit() {
-	ROS_INFO("ReversePathState exited");
 	_cmd_vel_replaying = false;
 	_cmd_vel_replay_timer.stop();
 
@@ -183,7 +178,6 @@ void ReversePathState::timerCallback(const ros::TimerEvent& event) {
 	if (!_cmd_vel_msgs.empty() && _current_cmd_vel_msg < _cmd_vel_msgs.size()) {
 		publishReverseCmdVelMsg();
 	} else {
-		ROS_INFO("ReversePathState timer finished replaying");
 		_cmd_vel_replaying = false;
 		_cmd_vel_replay_timer.stop();
 		if (!_interrupt_occured) {

@@ -3,32 +3,25 @@
 namespace statemachine {
 
 IdleState::IdleState() {
-	ROS_INFO("IdleState constructed");
-	_name = "Idle";
 }
 
 IdleState::~IdleState() {
-	ROS_INFO("IdleState destructed");
 }
 
 void IdleState::onSetup() {
-	ROS_INFO("IdleState setup");
+	_name = "Idle";
 }
 
 void IdleState::onEntry() {
-	ROS_INFO("IdleState entered");
 }
 
 void IdleState::onActive() {
-	//ROS_INFO("IdleState active");
 }
 
 void IdleState::onExit() {
-	ROS_INFO("IdleState exited");
 }
 
 void IdleState::onExplorationStart(bool &success, std::string &message) {
-	ROS_INFO("Exploration Start called in IdleState");
 	success = true;
 	message = "Exploration started";
 	if (!_interrupt_occured) {
@@ -38,13 +31,11 @@ void IdleState::onExplorationStart(bool &success, std::string &message) {
 }
 
 void IdleState::onExplorationStop(bool &success, std::string &message) {
-	ROS_INFO("Exploration Stop called in IdleState");
 	success = false;
 	message = "Exploration not running";
 }
 
 void IdleState::onWaypointFollowingStart(bool &success, std::string &message) {
-	ROS_INFO("Waypoint following start/pause called in IdleState");
 	success = true;
 	message = "Waypoint following started";
 	_stateinterface->transitionToVolatileState(
@@ -52,7 +43,6 @@ void IdleState::onWaypointFollowingStart(bool &success, std::string &message) {
 }
 
 void IdleState::onWaypointFollowingStop(bool &success, std::string &message) {
-	ROS_INFO("Waypoint following stop called in IdleState");
 	success = false;
 	message = "Waypoint following not running";
 }

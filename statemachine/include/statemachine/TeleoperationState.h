@@ -10,7 +10,7 @@ namespace statemachine {
 
 /**
  * @class   TeleoperationState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   State being active while the robot is teleoperated
  */
 class TeleoperationState: public BaseState {
 

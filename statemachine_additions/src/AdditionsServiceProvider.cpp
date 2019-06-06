@@ -16,7 +16,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	}
 
 	ros::NodeHandle nh("statemachine");
-
 	_start_stop_cmd_vel_recording_service = nh.advertiseService(
 			"startStopCmdVelRecording",
 			&AdditionsServiceProvider::startStopCmdVelRecording, this);

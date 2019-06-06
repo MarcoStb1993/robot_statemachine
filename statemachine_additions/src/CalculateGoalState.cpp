@@ -3,17 +3,14 @@
 namespace statemachine {
 
 CalculateGoalState::CalculateGoalState() {
-	ROS_INFO("CalculateGoalState constructed");
-	_name = "Calculate Goal";
+
 }
 
 CalculateGoalState::~CalculateGoalState() {
-	ROS_INFO("CalculateGoalState destructed");
 }
 
 void CalculateGoalState::onSetup() {
-	ROS_INFO("CalculateGoalState setup");
-	_frontiers_received = false;
+	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("statemachine");
 	_frontiers_sub = nh.subscribe<geometry_msgs::PoseArray>("frontiers", 10,
 			&CalculateGoalState::frontiersCallback, this);
@@ -23,13 +20,15 @@ void CalculateGoalState::onSetup() {
 			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
 	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
 			"getRobotPose");
-
 	_idle_timer = nh.createTimer(ros::Duration(5.0),
 			&CalculateGoalState::timerCallback, this, true);
+	//initialize variables
+	_name = "Calculate Goal";
+	_frontiers_received = false;
 }
 
 void CalculateGoalState::onEntry() {
-	ROS_INFO("CalculateGoalState entered");
+	//Request list of failed goals from Service Provider
 	statemachine_msgs::GetFailedGoals srv;
 	if (_get_failed_goals_service.call(srv)) {
 		_failed_goals = srv.response.failedGoals.poses;
@@ -39,8 +38,8 @@ void CalculateGoalState::onEntry() {
 }
 
 void CalculateGoalState::onActive() {
-	//ROS_INFO("CalculateGoalState active");
 	if (_frontiers_received) {
+		//Calculate frontier center closest to the robot
 		statemachine_msgs::GetRobotPose srv;
 		if (_get_robot_pose_service.call(srv)) {
 			geometry_msgs::Pose current_pose = srv.response.pose;
@@ -58,7 +57,8 @@ void CalculateGoalState::onActive() {
 				}
 			}
 			if (min_distance == std::numeric_limits<double>::infinity()) {
-				ROS_INFO("No more reachable goals, Exploration stopped");
+				ROS_ERROR(
+						"Exploration stopped because there are no more reachable goals");
 				abortCalculateGoal();
 			} else {
 				double yaw = atan2(_goal.position.y - current_pose.position.y,
@@ -79,7 +79,6 @@ void CalculateGoalState::onActive() {
 }
 
 void CalculateGoalState::onExit() {
-	ROS_INFO("CalculateGoalState exited");
 	statemachine_msgs::SetNavigationGoal srv;
 	srv.request.goal = _goal;
 	srv.request.navigationMode = EXPLORATION;
@@ -91,14 +90,12 @@ void CalculateGoalState::onExit() {
 
 void CalculateGoalState::onExplorationStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Exploration Start called in CalculateGoalState");
 	success = true;
 	message = "Exploration running";
 }
 
 void CalculateGoalState::onExplorationStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Exploration Stop called in CalculateGoalState");
 	success = true;
 	message = "Exploration stopped";
 	abortCalculateGoal();
@@ -106,14 +103,12 @@ void CalculateGoalState::onExplorationStop(bool &success,
 
 void CalculateGoalState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following start/pause called in CalculateGoalState");
 	success = false;
 	message = "Exploration running";
 }
 
 void CalculateGoalState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
-	ROS_INFO("Waypoint following stop called in CalculateGoalState");
 	success = false;
 	message = "Exploration running";
 }
@@ -140,7 +135,6 @@ void CalculateGoalState::onInterrupt(int interrupt) {
 
 void CalculateGoalState::frontiersCallback(
 		const geometry_msgs::PoseArray::ConstPtr& frontiers) {
-	ROS_INFO("Frontiers received in CalculateGoalState");
 	_frontier_points = *frontiers;
 	_frontiers_received = true;
 }
@@ -158,7 +152,7 @@ bool CalculateGoalState::differentFromFailedGoals(geometry_msgs::Point point) {
 }
 
 void CalculateGoalState::timerCallback(const ros::TimerEvent& event) {
-	ROS_ERROR("Calculate Goal State received no goals");
+	ROS_ERROR("Exploration stopped because no goal was selected in time");
 	abortCalculateGoal();
 }
 

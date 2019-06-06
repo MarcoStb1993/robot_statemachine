@@ -12,7 +12,8 @@ namespace statemachine {
 
 /**
  * @class   MappingState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   Dummy state for mapping at a reached goal during exploration. Only initiates transition to
+ * 			CalculateGoalState.
  */
 class MappingState: public BaseState {
 

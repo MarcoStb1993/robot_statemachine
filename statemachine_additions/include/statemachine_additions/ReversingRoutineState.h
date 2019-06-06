@@ -16,7 +16,7 @@ namespace statemachine {
 
 /**
  * @class   ReversingRoutineState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   Routine state that toggles the reverse mode.
  */
 class ReversingRoutineState: public BaseState {
 
@@ -82,9 +82,10 @@ private:
 	ros::NodeHandle _nh;
 	ros::ServiceClient _set_reverse_moving_service;
 	ros::ServiceClient _get_reverse_moving_service;
-	ros::ServiceClient _set_rona_reverse_on;
-	ros::ServiceClient _set_rona_reverse_off;
 
+	/**
+	 * Is the robot currently driving in reverse
+	 */
 	bool _reverse_mode_active;
 };
 

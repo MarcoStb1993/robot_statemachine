@@ -35,8 +35,9 @@ class ViewportMouseEvent;
 namespace statemachine {
 
 /**
- * PlantWaypointTool class serves as a Tool plugin for RViz which enables planting waypoints
- * on a desired location with an adjustable orientation.
+ * @class PlantWaypointTool
+ * @brief Serves as a Tool plugin for RViz which enables planting waypoints
+ * 		  on a desired location with an adjustable orientation.
  */
 class PlantWaypointTool: public rviz::Tool {
 

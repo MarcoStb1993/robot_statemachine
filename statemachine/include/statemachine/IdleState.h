@@ -11,7 +11,7 @@ namespace statemachine {
 
 /**
  * @class   IdleState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   State being active when waiting for new inout
  */
 class IdleState: public BaseState {
 

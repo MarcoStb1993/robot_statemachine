@@ -69,10 +69,6 @@ public:
 	void onInterrupt(int interrupt);
 
 private:
-
-	/**
-	 * @brief Service client for bootup service
-	 */
 	ros::ServiceClient _bootupClient;
 
 };

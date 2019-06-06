@@ -10,7 +10,7 @@ StatemachineControlPanel::StatemachineControlPanel(QWidget* parent) :
 	_exploration_running = false;
 	_waypoint_following_running = false;
 	_emergency_stop_active = false;
-	_operation_mode = STOPPED_OPERATION;
+	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
 	initRoutineComboBox();
 }
 
@@ -201,27 +201,27 @@ if (_set_reverse_mode_client.call(srv)) {
 
 void StatemachineControlPanel::emergencyStop() {
 _emergency_stop_active = !_emergency_stop_active;
-_operation_mode = STOPPED_OPERATION;
+_operation_mode = statemachine_msgs::OperationMode::STOPPED;
 callSetOperationMode();
 }
 
 void StatemachineControlPanel::stopOperation() {
-if (_operation_mode != STOPPED_OPERATION) {
-	_operation_mode = STOPPED_OPERATION;
+if (_operation_mode != statemachine_msgs::OperationMode::STOPPED) {
+	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
 	callSetOperationMode();
 }
 }
 
 void StatemachineControlPanel::setAutonomyOperation() {
-if (_operation_mode != AUTONOMOUS_OPERATION) {
-	_operation_mode = AUTONOMOUS_OPERATION;
+if (_operation_mode != statemachine_msgs::OperationMode::AUTONOMOUS) {
+	_operation_mode = statemachine_msgs::OperationMode::AUTONOMOUS;
 	callSetOperationMode();
 }
 }
 
 void StatemachineControlPanel::setTeleoperation() {
-if (_operation_mode != TELEOPERATION) {
-	_operation_mode = TELEOPERATION;
+if (_operation_mode != statemachine_msgs::OperationMode::TELEOPERATION) {
+	_operation_mode = statemachine_msgs::OperationMode::TELEOPERATION;
 	callSetOperationMode();
 }
 }

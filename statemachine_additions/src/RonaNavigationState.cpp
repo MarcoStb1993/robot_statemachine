@@ -3,16 +3,13 @@
 namespace statemachine {
 
 RonaNavigationState::RonaNavigationState() {
-	ROS_INFO("RonaNavigationState constructed");
-	_name = "Navigation";
 }
 
 RonaNavigationState::~RonaNavigationState() {
-	ROS_INFO("RonaNavigationState destructed");
 }
 
 void RonaNavigationState::onSetup() {
-	ROS_INFO("RonaNavigationState setup");
+	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("statemachine");
 	_get_navigation_goal_service = nh.serviceClient<
 			statemachine_msgs::GetNavigationGoal>("getNavigationGoal");
@@ -26,31 +23,27 @@ void RonaNavigationState::onSetup() {
 			statemachine_msgs::WaypointUnreachable>("waypointUnreachable");
 	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
 			"getRobotPose");
-
-	_navigation_mode = -1;
-	_goal_active = false;
-	_comparison_counter = 0;
-	_sirona_state.state = -1;
-	_nav_goal_published_counter = 0;
-
-	_idle_timer = nh.createTimer(ros::Duration(30.0),
-			&RonaNavigationState::timerCallback, this, true); //15 seconds idle timer
-	_idle_timer.stop();
-
 	_sirona_state_subscriber = _nh.subscribe("rona/sirona/state", 1,
 			&RonaNavigationState::sironaStateCallback, this);
 	_nav_goal_publisher = _nh.advertise<geometry_msgs::PoseStamped>(
 			"rona/exploration/target", 1, true);
 	_nav_stop_client = _nh.serviceClient<std_srvs::SetBool>("/rona/move/pause");
-
 	_get_exploration_mode = nh.serviceClient<std_srvs::Trigger>(
 			"getExplorationMode");
-	_exploration_mode = 1; //finish goals
-
+	_idle_timer = _nh.createTimer(ros::Duration(15.0),
+			&RonaNavigationState::timerCallback, this, true, false);
+	//initialize variables
+	_name = "Navigation";
+	_navigation_mode = -1;
+	_goal_active = false;
+	_comparison_counter = 0;
+	_exploration_mode = -1;
+	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+	_sirona_state.state = -1;
 }
 
 void RonaNavigationState::onEntry() {
-	ROS_INFO("RonaNavigationState entered");
+	//Request navigation goal from Service Provider
 	statemachine_msgs::GetNavigationGoal srv;
 	if (_get_navigation_goal_service.call(srv)) {
 		_nav_goal = srv.response.goal;
@@ -76,7 +69,7 @@ void RonaNavigationState::onEntry() {
 		ROS_ERROR("Failed to call Get Navigation Goal service");
 		abortNavigation();
 	}
-	_idle_timer.start();
+	//Get exploration mode from Service Provider if exploration is active
 	if (_navigation_mode == EXPLORATION) {
 		std_srvs::Trigger srv2;
 		if (_get_exploration_mode.call(srv2)) {
@@ -90,10 +83,11 @@ void RonaNavigationState::onEntry() {
 			abortNavigation();
 		}
 	}
+	//Start timer for checking navigation being stuck for too long (15 secs) without proper message from Move Base
+	_idle_timer.start();
 }
 
 void RonaNavigationState::onActive() {
-//ROS_INFO("RonaNavigationState active");
 	if (_goal_active) {
 		double passed_time = (ros::Time::now() - _nav_start_time).toSec();
 		if (passed_time > WAIT_TIME) {
@@ -176,10 +170,12 @@ void RonaNavigationState::onActive() {
 					}
 				}
 			} else {
+				//Check if robot moved for navigation failure check
 				comparePose();
 			}
 		}
 	} else {
+		//Initialize goal
 		geometry_msgs::PoseStamped target;
 		target.header.frame_id = "map";
 		target.header.stamp = ros::Time::now();
@@ -191,7 +187,6 @@ void RonaNavigationState::onActive() {
 }
 
 void RonaNavigationState::onExit() {
-	ROS_INFO("RonaNavigationState exited");
 	std_srvs::SetBool srv;
 	srv.request.data = true;
 	if (!_nav_stop_client.call(srv)) {
@@ -307,33 +302,38 @@ void RonaNavigationState::onInterrupt(int interrupt) {
 }
 
 void RonaNavigationState::timerCallback(const ros::TimerEvent& event) {
-	ROS_INFO("Navigation Timeout!");
+	ROS_ERROR("Navigation aborted because robot appears to be stuck");
 	abortNavigation();
 }
 
 void RonaNavigationState::comparePose() {
-	if (_comparison_counter++ >= 5) { //only compare poses every 5th call to reduce load
-		tf::Pose current_pose;
-		statemachine_msgs::GetRobotPose srv;
-		if (_get_robot_pose_service.call(srv)) {
-			tf::poseMsgToTF(srv.response.pose, current_pose);
-			tf::Pose pose_difference = current_pose.inverseTimes(_last_pose);
-			if (pose_difference.getOrigin().x() < POSE_TOLERANCE
-					&& pose_difference.getOrigin().y() < POSE_TOLERANCE
-					&& pose_difference.getOrigin().z() < POSE_TOLERANCE
-					&& pose_difference.getRotation().x() == 0.0
-					&& pose_difference.getRotation().y() == 0.0
-					&& pose_difference.getRotation().z() == 0.0
-					&& pose_difference.getRotation().w() == 1.0) {
-				_idle_timer.start();
+	if (_operation_mode == statemachine_msgs::OperationMode::AUTONOMOUS) {
+		if (_comparison_counter++ >= 5) { //only compare poses every 5th call to reduce load
+			tf::Pose current_pose;
+			statemachine_msgs::GetRobotPose srv;
+			if (_get_robot_pose_service.call(srv)) {
+				tf::poseMsgToTF(srv.response.pose, current_pose);
+				tf::Pose pose_difference = current_pose.inverseTimes(
+						_last_pose);
+				if (pose_difference.getOrigin().x() < POSE_TOLERANCE
+						&& pose_difference.getOrigin().y() < POSE_TOLERANCE
+						&& pose_difference.getOrigin().z() < POSE_TOLERANCE
+						&& pose_difference.getRotation().x() == 0.0
+						&& pose_difference.getRotation().y() == 0.0
+						&& pose_difference.getRotation().z() == 0.0
+						&& pose_difference.getRotation().w() == 1.0) {
+					_idle_timer.start();
+				} else {
+					_idle_timer.stop();
+				}
+				_last_pose = current_pose;
+				_comparison_counter = 0;
 			} else {
-				_idle_timer.stop();
+				ROS_ERROR("Failed to call Get Robot Pose service");
 			}
-			_last_pose = current_pose;
-			_comparison_counter = 0;
-		} else {
-			ROS_ERROR("Failed to call Get Robot Pose service");
 		}
+	} else {
+		_idle_timer.stop();
 	}
 }
 
@@ -341,12 +341,17 @@ void RonaNavigationState::sironaStateCallback(const rona_msgs::State& msg) {
 	_sirona_state = msg;
 }
 
+void RonaNavigationState::operationModeCallback(
+		const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
+	_operation_mode = operation_mode->mode;
+}
+
 void RonaNavigationState::goalObsoleteCallback(
 		const std_msgs::Bool::ConstPtr& msg) {
 	if (msg->data && !_interrupt_occured) {
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(
-				CALCULATEGOAL_STATE));
+				MAPPING_STATE));
 	}
 }
 

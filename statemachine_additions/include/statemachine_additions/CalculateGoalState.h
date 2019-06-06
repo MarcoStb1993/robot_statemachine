@@ -17,7 +17,8 @@ namespace statemachine {
 
 /**
  * @class   CalculateGoalState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   State for choosing a goal from all provided frontiers and calling Navigation when successful.
+ * 			The frontier center closest to the robot is selected as navigation goal.
  */
 class CalculateGoalState: public BaseState {
 
@@ -81,7 +82,7 @@ public:
 
 	/**
 	 * @brief Called when new frontiers are received
-	 * @param PointCloud2 with all frontier points
+	 * @param frontiers List of poses containing all frontier centers
 	 */
 	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
 
@@ -96,25 +97,36 @@ private:
 
 	ros::NodeHandle _nh;
 	ros::Subscriber _frontiers_sub;
-	std::vector<geometry_msgs::Pose> _failed_goals;
-	geometry_msgs::Pose _goal;
-	geometry_msgs::PoseArray _frontier_points;
-	bool _frontiers_received;
-
 	ros::ServiceClient _get_failed_goals_service;
 	ros::ServiceClient _set_navigation_goal_service;
 	ros::ServiceClient _get_robot_pose_service;
-
-	/**
-	 * @brief Timer for callback after receiving no new teleoperation commands
-	 */
 	ros::Timer _idle_timer;
 
 	/**
-	 * @brief Callback for idle timer
+	 * List of previously failed goals
+	 */
+	std::vector<geometry_msgs::Pose> _failed_goals;
+	/**
+	 * Chosen goal to be forwarded to navigation
+	 */
+	geometry_msgs::Pose _goal;
+	/**
+	 * List of all available frontier centers
+	 */
+	geometry_msgs::PoseArray _frontier_points;
+	/**
+	 * Were frontiers received
+	 */
+	bool _frontiers_received;
+
+	/**
+	 * @brief Callback for when no goal was chosen in time and calculation likely failed
 	 * @param event
 	 */
 	void timerCallback(const ros::TimerEvent& event);
+	/**
+	 * Initiate transition to idle state
+	 */
 	void abortCalculateGoal();
 };
 

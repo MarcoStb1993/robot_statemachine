@@ -30,11 +30,26 @@
 
 namespace statemachine {
 
+/**
+ * @class ServiceProvider
+ * @brief Establishes communication between the different states and the statemachine's
+ * 		  periphery including the GUI. It offers services and publishes topics based on the variables that need
+ * 		  to be saved during state transitions.
+ */
 class ServiceProvider {
 
 public:
+	/**
+	 * Constructor
+	 */
 	ServiceProvider();
+	/**
+	 * Destructor
+	 */
 	~ServiceProvider();
+	/**
+	 * Publish all topics (waypoints, goal obsolete and exploration mode)
+	 */
 	void publishTopics();
 
 private:
@@ -162,6 +177,10 @@ private:
 	bool setExplorationMode(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
 	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
+	/**
+	 * Checks if the current navigation goal is still present as the center of a frontier
+	 * @return Returns true if the current navigation goal is still the center of a frontier to be explored
+	 */
 	bool navGoalIncludedInFrontiers();
 	void publishGoalObsolete();
 	void publishExplorationModes();

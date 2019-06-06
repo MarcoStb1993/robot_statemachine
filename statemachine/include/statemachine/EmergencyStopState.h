@@ -9,7 +9,7 @@ namespace statemachine {
 
 /**
  * @class   EmergencyStopState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   State being active when the software emergency stop was pushed in the GUI
  */
 class EmergencyStopState: public BaseState {
 

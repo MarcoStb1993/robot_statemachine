@@ -12,8 +12,9 @@
 namespace statemachine {
 
 /**
- * WaypointFollowingVisualization class for visualizing waypoints as interactive markers in RViz
- * and handling their interaction
+ * @class WaypointFollowingVisualization
+ * @brief Class for visualizing waypoints as interactive markers in RViz
+ * 		  and handling their interaction
  */
 class WaypointFollowingVisualization {
 public:

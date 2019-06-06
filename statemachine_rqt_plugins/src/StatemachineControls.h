@@ -22,12 +22,12 @@
 #include <std_msgs/Bool.h>
 #include <pluginlib/class_list_macros.h>
 
-#define STOPPED_OPERATION 0
-#define AUTONOMOUS_OPERATION 1
-#define TELEOPERATION 2
-
 namespace statemachine {
 
+/**
+ * @class   StatemachineControlPanel
+ * @brief   Plugin for rqt which adds buttons to interface the statemachine
+ */
 class StatemachineControlPanel: public rqt_gui_cpp::Plugin {
 	Q_OBJECT
 

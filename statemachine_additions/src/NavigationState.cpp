@@ -3,16 +3,13 @@
 namespace statemachine {
 
 NavigationState::NavigationState() {
-	ROS_INFO("NavigationState constructed");
-	_name = "Navigation";
 }
 
 NavigationState::~NavigationState() {
-	ROS_INFO("NavigationState destructed");
 }
 
 void NavigationState::onSetup() {
-	ROS_INFO("NavigationState setup");
+	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("statemachine");
 	_get_navigation_goal_service = nh.serviceClient<
 			statemachine_msgs::GetNavigationGoal>("getNavigationGoal");
@@ -30,17 +27,20 @@ void NavigationState::onSetup() {
 			"getReverseMode");
 	_reverse_mode_subscriber = nh.subscribe<std_msgs::Bool>("reverseMode", 10,
 			&NavigationState::reverseModeCallback, this);
-
-	_navigation_mode = -1;
-	_goal_active = false;
-
 	_get_exploration_mode_service = nh.serviceClient<std_srvs::Trigger>(
 			"getExplorationMode");
-	_exploration_mode = 1; //finish goals
+	_idle_timer = _nh.createTimer(ros::Duration(15.0),
+			&NavigationState::timerCallback, this, true, false);
+	//initialize variables
+	_name = "Navigation";
+	_navigation_mode = -1;
+	_goal_active = false;
+	_exploration_mode = -1;
+	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
 }
 
 void NavigationState::onEntry() {
-	ROS_INFO("NavigationState entered");
+	//Request navigation goal from Service Provider
 	statemachine_msgs::GetNavigationGoal srv;
 	if (_get_navigation_goal_service.call(srv)) {
 		_nav_goal = srv.response.goal;
@@ -66,23 +66,21 @@ void NavigationState::onEntry() {
 		ROS_ERROR("Failed to call Get Navigation Goal service");
 		abortNavigation();
 	}
+	//Check if reverse mode is active with Service Provider
 	std_srvs::Trigger srv2;
 	if (_get_reverse_mode_service.call(srv2)) {
 		_reverse_mode = srv2.response.success;
 		if (_reverse_mode) {
-			ROS_INFO("Navigation in reverse mode");
 			_move_base_client.reset(
 					new MoveBaseClient("move_base_reverse", true));
 		} else {
-			ROS_INFO("Navigation in forward mode");
 			_move_base_client.reset(new MoveBaseClient("move_base", true));
 		}
 	} else {
 		ROS_ERROR("Failed to call Get Reverse Mode service");
-		ROS_INFO("Navigation in forward mode because of service failure");
 		_move_base_client.reset(new MoveBaseClient("move_base", true));
 	}
-	_idle_timer.start();
+	//Get exploration mode from Service Provider if exploration is active
 	if (_navigation_mode == EXPLORATION) {
 		std_srvs::Trigger srv2;
 		if (_get_exploration_mode_service.call(srv2)) {
@@ -96,10 +94,11 @@ void NavigationState::onEntry() {
 			abortNavigation();
 		}
 	}
+	//Start timer for checking navigation being stuck for too long (15 secs) without proper message from Move Base
+	_idle_timer.start();
 }
 
 void NavigationState::onActive() {
-	//ROS_INFO("NavigationState active");
 	if (_move_base_client->isServerConnected()) {
 		if (_goal_active) {
 			if (_move_base_client->getState().isDone()) {
@@ -184,9 +183,11 @@ void NavigationState::onActive() {
 					}
 				}
 			} else {
+				//Check if robot moved for navigation failure check
 				comparePose();
 			}
 		} else {
+			//Initialize goal
 			move_base_msgs::MoveBaseGoal goal;
 			goal.target_pose.header.frame_id = "map";
 			goal.target_pose.header.stamp = ros::Time::now();
@@ -198,7 +199,6 @@ void NavigationState::onActive() {
 }
 
 void NavigationState::onExit() {
-	ROS_INFO("NavigationState exited");
 	if (_goal_active) {
 		_move_base_client->cancelGoal();
 	}
@@ -310,33 +310,38 @@ void NavigationState::onInterrupt(int interrupt) {
 }
 
 void NavigationState::timerCallback(const ros::TimerEvent& event) {
-	ROS_INFO("Navigation Timeout!");
+	ROS_ERROR("Navigation aborted because robot appears to be stuck");
 	abortNavigation();
 }
 
 void NavigationState::comparePose() {
-	if (_comparison_counter++ >= 5) { //only compare poses every 5th call to reduce load
-		tf::Pose current_pose;
-		statemachine_msgs::GetRobotPose srv;
-		if (_get_robot_pose_service.call(srv)) {
-			tf::poseMsgToTF(srv.response.pose, current_pose);
-			tf::Pose pose_difference = current_pose.inverseTimes(_last_pose);
-			if (pose_difference.getOrigin().x() < POSE_TOLERANCE
-					&& pose_difference.getOrigin().y() < POSE_TOLERANCE
-					&& pose_difference.getOrigin().z() < POSE_TOLERANCE
-					&& pose_difference.getRotation().x() == 0.0
-					&& pose_difference.getRotation().y() == 0.0
-					&& pose_difference.getRotation().z() == 0.0
-					&& pose_difference.getRotation().w() == 1.0) {
-				_idle_timer.start();
+	if (_operation_mode == statemachine_msgs::OperationMode::AUTONOMOUS) {
+		if (_comparison_counter++ >= 5) { //only compare poses every 5th call to reduce load
+			tf::Pose current_pose;
+			statemachine_msgs::GetRobotPose srv;
+			if (_get_robot_pose_service.call(srv)) {
+				tf::poseMsgToTF(srv.response.pose, current_pose);
+				tf::Pose pose_difference = current_pose.inverseTimes(
+						_last_pose);
+				if (pose_difference.getOrigin().x() < POSE_TOLERANCE
+						&& pose_difference.getOrigin().y() < POSE_TOLERANCE
+						&& pose_difference.getOrigin().z() < POSE_TOLERANCE
+						&& pose_difference.getRotation().x() == 0.0
+						&& pose_difference.getRotation().y() == 0.0
+						&& pose_difference.getRotation().z() == 0.0
+						&& pose_difference.getRotation().w() == 1.0) {
+					_idle_timer.start();
+				} else {
+					_idle_timer.stop();
+				}
+				_last_pose = current_pose;
+				_comparison_counter = 0;
 			} else {
-				_idle_timer.stop();
+				ROS_ERROR("Failed to call Get Robot Pose service");
 			}
-			_last_pose = current_pose;
-			_comparison_counter = 0;
-		} else {
-			ROS_ERROR("Failed to call Get Robot Pose service");
 		}
+	} else {
+		_idle_timer.stop();
 	}
 }
 
@@ -345,7 +350,7 @@ void NavigationState::goalObsoleteCallback(
 	if (msg->data && !_interrupt_occured) {
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(
-				CALCULATEGOAL_STATE));
+				MAPPING_STATE));
 	}
 }
 
@@ -360,12 +365,15 @@ void NavigationState::reverseModeCallback(
 		if (_reverse_mode) {
 			_move_base_client.reset(
 					new MoveBaseClient("move_base_reverse", true));
-			ROS_INFO("Changed to reverse mode");
 		} else {
 			_move_base_client.reset(new MoveBaseClient("move_base", true));
-			ROS_INFO("Changed to forward mode");
 		}
 	}
+}
+
+void NavigationState::operationModeCallback(
+		const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
+	_operation_mode = operation_mode->mode;
 }
 
 void NavigationState::abortNavigation() {

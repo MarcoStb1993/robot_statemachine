@@ -15,7 +15,8 @@ namespace statemachine {
 
 /**
  * @class   ReversePathState
- * @brief   State being active until all vital systems are running and ready.
+ * @brief   State to replay the last few seconds of cmd vel topic in reversed order with negated speeds
+ * 			to move the same way back when robot is stuck.
  */
 class ReversePathState: public BaseState {
 public:
@@ -72,18 +73,42 @@ private:
 	ros::ServiceClient _get_cmd_vel_recording_service;
 	ros::ServiceClient _reset_cmd_vel_recording_service;
 	ros::Publisher _cmd_vel_publisher;
-
-	int _navigation_mode;
-	bool _cmd_vel_replaying;
-	std::vector<geometry_msgs::Twist> _cmd_vel_msgs;
-	int _current_cmd_vel_msg;
 	ros::Timer _cmd_vel_replay_timer;
+
 	std::string _autonomy_cmd_vel_topic;
+
+	/**
+	 * Mode of navigation (Exploration=0, Waypoint following=1 and Simple Goal=2)
+	 */
+	int _navigation_mode;
+	/**
+	 * If negated cmd vel is still replayed
+	 */
+	bool _cmd_vel_replaying;
+	/**
+	 * List of cmd vel messages to be negated and replayed
+	 */
+	std::vector<geometry_msgs::Twist> _cmd_vel_msgs;
+	/**
+	 * Current cmd vel message to be replayed
+	 */
+	int _current_cmd_vel_msg;
 
 	bool startStopCmdVelReversedReplay(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
+	/**
+	 * Callback for timer to publish the cmd vel messages in reverse order with the same frequency as the
+	 * original publisher. Initiates state transition when playback ended
+	 * @param event
+	 */
 	void timerCallback(const ros::TimerEvent& event);
+	/**
+	 * Publish a reversed cmd vel message
+	 */
 	void publishReverseCmdVelMsg();
+	/**
+	 * Initiates transition to Idle State
+	 */
 	void abortNavigation();
 };
 

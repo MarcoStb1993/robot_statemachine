@@ -17,7 +17,7 @@ namespace statemachine {
 
 /**
  * @class   WaypointFollowingState
- * @brief   State being active while
+ * @brief   State to decide which waypoint will be the next navigation goal while in waypoint following mode.
  */
 class WaypointFollowingState: public BaseState {
 
@@ -80,18 +80,32 @@ public:
 	void onInterrupt(int interrupt);
 
 private:
-
-	statemachine_msgs::WaypointArray _waypoint_array;
-	int _next_waypoint_position;
-
 	ros::ServiceClient _get_waypoints_service;
 	ros::ServiceClient _set_waypoint_following_mode_service;
 	ros::ServiceClient _reset_waypoints_service;
 	ros::ServiceClient _set_navigation_goal_service;
 	ros::ServiceClient _waypoint_visited_service;
 
+	/**
+	 * List of all waypoints
+	 */
+	statemachine_msgs::WaypointArray _waypoint_array;
+	/**
+	 * Position of the next waypoint to navigate to in the list
+	 */
+	int _next_waypoint_position;
+
+	/**
+	 * Resets the status' of all waypoints and aborts waypoint following
+	 */
 	void resetWaypoints();
+	/**
+	 * Initiates transition to Idle State
+	 */
 	void abortWaypointFollowing();
+	/**
+	 * Requests all waypoints from Service Provider
+	 */
 	void getWaypoints();
 	void setCurrentWaypointVisited();
 };
