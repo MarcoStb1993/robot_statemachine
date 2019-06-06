@@ -1,0 +1,11 @@
+<launch>
+	<node pkg="rviz" type="rviz" name="rviz"
+		args="-d $(find statemachine_additions)/config/georg/nav_georg.rviz">
+		<remap from="/move_base_simple/goal"
+			to="/statemachine/simpleGoal" />
+	</node>
+	<include
+		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">
+		<arg name="update_frequency" value="20" />
+	</include>
+</launch>

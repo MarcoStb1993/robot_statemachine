@@ -45,19 +45,19 @@
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base" output="screen">
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_common.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_common.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_local.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_local.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_global.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_global.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/planner.yaml"
+			file="$(find statemachine_additions)/config/georg/planner.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg 
@@ -71,19 +71,19 @@
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base_reverse" output="screen">
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_common.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_common.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_local.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_local.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_global.yaml"
+			file="$(find statemachine_additions)/config/georg/costmap_global.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/planner.yaml"
+			file="$(find statemachine_additions)/config/georg/planner.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg robot_frame)_reverse" />
