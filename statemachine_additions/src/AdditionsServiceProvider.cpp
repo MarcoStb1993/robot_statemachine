@@ -6,7 +6,14 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 		as(NULL) {
 	ros::NodeHandle private_nh("~");
 	private_nh.param<std::string>("autonomy_cmd_vel_topic",
-			_autonomy_cmd_vel_topic, "/cmd_vel");
+			_autonomy_cmd_vel_topic, "/autonomy/cmd_vel");
+	std::string navigation_plugin;
+	private_nh.param<std::string>("navigation_plugin", navigation_plugin, "");
+	if (navigation_plugin.compare("statemachine::NavigationState") == 0) {
+		_navigation_plugin_used = true;
+	} else {
+		_navigation_plugin_used = false;
+	}
 
 	ros::NodeHandle nh("statemachine");
 
@@ -30,6 +37,19 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	_get_reverse_mode_service = nh.advertiseService("getReverseMode",
 			&AdditionsServiceProvider::getReverseMode, this);
 	_reverse_mode_publisher = nh.advertise<std_msgs::Bool>("reverseMode", 10);
+	if (_navigation_plugin_used) {
+		std::ostringstream autonomy_cmd_vel_reverse_topic;
+		autonomy_cmd_vel_reverse_topic << _autonomy_cmd_vel_topic << "_reverse";
+		_reverse_mode_cmd_vel_subscriber = _nh.subscribe(
+				autonomy_cmd_vel_reverse_topic.str(), 10,
+				&AdditionsServiceProvider::reverseModeCmdVelCallback, this);
+		_reverse_mode_cmd_vel_publisher = _nh.advertise<geometry_msgs::Twist>(
+				_autonomy_cmd_vel_topic, 10);
+	}
+	_set_rona_reverse_on = _nh.serviceClient<std_srvs::Empty>(
+			"rona/move/set_reverse_on");
+	_set_rona_reverse_off = _nh.serviceClient<std_srvs::Empty>(
+			"rona/move/set_reverse_off");
 
 	as = new MoveBaseActionServer(_nh, "frontier_move_base",
 			boost::bind(&AdditionsServiceProvider::navigationGoalCallback, this,
@@ -63,12 +83,12 @@ void AdditionsServiceProvider::publishTopics() {
 bool AdditionsServiceProvider::startStopCmdVelRecording(
 		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
 	if (req.data) {
-		ros::NodeHandle nh;
-		_cmd_vel_subscriber = nh.subscribe(_autonomy_cmd_vel_topic, 10,
+		_reverse_path_cmd_vel_subscriber = _nh.subscribe(
+				_autonomy_cmd_vel_topic, 10,
 				&AdditionsServiceProvider::cmdVelCallback, this);
 		res.message = "Started Cmd Vel recording";
 	} else {
-		_cmd_vel_subscriber.shutdown();
+		_reverse_path_cmd_vel_subscriber.shutdown();
 		res.message = "Stopped Cmd Vel recording";
 	}
 	res.success = 1;
@@ -133,24 +153,24 @@ void AdditionsServiceProvider::cmdVelCallback(
 
 bool AdditionsServiceProvider::setReverseMode(std_srvs::SetBool::Request &req,
 		std_srvs::SetBool::Response &res) {
-	if (req.data) {
-		if (_reverse_mode_active) {
-			res.success = 0;
-			res.message = "Already in reverse mode";
-		} else {
-			_reverse_mode_active = true;
+	if (req.data != _reverse_mode_active) {
+		if (_navigation_plugin_used) {
+			_reverse_mode_active = req.data;
 			res.success = 1;
-			res.message = "Set to reverse mode";
+			res.message = "Mode set";
+		} else {
+			if (setReverseModeRona(req.data)) {
+				_reverse_mode_active = req.data;
+				res.success = 1;
+				res.message = "Mode set";
+			} else {
+				res.success = 0;
+				res.message = "Unable to set Mode in Rona";
+			}
 		}
 	} else {
-		if (_reverse_mode_active) {
-			res.success = 1;
-			res.message = "Set to forward mode";
-			_reverse_mode_active = false;
-		} else {
-			res.success = 0;
-			res.message = "Already in forward mode";
-		}
+		res.success = 0;
+		res.message = "Already in requested mode";
 	}
 	return true;
 }
@@ -173,10 +193,42 @@ void AdditionsServiceProvider::publishReverseMode() {
 	_reverse_mode_publisher.publish(msg);
 }
 
+void AdditionsServiceProvider::reverseModeCmdVelCallback(
+		const geometry_msgs::Twist::ConstPtr& cmd_vel) {
+	ROS_INFO("message reversed");
+	geometry_msgs::Twist cmd_vel_reversed;
+	cmd_vel_reversed.linear.x = cmd_vel->linear.x * -1;
+	cmd_vel_reversed.linear.y = cmd_vel->linear.y * -1;
+	cmd_vel_reversed.linear.z = cmd_vel->linear.z * -1;
+	cmd_vel_reversed.angular.x = cmd_vel->angular.x;
+	cmd_vel_reversed.angular.y = cmd_vel->angular.y;
+	cmd_vel_reversed.angular.z = cmd_vel->angular.z;
+	_reverse_mode_cmd_vel_publisher.publish(cmd_vel_reversed);
+}
+
+bool AdditionsServiceProvider::setReverseModeRona(bool on) {
+	ROS_INFO("Set reverse mode rona");
+	std_srvs::Empty srv;
+	if (on) {
+		if (_set_rona_reverse_on.call(srv)) {
+			return true;
+		} else {
+			ROS_ERROR("Failed to call Set Reverse Mode On service");
+			return false;
+		}
+	} else {
+		if (_set_rona_reverse_off.call(srv)) {
+			return true;
+		} else {
+			ROS_ERROR("Failed to call Set Reverse Mode Off service");
+			return false;
+		}
+	}
+}
+
 void AdditionsServiceProvider::navigationGoalCallback(
 		const move_base_msgs::MoveBaseGoalConstPtr& frontier_goal) {
 	as->setSucceeded(move_base_msgs::MoveBaseResult(), "Goal reached.");
-	//ROS_INFO("Frontier goal intercepted: %3.3f %3.3f", frontier_goal->target_pose.pose.position.x, frontier_goal->target_pose.pose.position.y);
 }
 
 void AdditionsServiceProvider::publishFrontierPoses() {

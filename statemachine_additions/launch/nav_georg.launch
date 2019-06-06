@@ -1,24 +1,20 @@
-<!-- Simulation of Husky UGV with GMapping and Frontier Exploration -->
+<!-- Simulation of Georg UGV Frontier Exploration -->
 
 <launch>
-	<arg name="world"
-		default="$(find husky_gazebo)/launch/playpen.launch" />
 	<arg name="robot_frame" default="base_footprint" />
-	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
+	<arg name="autonomy_cmd_vel_topic" default="/autonomy/vel/cmd" />
 	<arg name="teleoperation_cmd_vel_topic"
-		default="/teleoperation/cmd_vel" />
-	<arg name="cmd_vel_topic" default="/cmd_vel" />
+		default="/teleoperation/vel/cmd" />
+	<arg name="cmd_vel_topic" default="/vel/cmd" />
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::NavigationState" />
 	<arg name="mapping_plugin" default="statemachine::MappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
-	<arg name="rviz" default="false" />
 
-	<include
-		file="$(find statemachine_additions)/launch/gazebo.launch">
-		<arg name="world_file" value="$(arg world)" />
-	</include>
+	<node pkg="tf" type="static_transform_publisher"
+		name="velodyne_32_to_laser_tf"
+		args="0 0 0 0 0 0 1  /laser /velodyne_32  20" />
 
 	<include file="$(find statemachine)/launch/statemachine.launch">
 		<arg name="update_frequency" value="20" />
@@ -44,11 +40,6 @@
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
-	</node>
-
-	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping"
-		output="screen">
-		<param name="base_frame" value="base_footprint" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"
@@ -111,10 +102,11 @@
 		name="base_footprint_reverse"
 		args="0 0 0 3.1415 0 0             $(arg robot_frame)         $(arg robot_frame)_reverse		10" />
 
+
 	<!-- Explore Lite -->
 	<node pkg="explore_lite" type="explore" respawn="false"
 		name="explore">
-		<param name="robot_base_frame" value="base_footprint" />
+		<param name="robot_base_frame" value="$(arg robot_frame)" />
 		<param name="costmap_topic" value="map" />
 		<param name="costmap_updates_topic" value="map_updates" />
 		<param name="visualize" value="true" />
@@ -127,15 +119,4 @@
 		<param name="min_frontier_size" value="0.75" />
 		<remap from="/move_base" to="/frontier_move_base" />
 	</node>
-
-	<!-- RViz für Exploration -->
-	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
-		args="-d $(find statemachine_additions)/config/gazebo_sim/gazebo_simulation.rviz">
-		<remap from="/move_base_simple/goal"
-			to="/statemachine/simpleGoal" />
-	</node>
-	<include if="$(arg rviz)"
-		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">
-		<arg name="update_frequency" value="20" />
-	</include>
 </launch>

@@ -7,6 +7,7 @@
 
 #include <std_srvs/SetBool.h>
 #include <std_msgs/Bool.h>
+#include <std_srvs/Empty.h>
 
 #include <statemachine_msgs/GetCmdVelRecording.h>
 #include <std_srvs/Trigger.h>
@@ -36,11 +37,16 @@ private:
 	ros::ServiceServer _reset_cmd_vel_recording_service;
 	ros::ServiceServer _request_reverse_path_usage_service;
 	ros::ServiceServer _reset_reverse_path_usage_service;
-	ros::Subscriber _cmd_vel_subscriber;
+	ros::Subscriber _reverse_path_cmd_vel_subscriber;
+
+	ros::ServiceClient _set_rona_reverse_on;
+	ros::ServiceClient _set_rona_reverse_off;
 
 	ros::ServiceServer _set_reverse_mode_service;
 	ros::ServiceServer _get_reverse_mode_service;
 	ros::Publisher _reverse_mode_publisher;
+	ros::Subscriber _reverse_mode_cmd_vel_subscriber;
+	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
 	bool _reverse_path_used;
 	boost::circular_buffer<geometry_msgs::Twist> _cmd_vel_msgs;
@@ -56,6 +62,10 @@ private:
 	 * Is currently driving in reverse
 	 */
 	bool _reverse_mode_active;
+	/**
+	 * Is the Navigation stack used as Plugin for navigation
+	 */
+	bool _navigation_plugin_used;
 
 	/**
 	 * List of all extracted frontier centers
@@ -79,6 +89,9 @@ private:
 	bool getReverseMode(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 	void publishReverseMode();
+	void reverseModeCmdVelCallback(
+			const geometry_msgs::Twist::ConstPtr& cmd_vel);
+	bool setReverseModeRona(bool on);
 
 	void navigationGoalCallback(
 			const move_base_msgs::MoveBaseGoalConstPtr& frontier_goal);

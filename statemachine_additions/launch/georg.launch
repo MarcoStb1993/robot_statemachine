@@ -39,6 +39,7 @@
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
+		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
 	</node>
 
 
@@ -159,13 +160,13 @@
 
 	<node pkg="tf" type="static_transform_publisher"
 		name="base_footprint_reverse"
-		args="0 0 0 3.1415 0 0             $(arg robot_frame)          base_footprint_reverse		10" />
+		args="0 0 0 3.1415 0 0             $(arg robot_frame)          $(arg robot_frame)_reverse		10" />
 
 
 	<!-- Explore Lite -->
 	<node pkg="explore_lite" type="explore" respawn="false"
 		name="explore">
-		<param name="robot_base_frame" value="base_footprint" />
+		<param name="robot_base_frame" value="$(arg robot_frame)" />
 		<param name="costmap_topic" value="map" />
 		<param name="costmap_updates_topic" value="map_updates" />
 		<param name="visualize" value="true" />

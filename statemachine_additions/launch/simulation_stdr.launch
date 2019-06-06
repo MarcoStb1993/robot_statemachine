@@ -55,12 +55,11 @@
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
+		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
 	</node>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
 		<param name="base_frame" value="$(arg robot_frame)" />
-		<!--param name="odom_frame" value="/robot0" /> <param name="map_frame" 
-			value="/gmapping/map" / -->
 		<remap from="/scan" to="/robot0/laser_0" />
 		<remap from="/map" to="/gmapping/map" />
 	</node>
@@ -82,10 +81,48 @@
 		<rosparam
 			file="$(find statemachine_additions)/config/stdr_sim/planner.yaml"
 			command="load" />
-		<remap from="/cmd_vel" to="$(arg autonomy_cmd_vel_topic)" />
+		<param name="global_costmap/robot_base_frame"
+			value="$(arg robot_frame)" />
+		<param name="local_costmap/robot_base_frame"
+			value="$(arg robot_frame)" />
 		<remap from="/map" to="/gmapping/map" />
-		<remap from="/odom" to="/robot0/odom" />
+		<remap from="/cmd_vel" to="$(arg autonomy_cmd_vel_topic)" />
 	</node>
+
+	<node pkg="move_base" type="move_base" respawn="false"
+		name="move_base_reverse" output="screen">
+		<rosparam
+			file="$(find statemachine_additions)/config/stdr_sim/costmap_common.yaml"
+			command="load" ns="global_costmap" />
+		<rosparam
+			file="$(find statemachine_additions)/config/stdr_sim/costmap_common.yaml"
+			command="load" ns="local_costmap" />
+		<rosparam
+			file="$(find statemachine_additions)/config/stdr_sim/costmap_local.yaml"
+			command="load" />
+		<rosparam
+			file="$(find statemachine_additions)/config/stdr_sim/costmap_global.yaml"
+			command="load" />
+		<rosparam
+			file="$(find statemachine_additions)/config/stdr_sim/planner.yaml"
+			command="load" />
+		<param name="global_costmap/robot_base_frame"
+			value="$(arg robot_frame)_reverse" />
+		<param name="local_costmap/robot_base_frame"
+			value="$(arg robot_frame)_reverse" />
+		<remap from="/map" to="/gmapping/map" />
+		<remap from="/cmd_vel"
+			to="$(arg autonomy_cmd_vel_topic)_reverse" />
+		<remap from="move_base/goal" to="move_base_reverse/goal" />
+		<remap from="move_base/cancel" to="move_base_reverse/cancel" />
+		<remap from="move_base/feedback" to="move_base_reverse/feedback" />
+		<remap from="move_base/status" to="move_base_reverse/status" />
+		<remap from="move_base/result" to="move_base_reverse/result" />
+	</node>
+
+	<node pkg="tf" type="static_transform_publisher"
+		name="robot0_reverse"
+		args="0 0 0 3.1415 0 0             $(arg robot_frame)          $(arg robot_frame)_reverse		10" />
 
 	<!-- Explore Lite -->
 	<node pkg="explore_lite" type="explore" respawn="false"

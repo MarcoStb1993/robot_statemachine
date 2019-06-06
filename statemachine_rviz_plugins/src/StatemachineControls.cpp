@@ -39,10 +39,6 @@ void StatemachineControlPanel::initCommunications() {
 
 	_set_reverse_mode_client = nh.serviceClient<std_srvs::SetBool>(
 			"setReverseMode");
-	_set_rona_reverse_on = _nh.serviceClient<std_srvs::Empty>(
-			"rona/move/set_reverse_on");
-	_set_rona_reverse_off = _nh.serviceClient<std_srvs::Empty>(
-			"rona/move/set_reverse_off");
 	_reverse_mode_subscriber = nh.subscribe<std_msgs::Bool>("reverseMode", 10,
 			&StatemachineControlPanel::reverseModeCallback, this);
 
@@ -187,41 +183,19 @@ if (!_get_robot_pose_client.call(srv)) {
 }
 
 void StatemachineControlPanel::setReverseMode() {
-std_srvs::Empty srv;
-if (_reverse_mode) {
-	if (_set_rona_reverse_off.call(srv)) {
-		std_srvs::SetBool srv2;
-		srv2.request.data = false;
-		if (_set_reverse_mode_client.call(srv2)) {
-			_reverse_mode = false;
-			_gui->reverse_checkbox->setChecked(_reverse_mode);
-		} else {
-			ROS_ERROR("Failed to call Set Reverse Mode service");
-			_gui->movement_label->setText(
-					"Control: Set Reverse Mode service not available");
-		}
+std_srvs::SetBool srv;
+srv.request.data = !_reverse_mode;
+if (_set_reverse_mode_client.call(srv)) {
+	if (srv.response.success) {
+		_reverse_mode = !_reverse_mode;
+		_gui->reverse_checkbox->setChecked(_reverse_mode);
 	} else {
-		ROS_ERROR("Failed to call Set Reverse Mode On service");
-		_gui->movement_label->setText(
-				"Control: Set Reverse Mode On service not available");
+		_gui->movement_label->setText("Control: Failed to change reverse mode");
 	}
 } else {
-	if (_set_rona_reverse_on.call(srv)) {
-		std_srvs::SetBool srv2;
-		srv2.request.data = true;
-		if (_set_reverse_mode_client.call(srv2)) {
-			_reverse_mode = true;
-			_gui->reverse_checkbox->setChecked(_reverse_mode);
-		} else {
-			ROS_ERROR("Failed to call Set Reverse Mode service");
-			_gui->movement_label->setText(
-					"Control: Set Reverse Mode service not available");
-		}
-	} else {
-		ROS_ERROR("Failed to call Set Reverse Mode Off service");
-		_gui->movement_label->setText(
-				"Control: Set Reverse Mode Off service not available");
-	}
+	ROS_ERROR("Failed to call Set Reverse Mode service");
+	_gui->movement_label->setText(
+			"Control: Set Reverse Mode service not available");
 }
 }
 

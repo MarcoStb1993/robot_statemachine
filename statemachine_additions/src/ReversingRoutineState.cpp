@@ -29,11 +29,7 @@ void ReversingRoutineState::onEntry() {
 	ROS_INFO("ReversingRoutineState entered");
 	std_srvs::Trigger srv;
 	if (_get_reverse_moving_service.call(srv)) {
-		if (srv.response.success) {
-			_reverse_mode_active = true;
-		} else {
-			_reverse_mode_active = false;
-		}
+		_reverse_mode_active = srv.response.success;
 	} else {
 		ROS_ERROR("Failed to call Get Reverse Mode service");
 		if (!_interrupt_occured) {
@@ -45,27 +41,10 @@ void ReversingRoutineState::onEntry() {
 
 void ReversingRoutineState::onActive() {
 	//ROS_INFO("ReversingRoutineState active");
-	std_srvs::Empty srv;
-	if (_reverse_mode_active) {
-		if (_set_rona_reverse_off.call(srv)) {
-			std_srvs::SetBool srv2;
-			srv2.request.data = false;
-			if (!_set_reverse_moving_service.call(srv2)) {
-				ROS_ERROR("Failed to call Set Reverse Mode service");
-			}
-		} else {
-			ROS_ERROR("Failed to call Set Reverse Mode On service");
-		}
-	} else {
-		if (_set_rona_reverse_on.call(srv)) {
-			std_srvs::SetBool srv2;
-			srv2.request.data = true;
-			if (!_set_reverse_moving_service.call(srv2)) {
-				ROS_ERROR("Failed to call Set Reverse Mode service");
-			}
-		} else {
-			ROS_ERROR("Failed to call Set Reverse Mode Off service");
-		}
+	std_srvs::SetBool srv;
+	srv.request.data = !_reverse_mode_active;
+	if (!_set_reverse_moving_service.call(srv)) {
+		ROS_ERROR("Failed to call Set Reverse Mode service");
 	}
 	if (!_interrupt_occured) {
 		_stateinterface->transitionToVolatileState(

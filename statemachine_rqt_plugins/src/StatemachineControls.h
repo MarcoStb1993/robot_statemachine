@@ -19,7 +19,6 @@
 #include <statemachine_msgs/GetRobotPose.h>
 #include <statemachine_msgs/SetOperationMode.h>
 #include <std_srvs/SetBool.h>
-#include <std_srvs/Empty.h>
 #include <std_msgs/Bool.h>
 #include <pluginlib/class_list_macros.h>
 
@@ -66,8 +65,6 @@ private:
 	ros::ServiceClient _add_waypoint_client;
 	ros::ServiceClient _get_waypoint_routines_client;
 	ros::ServiceClient _set_reverse_mode_client;
-	ros::ServiceClient _set_rona_reverse_on;
-	ros::ServiceClient _set_rona_reverse_off;
 	ros::ServiceClient _get_robot_pose_client;
 	ros::ServiceClient _set_operation_mode_client;
 	ros::ServiceClient _set_exploration_mode_client;

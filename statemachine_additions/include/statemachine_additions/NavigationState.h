@@ -92,7 +92,7 @@ public:
 private:
 
 	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-	MoveBaseClient _move_base_client;
+	boost::shared_ptr<MoveBaseClient> _move_base_client;
 	geometry_msgs::Pose _nav_goal;
 	bool _goal_active;
 	std::vector<geometry_msgs::Pose> _failed_goals;
@@ -104,6 +104,7 @@ private:
 	ros::Timer _idle_timer;
 	int _comparison_counter;
 	bool _exploration_mode;
+	bool _reverse_mode;
 
 	ros::NodeHandle _nh;
 	ros::ServiceClient _get_navigation_goal_service;
@@ -112,8 +113,10 @@ private:
 	ros::ServiceClient _waypoint_visited_service;
 	ros::ServiceClient _waypoint_unreachable_service;
 	ros::ServiceClient _get_robot_pose_service;
-	ros::ServiceClient _get_exploration_mode;
+	ros::ServiceClient _get_exploration_mode_service;
+	ros::ServiceClient _get_reverse_mode_service;
 	ros::Subscriber _get_goal_obsolete;
+	ros::Subscriber _reverse_mode_subscriber;
 
 	/**
 	 * @brief Callback for idle timer
@@ -121,8 +124,10 @@ private:
 	 */
 	void timerCallback(const ros::TimerEvent& event);
 	void goalObsoleteCallback(const std_msgs::Bool::ConstPtr& msg);
+	void reverseModeCallback(const std_msgs::Bool::ConstPtr& reverse_mode);
 	void abortNavigation();
 	void comparePose();
+
 };
 
 }

@@ -1,6 +1,5 @@
 robot_radius: 0.2
 
-robot_base_frame: robot0
 update_frequency: 4.0
 publish_frequency: 3.0
 transform_tolerance: 0.5
