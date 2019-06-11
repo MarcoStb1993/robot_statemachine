@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   statemachine
   statemachine_msgs
   visualization_msgs
-  rona_msgs
   pcl_conversions
   pcl_ros
 )
@@ -27,7 +26,6 @@ include_directories(include
 add_library(statemachine_plugins
     src/CalculateGoalState.cpp
     src/NavigationState.cpp
-    src/RonaNavigationState.cpp
     src/MappingState.cpp
     src/ReversePathState.cpp
     src/ReversingRoutineState.cpp)

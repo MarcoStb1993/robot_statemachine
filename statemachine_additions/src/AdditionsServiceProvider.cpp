@@ -31,10 +31,10 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 			"resetCmdVelRecording",
 			&AdditionsServiceProvider::resetCmdVelRecording, this);
 
-	_set_navigation_to_reverse_service = nh.advertiseService(
-			"setNavigationToReverse",
-			&AdditionsServiceProvider::setNavigationToReverse, this);
 	if (_navigation_plugin_used) {
+		_set_navigation_to_reverse_service = nh.advertiseService(
+				"setNavigationToReverse",
+				&AdditionsServiceProvider::setNavigationToReverse, this);
 		std::ostringstream autonomy_cmd_vel_reverse_topic;
 		autonomy_cmd_vel_reverse_topic << _autonomy_cmd_vel_topic << "_reverse";
 		_reverse_mode_cmd_vel_subscriber = _nh.subscribe(
@@ -43,10 +43,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 		_reverse_mode_cmd_vel_publisher = _nh.advertise<geometry_msgs::Twist>(
 				_autonomy_cmd_vel_topic, 10);
 	}
-	_set_rona_reverse_on = _nh.serviceClient<std_srvs::Empty>(
-			"rona/move/set_reverse_on");
-	_set_rona_reverse_off = _nh.serviceClient<std_srvs::Empty>(
-			"rona/move/set_reverse_off");
 
 	as = new MoveBaseActionServer(_nh, "frontier_move_base",
 			boost::bind(&AdditionsServiceProvider::navigationGoalCallback, this,
@@ -146,18 +142,8 @@ void AdditionsServiceProvider::cmdVelCallback(
 
 bool AdditionsServiceProvider::setNavigationToReverse(
 		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
-	if (_navigation_plugin_used) {
-		res.success = 1;
-		res.message = "Mode set";
-	} else {
-		if (setReverseModeRona(req.data)) {
-			res.success = 1;
-			res.message = "Mode set";
-		} else {
-			res.success = 0;
-			res.message = "Unable to set Mode in Rona";
-		}
-	}
+	res.success = 1;
+	res.message = "Mode set";
 	return true;
 }
 
@@ -172,26 +158,6 @@ void AdditionsServiceProvider::reverseModeCmdVelCallback(
 	cmd_vel_reversed.angular.y = cmd_vel->angular.y;
 	cmd_vel_reversed.angular.z = cmd_vel->angular.z;
 	_reverse_mode_cmd_vel_publisher.publish(cmd_vel_reversed);
-}
-
-bool AdditionsServiceProvider::setReverseModeRona(bool on) {
-	ROS_INFO("Set reverse mode rona");
-	std_srvs::Empty srv;
-	if (on) {
-		if (_set_rona_reverse_on.call(srv)) {
-			return true;
-		} else {
-			ROS_ERROR("Failed to call Set Reverse Mode On service");
-			return false;
-		}
-	} else {
-		if (_set_rona_reverse_off.call(srv)) {
-			return true;
-		} else {
-			ROS_ERROR("Failed to call Set Reverse Mode Off service");
-			return false;
-		}
-	}
 }
 
 void AdditionsServiceProvider::navigationGoalCallback(

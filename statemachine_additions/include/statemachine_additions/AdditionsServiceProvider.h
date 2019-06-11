@@ -47,9 +47,6 @@ private:
 
 	ros::ServiceServer _set_navigation_to_reverse_service;
 
-	ros::ServiceClient _set_rona_reverse_on;
-	ros::ServiceClient _set_rona_reverse_off;
-
 	ros::Subscriber _reverse_mode_cmd_vel_subscriber;
 	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
@@ -110,12 +107,7 @@ private:
 	 */
 	void reverseModeCmdVelCallback(
 			const geometry_msgs::Twist::ConstPtr& cmd_vel);
-	/**
-	 * Set Rona to reverse mode on or off depending on the parameter
-	 * @param on If Rona should be set to on or off
-	 * @return Returns true if the mode was set successfully, false otherwise
-	 */
-	bool setReverseModeRona(bool on);
+
 	/**
 	 * Callback for requests to the SimpleActionServer that just responds with "Goal reached"
 	 * @param frontier_goal

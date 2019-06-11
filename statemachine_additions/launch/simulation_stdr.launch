@@ -56,6 +56,7 @@
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
+
 	</node>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">

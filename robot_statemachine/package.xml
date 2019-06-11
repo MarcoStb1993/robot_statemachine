@@ -32,7 +32,7 @@
 	<exec_depend>statemachine_additions</exec_depend>
 	<exec_depend>statemachine_rviz_plugins</exec_depend>
 	<exec_depend>statemachine_rqt_plugins</exec_depend>
-	
+
 	<export>
 		<metapackage />
 	</export>

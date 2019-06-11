@@ -5,7 +5,6 @@
 #include <statemachine/BaseState.h>
 #include <statemachine/IdleState.h>
 #include <statemachine/EmergencyStopState.h>
-#include <statemachine_additions/ReversePathState.h>
 #include <statemachine/StateInterface.h>
 #include <geometry_msgs/PoseArray.h>
 #include <move_base_msgs/MoveBaseAction.h>
