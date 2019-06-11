@@ -31,11 +31,9 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 			"resetCmdVelRecording",
 			&AdditionsServiceProvider::resetCmdVelRecording, this);
 
-	_set_reverse_mode_service = nh.advertiseService("setReverseMode",
-			&AdditionsServiceProvider::setReverseMode, this);
-	_get_reverse_mode_service = nh.advertiseService("getReverseMode",
-			&AdditionsServiceProvider::getReverseMode, this);
-	_reverse_mode_publisher = nh.advertise<std_msgs::Bool>("reverseMode", 10);
+	_set_navigation_to_reverse_service = nh.advertiseService(
+			"setNavigationToReverse",
+			&AdditionsServiceProvider::setNavigationToReverse, this);
 	if (_navigation_plugin_used) {
 		std::ostringstream autonomy_cmd_vel_reverse_topic;
 		autonomy_cmd_vel_reverse_topic << _autonomy_cmd_vel_topic << "_reverse";
@@ -65,9 +63,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	_msg_buffer_size = controller_frequency * 2; //2 seconds recorded cmd vel messages
 	_cmd_vel_msgs.set_capacity(_msg_buffer_size);
 	_reverse_path_used = false;
-
-	_reverse_mode_active = false;
-
 }
 
 AdditionsServiceProvider::~AdditionsServiceProvider() {
@@ -75,7 +70,6 @@ AdditionsServiceProvider::~AdditionsServiceProvider() {
 }
 
 void AdditionsServiceProvider::publishTopics() {
-	publishReverseMode();
 	publishFrontierPoses();
 }
 
@@ -150,46 +144,21 @@ void AdditionsServiceProvider::cmdVelCallback(
 	}
 }
 
-bool AdditionsServiceProvider::setReverseMode(std_srvs::SetBool::Request &req,
-		std_srvs::SetBool::Response &res) {
-	if (req.data != _reverse_mode_active) {
-		if (_navigation_plugin_used) {
-			_reverse_mode_active = req.data;
+bool AdditionsServiceProvider::setNavigationToReverse(
+		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+	if (_navigation_plugin_used) {
+		res.success = 1;
+		res.message = "Mode set";
+	} else {
+		if (setReverseModeRona(req.data)) {
 			res.success = 1;
 			res.message = "Mode set";
 		} else {
-			if (setReverseModeRona(req.data)) {
-				_reverse_mode_active = req.data;
-				res.success = 1;
-				res.message = "Mode set";
-			} else {
-				res.success = 0;
-				res.message = "Unable to set Mode in Rona";
-			}
+			res.success = 0;
+			res.message = "Unable to set Mode in Rona";
 		}
-	} else {
-		res.success = 0;
-		res.message = "Already in requested mode";
 	}
 	return true;
-}
-
-bool AdditionsServiceProvider::getReverseMode(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	if (_reverse_mode_active) {
-		res.success = true;
-		res.message = "Reverse mode active";
-	} else {
-		res.success = false;
-		res.message = "Forward mode active";
-	}
-	return true;
-}
-
-void AdditionsServiceProvider::publishReverseMode() {
-	std_msgs::Bool msg;
-	msg.data = _reverse_mode_active;
-	_reverse_mode_publisher.publish(msg);
 }
 
 void AdditionsServiceProvider::reverseModeCmdVelCallback(

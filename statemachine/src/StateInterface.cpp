@@ -60,7 +60,7 @@ boost::shared_ptr<statemachine::BaseState> StateInterface::getPluginState(
 		break;
 	}
 	default: {
-		ROS_INFO("No matching plugin type found, return to Idle State");
+		ROS_ERROR("No matching plugin type found, return to Idle State");
 		return boost::make_shared<IdleState>();
 		break;
 	}
@@ -106,7 +106,7 @@ void StateInterface::transitionToVolatileState(
 			_next_state->setStateInterface(this);
 			_next_state->onSetup();
 		} else {
-			ROS_INFO(
+			ROS_ERROR(
 					"Next state instance invalid. Either NULL or already assigned state passed.");
 		}
 	}
@@ -143,8 +143,6 @@ void StateInterface::simpleGoalCallback(
 
 bool StateInterface::startStopExplorationService(
 		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
-	ROS_INFO("Start/Stop exploration command received with request: %s",
-			req.data ? "true" : "false");
 	if (_current_state) {
 		bool success;
 		std::string message;
@@ -164,8 +162,6 @@ bool StateInterface::startStopExplorationService(
 
 bool StateInterface::startStopWaypointFollowingService(
 		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
-	ROS_INFO("Start/Stop wayfollowing command received with request: %s",
-			req.data ? "true" : "false");
 	if (_current_state) {
 		bool success;
 		std::string message;

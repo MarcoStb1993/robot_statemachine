@@ -45,12 +45,11 @@ private:
 	ros::ServiceServer _reset_reverse_path_usage_service;
 	ros::Subscriber _reverse_path_cmd_vel_subscriber;
 
+	ros::ServiceServer _set_navigation_to_reverse_service;
+
 	ros::ServiceClient _set_rona_reverse_on;
 	ros::ServiceClient _set_rona_reverse_off;
 
-	ros::ServiceServer _set_reverse_mode_service;
-	ros::ServiceServer _get_reverse_mode_service;
-	ros::Publisher _reverse_mode_publisher;
 	ros::Subscriber _reverse_mode_cmd_vel_subscriber;
 	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
@@ -77,19 +76,15 @@ private:
 	 *Topic name for the autonomy cmd vel topic to be recorded
 	 */
 	std::string _autonomy_cmd_vel_topic;
-	/**
-	 * Is currently driving in reverse
-	 */
-	bool _reverse_mode_active;
-	/**
-	 * Is the Navigation stack used as Plugin for navigation
-	 */
-	bool _navigation_plugin_used;
 
 	/**
 	 * List of all extracted frontier centers
 	 */
 	geometry_msgs::PoseArray _frontier_poses;
+	/**
+	 * Is the Navigation stack used as Plugin for navigation
+	 */
+	bool _navigation_plugin_used;
 
 	bool startStopCmdVelRecording(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
@@ -107,14 +102,12 @@ private:
 	 */
 	void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& msg);
 
-	bool setReverseMode(std_srvs::SetBool::Request &req,
+	bool setNavigationToReverse(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
-	bool getReverseMode(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
 	/**
-	 * Publish if reverse mode is active
+	 * Receives cmd vel and negate linear movement so robot goes backwards
+	 * @param cmd_vel cmd vel generated for backward movement
 	 */
-	void publishReverseMode();
 	void reverseModeCmdVelCallback(
 			const geometry_msgs::Twist::ConstPtr& cmd_vel);
 	/**

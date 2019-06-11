@@ -57,6 +57,14 @@ ServiceProvider::ServiceProvider() {
 	_exploration_mode_publisher = nh.advertise<std_msgs::Bool>(
 			"explorationMode", 1);
 
+	_set_reverse_mode_service = nh.advertiseService("setReverseMode",
+			&ServiceProvider::setReverseMode, this);
+	_get_reverse_mode_service = nh.advertiseService("getReverseMode",
+			&ServiceProvider::getReverseMode, this);
+	_set_navigation_to_reverse_client = nh.serviceClient<std_srvs::SetBool>(
+			"setNavigationToReverse");
+	_reverse_mode_publisher = nh.advertise<std_msgs::Bool>("reverseMode", 10);
+
 	_waypoint_array.header.seq = 0;
 	_waypoint_array.header.stamp = ros::Time::now();
 	_waypoint_array.header.frame_id = "map";
@@ -69,6 +77,8 @@ ServiceProvider::ServiceProvider() {
 
 	_goal_obsolete = false;
 	_exploration_mode = 0;
+
+	_reverse_mode_active = false;
 }
 
 ServiceProvider::~ServiceProvider() {
@@ -79,6 +89,7 @@ void ServiceProvider::publishTopics() {
 	publishWaypoints();
 	publishGoalObsolete();
 	publishExplorationModes();
+	publishReverseMode();
 }
 
 bool ServiceProvider::addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
@@ -317,6 +328,50 @@ void ServiceProvider::publishExplorationModes() {
 	std_msgs::Bool msg;
 	msg.data = _exploration_mode;
 	_exploration_mode_publisher.publish(msg);
+}
+
+bool ServiceProvider::setReverseMode(std_srvs::SetBool::Request &req,
+		std_srvs::SetBool::Response &res) {
+	if (req.data != _reverse_mode_active) {
+		_reverse_mode_active = req.data;
+		std_srvs::SetBool srv;
+		srv.request.data = _reverse_mode_active;
+		if (_set_navigation_to_reverse_client.call(srv)) {
+			if (srv.response.success) {
+				res.success = 1;
+				res.message = "Mode set";
+			} else {
+				res.success = 0;
+				res.message = "Mode not set";
+			}
+		} else {
+			ROS_ERROR("Unable to call Set Navigation To Reverse service");
+			res.success = 0;
+			res.message = "Unable to set reverse mode";
+		}
+	} else {
+		res.success = 0;
+		res.message = "Already in requested mode";
+	}
+	return true;
+}
+
+bool ServiceProvider::getReverseMode(std_srvs::Trigger::Request &req,
+		std_srvs::Trigger::Response &res) {
+	if (_reverse_mode_active) {
+		res.success = true;
+		res.message = "Reverse mode active";
+	} else {
+		res.success = false;
+		res.message = "Forward mode active";
+	}
+	return true;
+}
+
+void ServiceProvider::publishReverseMode() {
+	std_msgs::Bool msg;
+	msg.data = _reverse_mode_active;
+	_reverse_mode_publisher.publish(msg);
 }
 
 }
