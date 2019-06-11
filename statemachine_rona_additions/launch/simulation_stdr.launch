@@ -1,0 +1,217 @@
+<!-- Simulation of Statemachine with GMapping and Frontier Exploration -->
+
+<launch>
+	<arg name="robot_frame" default="robot0" />
+	<arg name="autonomy_cmd_vel_topic"
+		default="/robot0/autonomy/cmd_vel" />
+	<arg name="teleoperation_cmd_vel_topic"
+		default="/robot0/teleoperation/cmd_vel" />
+	<arg name="cmd_vel_topic" default="/robot0/cmd_vel" />
+	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
+	<arg name="navigation_plugin"
+		default="statemachine::RonaNavigationState" />
+	<arg name="mapping_plugin" default="statemachine::MappingState" />
+	<arg name="waypoint_routines" default="['Reversing']" />
+	<arg name="rviz" default="false" />
+
+	<include file="$(find stdr_robot)/launch/robot_manager.launch" />
+
+	<node type="stdr_server_node" pkg="stdr_server" name="stdr_server"
+		output="screen"
+		args="$(find stdr_resources)/maps/sparse_obstacles.yaml" />
+
+	<node pkg="tf" type="static_transform_publisher" name="world2map"
+		args="0 0 0 0 0 0  world map 100" />
+
+	<include file="$(find stdr_gui)/launch/stdr_gui.launch" />
+
+	<node pkg="stdr_robot" type="robot_handler"
+		name="$(anon robot_spawn)"
+		args="add $(find statemachine_additions)/config/stdr_sim/robot1.yaml 1 2 0" />
+
+	<!--include file="$(find stdr_launchers)/launch/server_with_map_and_gui_plus_robot.launch" 
+		/ -->
+
+	<include file="$(find statemachine)/launch/statemachine.launch">
+		<arg name="update_frequency" value="20" />
+		<arg name="robot_frame" value="$(arg robot_frame)" />
+		<arg name="autonomy_cmd_vel_topic"
+			value="$(arg autonomy_cmd_vel_topic)" />
+		<arg name="teleoperation_cmd_vel_topic"
+			value="$(arg teleoperation_cmd_vel_topic)" />
+		<arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
+		<arg name="calculate_goal_plugin" value="$(arg goal_plugin)" />
+		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
+		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
+		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
+	</include>
+
+	<node pkg="statemachine_additions" type="bootUpNode"
+		name="bootUpNode" output="screen" />
+
+	<node pkg="statemachine_additions"
+		type="additionsServiceProviderNode"
+		name="additionsServiceProviderNode">
+		<param name="update_frequency" value="20" />
+		<param name="autonomy_cmd_vel_topic"
+			value="$(arg autonomy_cmd_vel_topic)" />
+	</node>
+
+	<node pkg="statemachine_rona_additions"
+		type="ronaAdditionsServiceProviderNode"
+		name="ronaAdditionsServiceProviderNode" output="screen" />
+
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+		<param name="base_frame" value="$(arg robot_frame)" />
+		<!--param name="odom_frame" value="$(arg robot_frame)" /> <param name="map_frame" 
+			value="/gmapping/map" / -->
+		<remap from="/scan" to="/robot0/laser_0" />
+		<remap from="/map" to="/gmapping/map" />
+	</node>
+
+	<!-- RONA Navigation -->
+	<!-- Path controller -->
+	<node name="rona_move_node" pkg="rona_move" type="rona_move_node">
+		<param name="pub_cmd_vel_topic" type="string"
+			value="$(arg autonomy_cmd_vel_topic)" />
+		<param name="pub_state_topic" type="string"
+			value="rona/move/state" />
+		<param name="pub_process_topic" type="string"
+			value="rona/move/process" />
+		<param name="sub_path_topic" type="string"
+			value="rona/move/path" />
+		<param name="sub_ctrl_topic" type="string"
+			value="rona/move/ctrl" />
+		<param name="map_frame" type="string" value="map" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
+		<param name="vel_lin_max" type="double" value="0.5" />
+		<param name="vel_ang_max" type="double" value="0.5" />
+		<param name="target_radius" type="double" value="0.2" />
+		<param name="target_radius_final" type="double" value="0.2" />
+		<param name="cos_pwr_n" type="int" value="4 " />
+		<param name="cos_fac_n" type="double" value="3.5" />
+		<param name="ang_reached_range" type="double" value="0.05" />
+		<param name="lin_end_approach" type="double" value="1.0" />
+		<param name="lin_ctrl_scale" type="double" value="2.0" />
+		<param name="ang_ctrl_scale" type="double" value="8.0" />
+		<param name="min_vel_value" type="double" value="0.001" />
+		<param name="do_endrotate" type="bool" value="true" />
+	</node>
+
+	<!-- Path planner -->
+	<node name="sirona_plan_node" pkg="sirona" type="sirona_plan_node"
+		output="screen">
+		<param name="sub_map_topic" type="string" value="gmapping/map" />
+		<param name="sub_target_topic" type="string"
+			value="rona/plan/target" />
+		<param name="sub_replan_topic" type="string"
+			value="rona/plan/replan" />
+		<param name="sub_add_obstacle_topic" type="string"
+			value="rona/plan/add_obstacle" />
+		<param name="sub_rm_obstacle_topic" type="string"
+			value="rona/plan/rm_obstacle" />
+		<param name="pub_path_topic" type="string"
+			value="rona/plan/path" />
+		<param name="pub_grid_topic" type="string"
+			value="rona/map/inflated" />
+		<param name="pub_grid_ob_topic" type="string"
+			value="rona/map/obstacles" />
+		<param name="map_frame" type="string" value="map" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
+		<param name="robot_radius" type="double" value="0.2" />
+		<param name="dt_radius" type="double" value="0.3" />
+		<param name="free_robot_pos_factor" type="double" value="0.2" />
+	</node>
+
+	<!-- Sirona state statemachine -->
+	<node name="sirona_sm_node" pkg="sirona" type="sirona_sm_node"
+		output="screen">
+		<param name="pub_re_target_topic" type="string"
+			value="rona/plan/target" />
+		<param name="pub_re_addob_topic" type="string"
+			value="rona/plan/add_obstacle" />
+		<param name="pub_re_rmob_topic" type="string"
+			value="rona/plan/rm_obstacle" />
+		<param name="pub_replan_topic" type="string"
+			value="rona/plan/replan" />
+		<param name="pub_path_topic" type="string"
+			value="rona/move/path" />
+		<param name="pub_state_topic" type="string"
+			value="rona/sirona/state" />
+		<param name="pub_move_ctrl_topic" type="string"
+			value="rona/move/ctrl" />
+		<param name="sub_target_topic" type="string"
+			value="rona/exploration/target" />
+		<!--param name="sub_target_topic" type="string" value="/move_base_simple/goal" 
+			/ -->
+		<param name="sub_addob_topic" type="string"
+			value="rona/add_obstacle" />
+		<param name="sub_rmob_topic" type="string"
+			value="rona/rm_obstacle" />
+		<param name="sub_path_topic" type="string"
+			value="rona/plan/path" />
+		<param name="sub_state_topic" type="string"
+			value="rona/move/state" />
+		<param name="robot_frame" type="string"
+			value="$(arg robot_frame)" />
+		<param name="map_frame" type="string" value="map" />
+		<param name="obstacle_block_time" type="double" value="2.0" />
+		<param name="ob_react_poly_0_x" type="double" value="0.0" />
+		<param name="ob_react_poly_0_y" type="double" value="0.3" />
+		<param name="ob_react_poly_1_x" type="double" value="0.0" />
+		<param name="ob_react_poly_1_y" type="double" value="-0.3" />
+		<param name="ob_react_poly_2_x" type="double" value="1.2" />
+		<param name="ob_react_poly_2_y" type="double" value="-0.5" />
+		<param name="ob_react_poly_3_x" type="double" value="1.2" />
+		<param name="ob_react_poly_3_y" type="double" value="0.5" />
+	</node>
+
+	<!-- Obstacle Handler -->
+	<node name="rona_obstacle_handler_node" pkg="rona_obstacle"
+		type="rona_obstacle_handler_node" output="screen">
+		<param name="pub_marker_topic" type="string"
+			value="obstacle_fix_marker" />
+		<param name="pub_add_obstacle_topic" type="string"
+			value="rona/add_obstacle" />
+		<param name="pub_rm_obstacle_topic" type="string"
+			value="rona/rm_obstacle" />
+		<param name="sub_obstacle_topic" type="string" value="obstacle" />
+		<param name="map_frame" type="string" value="map" />
+		<param name="robot_radius" type="double" value="0.2" />
+		<param name="duration_obstacle_valid" type="double"
+			value="3600 " />
+	</node>
+
+	<node pkg="tf" type="static_transform_publisher"
+		name="base_footprint_reverse"
+		args="0 0 0 3.1415 0 0             $(arg robot_frame)          base_footprint_reverse		10" />
+
+	<!-- Explore Lite -->
+	<node pkg="explore_lite" type="explore" respawn="false"
+		name="explore">
+		<param name="robot_base_frame" value="$(arg robot_frame)" />
+		<param name="costmap_topic" value="gmapping/map" />
+		<param name="costmap_updates_topic" value="gmapping/map_updates" />
+		<param name="visualize" value="true" />
+		<param name="planner_frequency" value="5" />
+		<param name="progress_timeout" value="30.0" />
+		<param name="potential_scale" value="3.0" />
+		<param name="orientation_scale" value="0.0" />
+		<param name="gain_scale" value="1.0" />
+		<param name="transform_tolerance" value="0.3" />
+		<param name="min_frontier_size" value="0.75" />
+		<remap from="/move_base" to="/frontier_move_base" />
+	</node>
+
+	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
+		args="-d $(find statemachine_rona_additions)/config/stdr_sim/rona_statemachine_simulation.rviz">
+		<remap from="/move_base_simple/goal"
+			to="/statemachine/simpleGoal" />
+	</node>
+	<include if="$(arg rviz)"
+		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">
+		<arg name="update_frequency" value="20" />
+	</include>
+</launch>

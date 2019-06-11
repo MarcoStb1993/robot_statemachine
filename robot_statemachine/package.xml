@@ -30,6 +30,7 @@
 	<exec_depend>statemachine</exec_depend>
 	<exec_depend>statemachine_msgs</exec_depend>
 	<exec_depend>statemachine_additions</exec_depend>
+	<exec_depend>statemachine_rona_additions</exec_depend>
 	<exec_depend>statemachine_rviz_plugins</exec_depend>
 	<exec_depend>statemachine_rqt_plugins</exec_depend>
 
