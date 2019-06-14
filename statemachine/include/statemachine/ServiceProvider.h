@@ -130,6 +130,10 @@ private:
 	 */
 	geometry_msgs::PoseArray _frontiers;
 	/**
+	 * Tolerance for comparing if the current goal is still in the list of frontiers
+	 */
+	double _exploration_goal_tolerance;
+	/**
 	 * Is navigation goal still a frontier
 	 */
 	bool _goal_obsolete;

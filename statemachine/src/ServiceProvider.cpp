@@ -7,6 +7,8 @@ ServiceProvider::ServiceProvider() {
 	private_nh.param<std::string>("robot_frame", _robot_frame, "/base_link");
 	private_nh.param<std::vector<std::string>>("waypoint_routines",
 			_waypoint_routines, std::vector<std::string>());
+	private_nh.param<double>("exploration_goal_tolerance",
+			_exploration_goal_tolerance, 0.05);
 
 	ros::NodeHandle nh("statemachine");
 	_add_waypoint_service = nh.advertiseService("addWaypoint",
@@ -51,9 +53,6 @@ ServiceProvider::ServiceProvider() {
 			&ServiceProvider::setExplorationMode, this);
 	_get_exploration_mode_service = nh.advertiseService("getExplorationMode",
 			&ServiceProvider::getExplorationMode, this);
-	_frontier_goals_subscriber = nh.subscribe("frontiers", 1,
-			&ServiceProvider::frontiersCallback, this);
-	_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete", 1);
 	_exploration_mode_publisher = nh.advertise<std_msgs::Bool>(
 			"explorationMode", 1);
 
@@ -87,9 +86,12 @@ ServiceProvider::~ServiceProvider() {
 
 void ServiceProvider::publishTopics() {
 	publishWaypoints();
-	publishGoalObsolete();
 	publishExplorationModes();
 	publishReverseMode();
+	if (_exploration_mode) {
+		publishGoalObsolete();
+
+	}
 }
 
 bool ServiceProvider::addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
@@ -291,6 +293,16 @@ bool ServiceProvider::getExplorationMode(std_srvs::Trigger::Request &req,
 bool ServiceProvider::setExplorationMode(std_srvs::SetBool::Request &req,
 		std_srvs::SetBool::Response &res) {
 	_exploration_mode = req.data;
+	if (_exploration_mode) {
+		ros::NodeHandle nh("statemachine");
+		_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete",
+				1);
+		_frontier_goals_subscriber = nh.subscribe("frontiers", 1,
+				&ServiceProvider::frontiersCallback, this);
+	} else {
+		_goal_obsolete_publisher.shutdown();
+		_frontier_goals_subscriber.shutdown();
+	}
 	res.success = 1;
 	res.message = "Exploration mode set";
 	return true;
@@ -302,11 +314,13 @@ void ServiceProvider::frontiersCallback(
 }
 
 bool ServiceProvider::navGoalIncludedInFrontiers() {
-	double tolerance = 0.05;
 	for (auto iterator : _frontiers.poses) {
 		double x_dif = abs(_navigation_goal.position.x - iterator.position.x);
 		double y_dif = abs(_navigation_goal.position.y - iterator.position.y);
-		if (x_dif <= tolerance && y_dif <= tolerance) {
+		double z_dif = abs(_navigation_goal.position.z - iterator.position.z);
+		if (x_dif <= _exploration_goal_tolerance
+				&& y_dif <= _exploration_goal_tolerance
+				&& z_dif <= _exploration_goal_tolerance) {
 			return true;
 		}
 	}

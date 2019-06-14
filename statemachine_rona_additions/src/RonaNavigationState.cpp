@@ -131,42 +131,41 @@ void RonaNavigationState::onActive() {
 						break;
 					}
 					}
-				} else if (_sirona_state.state == _sirona_state.ABORTED
-						|| _sirona_state.state == _sirona_state.UNREACHABLE) {
-					if (!_interrupt_occured) {
-						switch (_navigation_mode) {
-						case EXPLORATION: {
-							statemachine_msgs::AddFailedGoal srv;
-							srv.request.failedGoal = _nav_goal;
-							if (!_add_failed_goal_service.call(srv)) {
-								ROS_ERROR(
-										"Failed to call Add Failed Goal service");
-							}
-							_stateinterface->transitionToVolatileState(
-									_stateinterface->getPluginState(
-									CALCULATEGOAL_STATE));
-							break;
+				}
+			} else if (_sirona_state.state == _sirona_state.ABORTED
+					|| _sirona_state.state == _sirona_state.UNREACHABLE) {
+				if (!_interrupt_occured) {
+					switch (_navigation_mode) {
+					case EXPLORATION: {
+						statemachine_msgs::AddFailedGoal srv;
+						srv.request.failedGoal = _nav_goal;
+						if (!_add_failed_goal_service.call(srv)) {
+							ROS_ERROR("Failed to call Add Failed Goal service");
 						}
-						case WAYPOINT_FOLLOWING: {
-							statemachine_msgs::WaypointUnreachable srv;
-							srv.request.position = _waypoint_position;
-							if (!_waypoint_unreachable_service.call(srv)) {
-								ROS_ERROR(
-										"Failed to call Waypoint Visited service");
-							}
-							_stateinterface->transitionToVolatileState(
-									boost::make_shared<WaypointFollowingState>());
-							break;
+						_stateinterface->transitionToVolatileState(
+								_stateinterface->getPluginState(
+								CALCULATEGOAL_STATE));
+						break;
+					}
+					case WAYPOINT_FOLLOWING: {
+						statemachine_msgs::WaypointUnreachable srv;
+						srv.request.position = _waypoint_position;
+						if (!_waypoint_unreachable_service.call(srv)) {
+							ROS_ERROR(
+									"Failed to call Waypoint Visited service");
 						}
-						case SIMPLE_GOAL: {
-							abortNavigation();
-							break;
-						}
-						default: {
-							abortNavigation();
-							break;
-						}
-						}
+						_stateinterface->transitionToVolatileState(
+								boost::make_shared<WaypointFollowingState>());
+						break;
+					}
+					case SIMPLE_GOAL: {
+						abortNavigation();
+						break;
+					}
+					default: {
+						abortNavigation();
+						break;
+					}
 					}
 				}
 			} else {
