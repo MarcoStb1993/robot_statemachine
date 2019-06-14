@@ -62,7 +62,7 @@ Which topic will be conducted is based on the operation mode which can be one of
 * Stopped
 * Teleoperation
 
-For *Autonomy* and *Teleoperation* the respective topic is propagated to the motor controller interface. If the operation mode is set to *Stopped* a command velocity of zero for all directions is published. The operation mode can be set through the GUI by a service Robot Control Mux is providing. It is published to the GUI for display as well. If a teleoperation command is issued, the mode automatically switches to *Teleoperation*.
+For *Autonomy* and *Teleoperation* the respective topic is propagated to the motor controller interface. If the operation mode is set to *Stopped* a command velocity of zero for all directions is published. The operation mode can be set through the GUI by a service Robot Control Mux is providing. It is published to the GUI for display as well. If a teleoperation command is issued, the mode automatically switches to *Teleoperation*. When in *Teleoperation* mode, a timer is started to supervise if new commands are being issued. If no new commands are received for the timer duration (which is set through a parameter), *Teleoperation* is replaced with the *Stopped* mode.
 
 If the software emergency stop is activated in the GUI, the operation mode is handled as *Stopped* and cannot be changed until the stop button is released again.
 
@@ -76,10 +76,20 @@ For setting and retrieving the current navigation goal the Service Provider is o
 
 The current robot pose can be retrieved and is calculated from the transform from the map to the robot's base footprint.
 
-The service provider also hosts services for exploration
+The Service Provider also hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *interrupt*, the Service Provider subscribes to the list of available frontiers and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not a frontier anymore, it becomes obsolete. This info is published when the mode is set to *interrupt* as well.
+
+Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published. 
+
+### Non-customizable states
+
+The core statemachine already features the following states for direct usage:
+* **Boot State:** Is the first state to be called and subscribes to a service which tells it when all necessary systems are available and ready to use. Then it initiates a transition to the **Idle State**. Can only be interrupted by the software emergency stop. 
+* **Emergency Stop State:** State being called when the software emergency stop was pushed. Only transitions to **Idle State** when button is released.
+* **Idle State:** Standard state when no commands were issued. Allows transitions to all other states.
+* **Teleoperation State:** State being called when teleoperation commands were issued. Only transitions to 
+* **Waypoint Following State:**
 
 
-### Non-customizable states 
 
 ## Usage
 
