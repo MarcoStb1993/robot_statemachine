@@ -8,8 +8,7 @@
 	<class type="statemachine::StatemachineControlPanel"
 		base_class_type="rviz::Panel">
 		<description>
-			A panel widget for controlling the robot statemachine in
-			rviz.
+			 Robot statemachine control panel for exploration and waypoint following as well as high-level robot supervision.
 		</description>
 	</class>
 </library>

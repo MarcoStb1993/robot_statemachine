@@ -280,7 +280,6 @@ void ExampleState::onWaypointFollowingStop(bool &success,
 }
 
 void ExampleState::onInterrupt(int interrupt) {
-	switch (interrupt) {
 	//...
 }
 

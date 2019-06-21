@@ -1,12 +1,12 @@
 <library path="lib/libstatemachine_rqt_plugins">
   <class name="StatemachineControlPanel" type="statemachine::StatemachineControlPanel" base_class_type="rqt_gui_cpp::Plugin">
     <description>
-      An example CPP GUI plugin to create a great user interface.
+      Robot statemachine control panel for exploration and waypoint following as well as high-level robot supervision.
     </description>
     <qtgui>
       <label>Statemachine Control</label>
       <icon type="theme">display-capplet</icon>
-      <statustip>Great user interface to provide real value.</statustip>
+      <statustip>Robot Statemachine control panel.</statustip>
     </qtgui>
   </class>
 </library>
