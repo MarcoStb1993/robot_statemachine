@@ -19,15 +19,18 @@ bool bootUpService(std_srvs::SetBool::Request &req,
 
 void timerCallback(const ros::TimerEvent&) {
 	boot_finished = true;
-	system("rostopic info /cmd_vel");
 }
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "bootUpNode");
+	ros::NodeHandle privateNh("~");
+	double wait_time;
+	privateNh.param<double>("wait_time", wait_time, 1);
 	ros::NodeHandle nh("statemachine");
 	ros::ServiceServer bootup_service = nh.advertiseService("bootUpFinished",
 			bootUpService);
-	ros::Timer timer = nh.createTimer(ros::Duration(0.5), timerCallback, true);
+	ros::Timer timer = nh.createTimer(ros::Duration(wait_time), timerCallback,
+			true);
 
 	while (ros::ok() && !node_finished) {
 		ros::spin();

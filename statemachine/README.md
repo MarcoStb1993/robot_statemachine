@@ -84,13 +84,67 @@ Furthermore, it advertises services for setting and retrieving the reverse mode,
 
 The core statemachine already features the following states for direct usage:
 * **Boot State:** Is the first state to be called and subscribes to a service which tells it when all necessary systems are available and ready to use. Then it initiates a transition to the **Idle State**. Can only be interrupted by the software emergency stop. 
-* **Emergency Stop State:** State being called when the software emergency stop was pushed. Only transitions to **Idle State** when button is released.
-* **Idle State:** Standard state when no commands were issued. Allows transitions to all other states.
-* **Teleoperation State:** State being called when teleoperation commands were issued. Only transitions to 
-* **Waypoint Following State:**
+* **Emergency Stop State:** State being called when the software emergency stop was pushed. Only allows transition to **Idle State** when button is released.
+* **Idle State:** Standard state when no commands were issued. Allows transitions to all other states through interrupts.
+* **Teleoperation State:** State being called when teleoperation commands were issued. Only transitions to **Idle State** when teleoepration timed out and **Emergency Stop State** when receiving the particular interrupt.
+* **Waypoint Following State:** Handles the waypoint following functionality by providing the next navigation goal depending on the status of all waypoints and the waypoint following mode. Normally transitions to the navigation state plugin. Can be interrupted by the software emergency stop and teleoperation which leads to a transition to the particular state. If waypoint following is stopped, transitions to **Idle State**.
+
+## Tutorials
+
+The following section displays some examples and tutorials on how to use the statemachine, starting with the required setup to use the statemachine. Afterwards, an example launching the statemachine is presented and then a tutorial on writing and including your own plugin state. For an example of a plugin state implementation, see the [statemachine additions package](../statemachine_additions).
+
+### Set up a robot for use with statemachine
+
+Setting up a robot for the basic statemachine usage is fairly straightforward since it only requires setting up a robot motor controller interface that subscribes to command velocity messages of type [geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html) and generates actual motor commands from them.
+
+A service provider to tell the **Boot State** that the boot is finished is also required. This should ideally check if all necessary systems on your robot are up and running. The service provider needs to offer a service of type [std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html) under the name "statemachine/bootUpFinished". The following code snippet shows a rudimentary sample implementation in a node:
+
+```cpp
+#include "ros/ros.h"
+#include "std_srvs/SetBool.h"
+
+bool boot_finished = false;
+
+bool bootUpService(std_srvs::SetBool::Request &req,
+		std_srvs::SetBool::Response &res) {
+	if (boot_finished) {
+		res.success = 1;
+		res.message = "Finished";
+	} else {
+		res.success = false;
+		res.message = "Still booting ...";
+	}
+	return true;
+}
+
+int main(int argc, char **argv) {
+	ros::init(argc, argv, "bootUpNode");
+	ros::NodeHandle nh("statemachine");
+	ros::ServiceServer bootup_service = nh.advertiseService("bootUpFinished",
+			bootUpService);
+	//checking boot process and setting boot_finished to true if finished
+	ros::spin();
+	return 0;
+}
+```
+
+If this is not possible or necessary for your configuration, you can just launch the `bootUpNode` from the [statemachine additions package](../statemachine_additions) that sets up the service provider and returns a successful boot message after default 1 second. The delay can be set using the parameter `wait_time`. 
+
+The setup for navigating to set goals and executing mapping behaviors or routines depends on the defined plugins and can therefore not generally be declared.
+
+(If you plan on using the plugins for [ROS navigation](http://wiki.ros.org/navigation) provided in the [statemachine additions package](../statemachine_additions), you need to follow the [navigation stack robot setup tutorial](http://wiki.ros.org/navigation/Tutorials/RobotSetup).)
+
+In general, a tool for navigation, a tool for mapping and a tool for exploration is necessary to fully exploit the robot statemachine.
+
+### Run statemachine
+
+The statemachine's core functionality is distributed over several nodes that can simply be started with the launchfile `statemachine.launch` which requires the following arguments:
 
 
+### Writing a plugin state
 
-## Usage
+### Use plugin state in statemachine
 
-### 
+### GUI introduction
+
+## Nodes

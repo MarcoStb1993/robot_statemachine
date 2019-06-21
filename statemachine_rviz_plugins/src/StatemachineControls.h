@@ -74,6 +74,7 @@ private:
 	ros::ServiceClient _get_robot_pose_client;
 	ros::ServiceClient _set_operation_mode_client;
 	ros::ServiceClient _set_exploration_mode_client;
+	ros::ServiceClient _state_info_client;
 	ros::Subscriber _state_info_subscriber;
 	ros::Subscriber _reverse_mode_subscriber;
 	ros::Subscriber _operation_mode_subcriber;
@@ -112,6 +113,7 @@ private:
 	void initCommunications();
 	void connectSlots();
 	void initRoutineComboBox();
+	void getStateInfo();
 	void setWaypointFollowingMode();
 	void setExplorationMode();
 	void updateOperationModeGUI();

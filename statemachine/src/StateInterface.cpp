@@ -24,6 +24,8 @@ StateInterface::StateInterface() :
 			"startStopWaypointFollowing",
 			&StateInterface::startStopWaypointFollowingService, this);
 	_state_info_publisher = nh.advertise<std_msgs::String>("stateInfo", 10);
+	_state_info_service = nh.advertiseService("stateInfo",
+			&StateInterface::stateInfoService, this);
 	_set_navigation_goal_client = nh.serviceClient<
 			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
 
@@ -176,6 +178,13 @@ bool StateInterface::startStopWaypointFollowingService(
 		res.success = false;
 		res.message = "No active state";
 	}
+	return true;
+}
+
+bool StateInterface::stateInfoService(std_srvs::Trigger::Request &req,
+		std_srvs::Trigger::Response &res) {
+	res.success = true;
+	res.message = _current_state->getName();
 	return true;
 }
 

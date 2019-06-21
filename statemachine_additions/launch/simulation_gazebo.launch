@@ -36,7 +36,9 @@
 	</include>
 
 	<node pkg="statemachine_additions" type="bootUpNode"
-		name="bootUpNode" output="screen" />
+		name="bootUpNode" output="screen">
+		<param name="wait_time" value="2" />
+	</node>
 
 	<node pkg="statemachine_additions"
 		type="additionsServiceProviderNode"

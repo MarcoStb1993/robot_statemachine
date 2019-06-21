@@ -10,6 +10,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/String.h>
 #include <std_srvs/SetBool.h>
+#include <std_srvs/Trigger.h>
 #include <pluginlib/class_loader.h>
 #include <map>
 
@@ -67,6 +68,7 @@ private:
 	ros::ServiceServer _start_stop_exploration_service;
 	ros::ServiceServer _start_stop_waypoint_following_service;
 	ros::ServiceClient _set_navigation_goal_client;
+	ros::ServiceServer _state_info_service;
 	ros::Publisher _state_info_publisher;
 
 	/**
@@ -108,13 +110,15 @@ private:
 	/**
 	 * Callback receiving goals issued in RViz GUI with the 2D Nav Goal Tool and calling the respective
 	 * interrupt in the current state
-	 * @param goal Navigaiton goal being set in RViz GUI
+	 * @param goal Navigation goal being set in RViz GUI
 	 */
 	void simpleGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& goal);
 	bool startStopExplorationService(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
 	bool startStopWaypointFollowingService(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
+	bool stateInfoService(std_srvs::Trigger::Request &req,
+			std_srvs::Trigger::Response &res);
 
 };
 

@@ -12,6 +12,7 @@ StatemachineControlPanel::StatemachineControlPanel(QWidget* parent) :
 	_emergency_stop_active = false;
 	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
 	initRoutineComboBox();
+	getStateInfo();
 }
 
 void StatemachineControlPanel::initCommunications() {
@@ -31,6 +32,7 @@ void StatemachineControlPanel::initCommunications() {
 
 	_state_info_subscriber = nh.subscribe("stateInfo", 10,
 			&StatemachineControlPanel::stateInfoCallback, this);
+	_state_info_client = nh.serviceClient<std_srvs::Trigger>("stateInfo");
 	_set_operation_mode_client = nh.serviceClient<
 			statemachine_msgs::SetOperationMode>("setOperationMode");
 	_operation_mode_subcriber = nh.subscribe<statemachine_msgs::OperationMode>(
@@ -331,6 +333,18 @@ if (_get_waypoint_routines_client.call(srv)) {
 	ROS_ERROR("Failed to call Get Waypoint Routines service");
 }
 _gui->routine_combo_box->addItems(list);
+}
+
+
+void StatemachineControlPanel::getStateInfo() {
+	std_srvs::Trigger srv;
+	if (_state_info_client.call(srv)) {
+		QString text = QString("Current state: %1").arg(
+				srv.response.message.c_str());
+		_gui->current_state_text->setText(text);
+	} else {
+		ROS_ERROR("Failed to call State Info service");
+	}
 }
 
 void StatemachineControlPanel::updateOperationModeGUI() {
