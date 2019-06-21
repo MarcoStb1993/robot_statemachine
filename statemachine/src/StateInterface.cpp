@@ -42,35 +42,47 @@ StateInterface::~StateInterface() {
 
 boost::shared_ptr<statemachine::BaseState> StateInterface::getPluginState(
 		int plugin_type, std::string routine) {
-	switch (plugin_type) {
-	case 1: {
-		return _plugin_loader.createInstance(_calculate_goal_plugin);
-		break;
-	}
-	case 2: {
-		return _plugin_loader.createInstance(_navigation_plugin);
-		break;
-	}
-	case 3: {
-		return _plugin_loader.createInstance(_mapping_plugin);
-		break;
-	}
-	case 4: {
-		std::ostringstream s;
-		s << "statemachine::" << routine << "RoutineState";
-		return _plugin_loader.createInstance(s.str());
-		break;
-	}
-	default: {
-		ROS_ERROR("No matching plugin type found, return to Idle State");
+	try {
+		switch (plugin_type) {
+		case 1: {
+			return _plugin_loader.createInstance(_calculate_goal_plugin);
+			break;
+		}
+		case 2: {
+			return _plugin_loader.createInstance(_navigation_plugin);
+			break;
+		}
+		case 3: {
+			return _plugin_loader.createInstance(_mapping_plugin);
+			break;
+		}
+		case 4: {
+			std::ostringstream s;
+			s << "statemachine::" << routine << "RoutineState";
+			return _plugin_loader.createInstance(s.str());
+			break;
+		}
+		default: {
+			if (!routine.empty()) {
+				std::ostringstream s;
+				s << "statemachine::" << routine;
+				return _plugin_loader.createInstance(s.str());
+			} else {
+				ROS_ERROR(
+						"No matching plugin type found, return to Idle State");
+				return boost::make_shared<IdleState>();
+			}
+			break;
+		}
+		}
+	} catch (const std::exception& e) {
+		ROS_ERROR("Plugin state could not be created, return to Idle State");
 		return boost::make_shared<IdleState>();
-		break;
-	}
 	}
 }
 
 void StateInterface::awake() {
-	// check 1st time awake
+// check 1st time awake
 	if (!_current_state && _next_state) {
 		_current_state = _next_state;
 		_current_state->onEntry();

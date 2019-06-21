@@ -5,7 +5,7 @@ The statemachine's core components will be explained first and it's usage afterw
 ## Documentation
 
 The statemachine consists of various non-customizable and custom states that are based on the [Base State](#base-state). The former [non-customizable states](#non-customizable-states) and the [Base State](#base-state) are a part of this package containing the statemachine's basics.  
-To handle state transitions the [State Interface](#state-interface) is used. [Robot Control Mux](#robot-control-mux) coordinates the actual control of the robot's movement while the [Service Provider](#service-provider) contains services, publishers and subscribers for communication between states and updating the GUI.
+To handle state transitions the [State Interface](#state-interface) is used. [Robot Control Mux](#robot-control-mux) coordinates the actual control of the robot's movement while the [Service Provider](#service-provider) contains services, publishers and subscribers for communication between states and updating the GUI. To be able to handle arbitrary robots, the statemachine relies on [Plugins](#plugins) that can be implemented depending on the robot.
 
 ### Base State
 
@@ -45,7 +45,7 @@ To access these plugins State Interface offers the method `getPluginState` which
 * MAPPING\_STATE
 * ROUTINE\_STATE
 
-For a *ROUTINE_STATE* the routine name needs to be provided as well, otherwise this parameter can remain empty. The other plugin states are set by parameters provided to State Interface on launch.
+For a *ROUTINE_STATE* the routine name needs to be provided as well, otherwise this parameter can remain empty. The other plugin states are set by parameters provided to State Interface on launch. If no plugin type was specified but a name
 
 State Interface subscribes to the *stateInfo* and *simpleGoal* topics to issue interrupts to the currently active state. Furthermore, it offers the two services *startStopExploration* and *startStopWaypointFollowing* which call the particular function in the active state.
 
@@ -88,6 +88,14 @@ The core statemachine already features the following states for direct usage:
 * **Idle State:** Standard state when no commands were issued. Allows transitions to all other states through interrupts.
 * **Teleoperation State:** State being called when teleoperation commands were issued. Only transitions to **Idle State** when teleoepration timed out and **Emergency Stop State** when receiving the particular interrupt.
 * **Waypoint Following State:** Handles the waypoint following functionality by providing the next navigation goal depending on the status of all waypoints and the waypoint following mode. Normally transitions to the navigation state plugin. Can be interrupted by the software emergency stop and teleoperation which leads to a transition to the particular state. If waypoint following is stopped, transitions to **Idle State**.
+
+### Plugins
+
+The statemachine package requires three different plugin states, one for exploration to calculate the next goal, one for navigation and one for mapping. The first is called when exploration is started or a previous exploration target was mapped successfully and  should interface an exploration package like [explore lite](http://wiki.ros.org/explore_lite) which finds unexplored regions in the map and extract a next goal from it. The second should interface a package for navigation like the [ROS navigation stack](http://wiki.ros.org/navigation) and update the statemachine according to the navigation's progress. The last is called when an exploration goal is reached and can include movements for better map acquisition or similar behaviors.
+
+Also, up to ten plugins states can be included for the waypoint following routines that are executed upon reaching a waypoint. They are not necessary for the statemachine like the plugins mentioned above. These routine can be implemented to enable arbitrary behavior when reaching a certain waypoint.
+
+
 
 ## Tutorials
 
@@ -132,16 +140,35 @@ If this is not possible or necessary for your configuration, you can just launch
 
 The setup for navigating to set goals and executing mapping behaviors or routines depends on the defined plugins and can therefore not generally be declared.
 
-(If you plan on using the plugins for [ROS navigation](http://wiki.ros.org/navigation) provided in the [statemachine additions package](../statemachine_additions), you need to follow the [navigation stack robot setup tutorial](http://wiki.ros.org/navigation/Tutorials/RobotSetup).)
+*Note*: If you plan on using the plugins for [ROS navigation](http://wiki.ros.org/navigation) provided in the [statemachine additions package](../statemachine_additions), you need to follow the [navigation stack robot setup tutorial](http://wiki.ros.org/navigation/Tutorials/RobotSetup).
 
 In general, a tool for navigation, a tool for mapping and a tool for exploration is necessary to fully exploit the robot statemachine.
 
 ### Run statemachine
 
 The statemachine's core functionality is distributed over several nodes that can simply be started with the launchfile `statemachine.launch` which requires the following arguments:
+* `update_frequency`: The update rate in Hz of the statemachine (default: 20)
+* `robot_frame`: The robot base frame (default: "base_footprint")
+* `mapping_plugin`: The plugin used for mapping (default: "statemachine::MappingState")
+* `calculate_goal_plugin`: The plugin used to calculate the next goal for exploration	 (default: "statemachine::CalculateGoalState")
+* `navigation_plugin`: The plugin used for navigation (default: "statemachine::NavigationState")
+* `autonomy_cmd_vel_topic`: The name of the command velocity topic for messages from exploration, waypoint following or simple goals (default: "/autonomy/cmd_vel")
+* `teleoperation_cmd_vel_topic`:	The name of the command velocity topic for messages from teleoperation (default: "/teleoperation/cmd_vel")
+* `cmd_vel_topic`: The name of the command velocity topic that the motor controller interface subscribes to (default: "/cmd_vel)
+* `teleoperation_idle_timer`: Time in seconds without input from teleoperation that leads to a transition to **Idle State** (default: 0.5)
+* `waypoint_routines`: List of all plugins to be used as routines for waypoints (default: [])
+* `exploration_goal_tolerance`: Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached (default: 0.05)
 
+*Note*: The default plugins mentioned above all exist in the statemachine additions package.
+
+The nodes can of course be started separately though it is easier to use the launch file. 
 
 ### Writing a plugin state
+
+
+
+
+
 
 ### Use plugin state in statemachine
 
