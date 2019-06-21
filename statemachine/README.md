@@ -45,7 +45,7 @@ To access these plugins State Interface offers the method `getPluginState` which
 * MAPPING\_STATE
 * ROUTINE\_STATE
 
-For a *ROUTINE_STATE* the routine name needs to be provided as well, otherwise this parameter can remain empty. The other plugin states are set by parameters provided to State Interface on launch. If no plugin type was specified but a name
+For a *ROUTINE_STATE* the routine name needs to be provided as well, otherwise this parameter can remain empty. The other plugin states are set by parameters provided to State Interface on launch. If no plugin type was specified but only a name, arbitrary plugins can be created and returned for state transition. If no plugin type and name were received or the desired plugin to be created does not exist, the **Idle State** will be returned and an error message put out. 
 
 State Interface subscribes to the *stateInfo* and *simpleGoal* topics to issue interrupts to the currently active state. Furthermore, it offers the two services *startStopExploration* and *startStopWaypointFollowing* which call the particular function in the active state.
 
@@ -93,9 +93,9 @@ The core statemachine already features the following states for direct usage:
 
 The statemachine package requires three different plugin states, one for exploration to calculate the next goal, one for navigation and one for mapping. The first is called when exploration is started or a previous exploration target was mapped successfully and  should interface an exploration package like [explore lite](http://wiki.ros.org/explore_lite) which finds unexplored regions in the map and extract a next goal from it. The second should interface a package for navigation like the [ROS navigation stack](http://wiki.ros.org/navigation) and update the statemachine according to the navigation's progress. The last is called when an exploration goal is reached and can include movements for better map acquisition or similar behaviors.
 
-Also, up to ten plugins states can be included for the waypoint following routines that are executed upon reaching a waypoint. They are not necessary for the statemachine like the plugins mentioned above. These routine can be implemented to enable arbitrary behavior when reaching a certain waypoint.
+Also, up to ten plugins states can be included for the waypoint following routines that are executed upon reaching a waypoint. They are not necessary for the statemachine like the plugins mentioned above. These routine can be implemented to enable arbitrary behavior when reaching a certain waypoint, for example inspecting gauge valves with a camera.
 
-
+More plugins can be added if additional states during exploration or waypoint following are desired. These can only be called from other implemented plugin states as the basic statemachine online includes transitions to the plugins described above. For example, if you have a robot able to climb stairs and you detect stairs during navigation, you can then call another plugin for stair-climbing and afterwards transition back to normal navigation.
 
 ## Tutorials
 
@@ -165,12 +165,173 @@ The nodes can of course be started separately though it is easier to use the lau
 
 ### Writing a plugin state
 
+To create a plugin state to be used with the robot statemachine follow the upcoming steps. This is very similar to the ROS tutorial [Writing and Using a Simple Plugin](http://wiki.ros.org/pluginlib/Tutorials/Writing%20and%20Using%20a%20Simple%20Plugin) but also includes some specific details for the statemachine.
+
+In your package, add the following code to the respective files:   
+
+*CMakeLists.txt:*
+
+```
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  pluginlib
+  statemachine
+  statemachine_msgs
+  ...
+)
+```
+
+*package.xml:*
+
+```xml
+...
+<build_depend>pluginlib</build_depend>
+<build_export_depend>pluginlib</build_export_depend>
+<exec_depend>pluginlib</exec_depend>
+<exec_depend>statemachine</exec_depend>
+<build_depend>statemachine</build_depend>
+<build_export_depend>statemachine</build_export_depend>
+<build_depend>statemachine_msgs</build_depend>
+<build_export_depend>statemachine_msgs</build_export_depend>
+<exec_depend>statemachine_msgs</exec_depend>
+...
+```
+
+This adds all dependencies needed to use the [pluginlib](http://wiki.ros.org/pluginlib) and include the [Base State](#base-state).  
+Next, create a class consisting of a header and source file in the respective directory in your package. The class needs to inherit from the [Base State](#base-state), interact with the [State Interface](#state-interface) and declare it is a plugin. The code for header and source are shown below.
+
+*ExampleState.h*:
+
+```cpp
+#include <pluginlib/class_list_macros.h>
+#include <statemachine/BaseState.h>
+#include <statemachine/StateInterface.h>
+
+namespace statemachine {
+
+class ExampleState: public BaseState {
+
+public:
+	ExampleState();
+	~ExampleState();
+	void onSetup();
+	void onEntry();
+	void onActive();
+	void onExit();
+	void onExplorationStart(bool &success, std::string &message);
+	void onExplorationStop(bool &success, std::string &message);
+	void onWaypointFollowingStart(bool &success, std::string &message);
+	void onWaypointFollowingStop(bool &success, std::string &message);
+	void onInterrupt(int interrupt);
+};
+
+}
+```
+
+*ExampleState.cpp*:
+
+```cpp
+#include "ExampleState.h"
+
+namespace statemachine {
+
+ExampleState::ExampleState() {
+	//...
+}
+
+ExampleState::~ExampleState() {
+	//...
+}
+
+void ExampleState::onSetup() {
+	//...
+}
+
+void ExampleState::onEntry() {
+	//...
+}
+
+void ExampleState::onActive() {
+	//...
+}
+
+void ExampleState::onExit() {
+	//...
+}
+
+void ExampleState::onExplorationStart(bool &success,
+		std::string &message) {
+	//...
+}
+
+void ExampleState::onExplorationStop(bool &success,
+		std::string &message) {
+	//...
+}
+
+void ExampleState::onWaypointFollowingStart(bool &success,
+		std::string &message) {
+	//...
+}
+
+void ExampleState::onWaypointFollowingStop(bool &success,
+		std::string &message) {
+	//...
+}
+
+void ExampleState::onInterrupt(int interrupt) {
+	switch (interrupt) {
+	//...
+}
+
+}
+
+PLUGINLIB_EXPORT_CLASS(statemachine::ExampleState,
+		statemachine::BaseState)
+
+```
+
+The state plugin needs to implement all methods declared in the [Base State](#base-state) as `virtual` and enables to add arbitrary functionality to them. The `PLUGINLIB_EXPORT_CLASS` macro registers the class as a plugin to the pluginlib.
+
+To make the plugin available to ROS, an XML file needs to be added in the package that declares them as a library. The file should look like this:  
+*statemachine_example_plugins.xml*:
+
+```xml
+<library path="lib/libstatemachine_example_plugins">
+	<class type="statemachine::ExampleState"
+		base_class_type="statemachine::BaseState">
+		<description>This is the example state.</description>
+	</class>
+	...
+</library>
+```
+
+It can feature multiple classes to declare in the same manner.  
+The plugin library needs to be exported as well. Therefore the following lines need to be added to the *package.xml*:
+
+```xml
+<export>
+	<statemachine plugin="${prefix}/statemachine_example_plugins.xml" />
+</export>
+```
+
+*Note:* There can only be one `export` bracket in each *package.xml*.
+
+With the following statement you can check in the terminal if the plugin was registered correctly:
+
+    rospack plugins --attrib=plugin statemachine
+    
+It should show:
+
+```
+"your_package_name" /"your_workspace_path"/src/"your_package_name"/statemachine_example_plugins.xml
+statemachine_additions /home/marco/catkin_ws/src/robot_statemachine/statemachine_additions/statemachine_plugins.xml
+```
+You can now use the plugin state in the robot statemachine.
+
+### Use plugin state in the statemachine
 
 
-
-
-
-### Use plugin state in statemachine
 
 ### GUI introduction
 
