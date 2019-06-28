@@ -58,8 +58,6 @@
 	<build_depend>actionlib_msgs</build_depend>
 	<build_export_depend>actionlib</build_export_depend>
 	<exec_depend>actionlib</exec_depend>
-	<build_depend>libpcl-all-dev</build_depend>
-	<exec_depend>libpcl-all</exec_depend>
 	<build_depend>pluginlib</build_depend>
 	<build_export_depend>pluginlib</build_export_depend>
 	<exec_depend>pluginlib</exec_depend>

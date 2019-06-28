@@ -1,6 +1,6 @@
 #  Statemachine
 
-The statemachine's core components will be explained first and it's usage afterwards, including examples and tutorials for writing plugins, including them into the statemachine and setting up a robot.
+The statemachine's core components will be explained first and it's usage afterwards, including examples and tutorials for writing plugins, including them into the statemachine and setting up a robot. Also, handling the GUI and starting a simulation with the statemachine is explained.
 
 ## Documentation
 
@@ -99,7 +99,7 @@ More plugins can be added if additional states during exploration or waypoint fo
 
 ## Tutorials
 
-The following section displays some examples and tutorials on how to use the statemachine, starting with the required setup to use the statemachine. Afterwards, an example launching the statemachine is presented and then a tutorial on writing and including your own plugin state. For an example of a plugin state implementation, see the [statemachine additions package](../statemachine_additions).
+The following section displays some examples and tutorials on how to use the statemachine, starting with the required setup to use the statemachine. Afterwards, running and launching the statemachine on its own and in a simulation environment is presented. The provided GUI and it's controls are shown and a tutorial on writing and including your own plugin state is presented last.
 
 ### Set up a robot for use with statemachine
 
@@ -142,7 +142,7 @@ The setup for navigating to set goals and executing mapping behaviors or routine
 
 *Note*: If you plan on using the plugins for [ROS navigation](http://wiki.ros.org/navigation) provided in the [statemachine additions package](../statemachine_additions), you need to follow the [navigation stack robot setup tutorial](http://wiki.ros.org/navigation/Tutorials/RobotSetup).
 
-In general, a tool for navigation, a tool for mapping and a tool for exploration is necessary to fully exploit the robot statemachine.
+In general, a tool for navigation, a tool for mapping and a tool for exploration are necessary to fully exploit the robot statemachine. This includes at least one sensor for sensing the environment and creating a 2D or 3D map and running SLAM.
 
 ### Run statemachine
 
@@ -162,6 +162,77 @@ The statemachine's core functionality is distributed over several nodes that can
 *Note*: The default plugins mentioned above all exist in the [statemachine additions package](../statemachine_additions).
 
 The nodes can of course be started separately though it is easier to use the launch file. 
+
+### Launch simulation
+
+To demonstrate the statemachine and get used to it's controls, the [statemachine additions package](../statemachine_additions) offers two launch files that start a simulation including a complete robot and environment to start right away.
+
+The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the statemachine has to offer, stick with the stdr simulator.
+
+Both simulations use the plugins implemented in [statemachine additions](../statemachine_additions) which need the following packages to be installed:
+* [gmapping](http://wiki.ros.org/gmapping) for SLAM
+* [ROS navigation stack](http://wiki.ros.org/navigation) for the **Navigation State**
+* [explore lite](http://wiki.ros.org/explore_lite) for the **Calculate Goal State**  
+
+When the above prerequisites are met, the simulations can be launched with the following commands including a pre-configured RViz display. If you do not want to start RViz, just leave out the `rviz:=true`.
+
+For gazebo:
+  
+```
+roslaunch statemachine_additions simulation_gazebo.launch rviz:=true
+```
+
+For the stdr simulator:
+  
+```
+roslaunch statemachine_additions simulation_stdr.launch rviz:=true
+```
+
+### GUI introduction
+
+The statemachine can be operated through a GUI that enables the use of all it's core functionalities. The GUI panel is depicted below and can be integrated into [RViz](http://wiki.ros.org/rviz) or [rqt](http://wiki.ros.org/rqt). To the former by adding a new panel through *Panels->Add New Panel* and then choose *StatemachineControlPanel* under *statemachine_rviz_plugins*. To the latter by adding a new plugin through *Plugins->Statemachine Control*.The GUI always shows which state is currently active and provides the options explained below.
+
+![Statemachine Control Panel](../images/statemachine_control_panel.png)
+
+The GUI offers control over the class handling the command velocities forwarded to the motor controller interface. This includes the software emergency stop as well as choosing autonomy, teleoperation or stopped. When the software emergency stop is active, the other choices are disabled and the command velocity is set to stopped until the software emergency stop is released again.
+
+The exploration can be started and stopped by using the respective buttons in the GUI. Next to the button is a drop-down box where the exploration mode can be set. This mode can either be *Finish* or *Interrupt* where the former lets the robot reach each goal before transitioning to **Mapping State** while the latter starts the transition as soon as the current goal is no longer listed as an exploration goal. The mode can only be set before starting
+exploration and not while it is running.
+
+Waypoint following can also be started and stopped through the respective buttons. Furthermore, when waypoint following is stopped, there is the option to reset the current progress and restore all waypoints to their initial values. It is possible to set the waypoint following mode using the drop-down box next to the formerly mentioned buttons. The waypoint following mode can be one of the following three and only changed when stopped: 
+* single
+* roundtrip
+* patrol
+
+The single mode lets the robot start from the first waypoint and then to all consecutive ones. Upon reaching the last one it stops. In roundtrip mode, after reaching the last waypoint all waypoints are reset and it starts anew from waypoint one. This is repeated until manually stopped. Patrol mode works in a similar fashion. After reaching the last waypoint all waypoints are reset and it starts again in reverse order. The first and last waypoints are only targeted once and their attached routines executed only once as well. Also, it can only be stopped manually.
+
+The GUI also offers the possibility to set a waypoint at the robot's current location and with the robot's current orientation. These waypoint's routines can be set from drop-down box next to the button setting the actual waypoint. 
+
+Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse.
+
+When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool**. It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flag pole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
+
+The already placed waypoints can be seen by displaying the respective topic. The displayed markers are interactive and can be seen below. Using the circle around them, they can be dragged in the desired direction, changing their x-y-position and yaw-orientation. The arrows above and below can be used to drag them in the respective direction, altering it's z-coordinate. Clicking on the waypoint marker opens a menu that offers the options to set the routine to be executed when reaching the waypoint and to delete the waypoint. The routine can also be set to none.
+
+![Waypoint in RViz](../images/waypoints.png)
+
+The [statemachine additions package](../statemachine_additions) features some exemplary RViz configuration files for the respective launch files that automatically include the GUI and **Plant Waypoint Tool** as well as adding the waypoint interactive marker topic to the display.
+
+*Note:* When saving the RViz configuration, the **Plant Waypoint Tool** sometimes does not get included in the configuration and has to be added each time RViz is started manually. To fix this, you can need to add `- Class: statemachine::PlantWaypointTool` to your RViz configuration file by hand. It has to be appended under *Visualization Manager: Tools* as can be seen in the snippet below.
+
+```
+...
+Visualization Manager:
+  Class: ""
+  Displays:
+  ...
+  Name: root
+  Tools:
+    ...
+    - Class: statemachine::PlantWaypointTool 
+  Value: true
+  ...
+```
 
 ### Writing a plugin state
 
@@ -364,50 +435,36 @@ For a reference implementation of the **Calculate Goal State**, the **Navigation
 
 If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the **Additions Service Provider** in the package [statemachine addtions](../statemachine_additions) for an example.
 
-### GUI introduction
-
-The statemachine can be operated through a GUI that enables the use of all it's core functionalities. The GUI panel is depicted below and can be integrated into [RViz](http://wiki.ros.org/rviz) or [rqt](http://wiki.ros.org/rqt). To the former by adding a new panel through *Panels->Add New Panel* and then choose *StatemachineControlPanel* under *statemachine_rviz_plugins*. To the latter by adding a new plugin through *Plugins->Statemachine Control*.The GUI always shows which state is currently active and provides the options explained below.
-
-![Statemachine Control Panel](../images/statemachine_control_panel.png)
-
-The GUI offers control over the class handling the command velocities forwarded to the motor controller interface. This includes the software emergency stop as well as choosing autonomy, teleoperation or stopped. When the software emergency stop is active, the other choices are disabled and the command velocity is set to stopped until the software emergency stop is released again.
-
-The exploration can be started and stopped by using the respective buttons in the GUI. Next to the button is a drop-down box where the exploration mode can be set. This mode can either be *Finish* or *Interrupt* where the former lets the robot reach each goal before transitioning to **Mapping State** while the latter starts the transition as soon as the current goal is no longer listed as an exploration goal. The mode can only be set before starting
-exploration and not while it is running.
-
-Waypoint following can also be started and stopped through the respective buttons. Furthermore, when waypoint following is stopped, there is the option to reset the current progress and restore all waypoints to their initial values. It is possible to set the waypoint following mode using the drop-down box next to the formerly mentioned buttons. The waypoint following mode can be one of the following three and only changed when stopped: 
-* single
-* roundtrip
-* patrol
-
-The single mode lets the robot start from the first waypoint and then to all consecutive ones. Upon reaching the last one it stops. In roundtrip mode, after reaching the last waypoint all waypoints are reset and it starts anew from waypoint one. This is repeated until manually stopped. Patrol mode works in a similar fashion. After reaching the last waypoint all waypoints are reset and it starts again in reverse order. The first and last waypoints are only targeted once and their attached routines executed only once as well. Also, it can only be stopped manually.
-
-The GUI also offers the possibility to set a waypoint at the robot's current location and with the robot's current orientation. These waypoint's routines can be set from drop-down box next to the button setting the actual waypoint. 
-
-Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse.
-
-When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool**. It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flag pole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
-
-The already placed waypoints can be seen by displaying the respective topic. The displayed markers are interactive and can be seen below. Using the circle around them, they can be dragged in the desired direction, changing their x-y-position and yaw-orientation. The arrows above and below can be used to drag them in the respective direction, altering it's z-coordinate. Clicking on the waypoint marker opens a menu that offers the options to set the routine to be executed when reaching the waypoint and to delete the waypoint. The routine can also be set to none.
-
-![Waypoint in RViz](../images/waypoints.png)
-
-The [statemachine additions package](../statemachine_additions) features some exemplary RViz configuration files for the respective launch files that automatically include the GUI and **Plant Waypoint Tool** as well as adding the waypoint interactive marker topic to the display.
-
-*Note:* When saving the RViz configuration, the **Plant Waypoint Tool** sometimes does not get included in the configuration and has to be added each time RViz is started manually. To fix this, you can need to add `- Class: statemachine::PlantWaypointTool` to your RViz configuration file by hand. It has to be appended under *Visualization Manager: Tools* as can be seen in the snippet below.
-
-```
-...
-Visualization Manager:
-  Class: ""
-  Displays:
-  ...
-  Name: root
-  Tools:
-    ...
-    - Class: statemachine::PlantWaypointTool 
-  Value: true
-  ...
-```
-
 ## Nodes
+
+### statemachineNode 
+
+#### Subscribed Topics
+
+#### Published Topics
+
+#### Services
+
+#### Parameters
+
+### robotControlMuxNode
+
+#### Subscribed Topics
+
+#### Published Topics
+
+#### Services
+
+#### Parameters
+
+### serviceProviderNode
+
+#### Subscribed Topics
+
+#### Published Topics
+
+#### Services
+
+#### Parameters
+
+#### Required tf Transforms

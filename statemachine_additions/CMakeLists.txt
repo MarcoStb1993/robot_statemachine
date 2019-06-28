@@ -11,8 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   statemachine
   statemachine_msgs
   visualization_msgs
-  pcl_conversions
-  pcl_ros
 )
 
 catkin_package(
