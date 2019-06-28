@@ -76,7 +76,7 @@ For setting and retrieving the current navigation goal the Service Provider is o
 
 The current robot pose can be retrieved and is calculated from the transform from the map to the robot's base footprint.
 
-The Service Provider also hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *interrupt*, the Service Provider subscribes to the list of available frontiers and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not a frontier anymore, it becomes obsolete. This info is published when the mode is set to *interrupt* as well.
+The Service Provider also hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *Interrupt*, the Service Provider subscribes to the list of available frontiers and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not a frontier anymore, it becomes obsolete. This info is published when the mode is set to *Interrupt* as well.
 
 Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published. 
 
@@ -159,7 +159,7 @@ The statemachine's core functionality is distributed over several nodes that can
 * `waypoint_routines`: List of all plugins to be used as routines for waypoints (default: [])
 * `exploration_goal_tolerance`: Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached (default: 0.05)
 
-*Note*: The default plugins mentioned above all exist in the statemachine additions package.
+*Note*: The default plugins mentioned above all exist in the [statemachine additions package](../statemachine_additions).
 
 The nodes can of course be started separately though it is easier to use the launch file. 
 
@@ -330,8 +330,84 @@ You can now use the plugin state in the robot statemachine.
 
 ### Use plugin state in the statemachine
 
+To use the created plugin from above in the statemachine, it has to be made known to the [State Interface](#state-interface). This needs to be done by setting the respective parameters, either through the launch file or manually when starting the nodes from console. The [State Interface](#state-interface) expects the names for the **Calculate Goal State**, the **Mapping State** and the **Navigation State** plugins. The waypoint **Routine State** plugins need to be given to the [Service Provider](#service-provider). A sample launch with set parameters can be seen in the snippet below, where the plugins defined in [statemachine additions](../statemachine_additions) are used. A detailed example can be seen in the [statemachine additions launch files](../statemachine_additions/launch). 
 
+```
+<include file="$(find statemachine)/launch/statemachine.launch">
+	<arg name="calculate_goal_plugin" value="statemachine::CalculateGoalState" />
+	<arg name="navigation_plugin" value="statemachine::NavigationState" />
+	<arg name="mapping_plugin" value="statemachine::MappingState" />
+	<arg name="waypoint_routines" value="['Reversing']" />
+	...
+</include>
+```
+
+The provided plugins can have arbitrary names, though it is recommended to use the *statemachine* namespace to avoid collisions with other packages since the plugin names need to be unique. 
+
+For waypoint routines up to ten routines can be provided as an array. Each routine plugin must be named like this <pre>statemachine::<i>Name</i>RoutineState</pre>
+*Name* has to be replaced by a uniquely identifying name for the particular routine. For the routines parameter provided only the *Name* needs to be set. So in the above example the plugin corresponding to the `Reversing` routine is called `statemachine::ReversingRoutineState`.
+
+If additional plugins should be used, their names do not need to be made known to the statemachine up front. How to include them will be explained below.
+
+For a transition to another state, in your implementation of a state the `transitionToVolatileState` method from [State Interface](#state-interface) needs to be called. If a transition to one of the included states is desired, it needs to be included in the header file and and then initialized and handed over as a parameter to the previously mentioned method. This is the first of the below examples. The second is a transition to a plugin state, which is made by providing one of the predefined types from [State Interface](#state-interface) to the method. If it is a routine plugin that should be called, the routine plugin's name needs to be provided as well, see the third example. The last example shows a transition to an additional plugin, where a 0 for the plugin type needs to be given and the name of the plugin without a leading `statemachine::` prefix.
+
+1. Transition to already included state:  
+`_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());`
+2. Transition to plugin state for navigation:  
+`_stateinterface->transitionToVolatileState(_stateinterface->getPluginState(NAVIGATION_STATE));`
+3. Transition to routine plugin state:  
+`_stateinterface->transitionToVolatileState(_stateinterface->getPluginState(ROUTINE_STATE, "Reversing"));`
+4. Transition to additional plugin state:  
+`_stateinterface->transitionToVolatileState(_stateinterface->getPluginState(0, "ClimbStairsState"));`
+
+For a reference implementation of the **Calculate Goal State**, the **Navigation State**, the **Mapping State** and a routine plugin called **Reversing Routine State**, see the [statemachine additions package](../statemachine_additions).
+
+If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the **Additions Service Provider** in the package [statemachine addtions](../statemachine_additions) for an example.
 
 ### GUI introduction
+
+The statemachine can be operated through a GUI that enables the use of all it's core functionalities. The GUI panel is depicted below and can be integrated into [RViz](http://wiki.ros.org/rviz) or [rqt](http://wiki.ros.org/rqt). To the former by adding a new panel through *Panels->Add New Panel* and then choose *StatemachineControlPanel* under *statemachine_rviz_plugins*. To the latter by adding a new plugin through *Plugins->Statemachine Control*.The GUI always shows which state is currently active and provides the options explained below.
+
+![Statemachine Control Panel](../images/statemachine_control_panel.png)
+
+The GUI offers control over the class handling the command velocities forwarded to the motor controller interface. This includes the software emergency stop as well as choosing autonomy, teleoperation or stopped. When the software emergency stop is active, the other choices are disabled and the command velocity is set to stopped until the software emergency stop is released again.
+
+The exploration can be started and stopped by using the respective buttons in the GUI. Next to the button is a drop-down box where the exploration mode can be set. This mode can either be *Finish* or *Interrupt* where the former lets the robot reach each goal before transitioning to **Mapping State** while the latter starts the transition as soon as the current goal is no longer listed as an exploration goal. The mode can only be set before starting
+exploration and not while it is running.
+
+Waypoint following can also be started and stopped through the respective buttons. Furthermore, when waypoint following is stopped, there is the option to reset the current progress and restore all waypoints to their initial values. It is possible to set the waypoint following mode using the drop-down box next to the formerly mentioned buttons. The waypoint following mode can be one of the following three and only changed when stopped: 
+* single
+* roundtrip
+* patrol
+
+The single mode lets the robot start from the first waypoint and then to all consecutive ones. Upon reaching the last one it stops. In roundtrip mode, after reaching the last waypoint all waypoints are reset and it starts anew from waypoint one. This is repeated until manually stopped. Patrol mode works in a similar fashion. After reaching the last waypoint all waypoints are reset and it starts again in reverse order. The first and last waypoints are only targeted once and their attached routines executed only once as well. Also, it can only be stopped manually.
+
+The GUI also offers the possibility to set a waypoint at the robot's current location and with the robot's current orientation. These waypoint's routines can be set from drop-down box next to the button setting the actual waypoint. 
+
+Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse.
+
+When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool**. It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flag pole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
+
+The already placed waypoints can be seen by displaying the respective topic. The displayed markers are interactive and can be seen below. Using the circle around them, they can be dragged in the desired direction, changing their x-y-position and yaw-orientation. The arrows above and below can be used to drag them in the respective direction, altering it's z-coordinate. Clicking on the waypoint marker opens a menu that offers the options to set the routine to be executed when reaching the waypoint and to delete the waypoint. The routine can also be set to none.
+
+![Waypoint in RViz](../images/waypoints.png)
+
+The [statemachine additions package](../statemachine_additions) features some exemplary RViz configuration files for the respective launch files that automatically include the GUI and **Plant Waypoint Tool** as well as adding the waypoint interactive marker topic to the display.
+
+*Note:* When saving the RViz configuration, the **Plant Waypoint Tool** sometimes does not get included in the configuration and has to be added each time RViz is started manually. To fix this, you can need to add `- Class: statemachine::PlantWaypointTool` to your RViz configuration file by hand. It has to be appended under *Visualization Manager: Tools* as can be seen in the snippet below.
+
+```
+...
+Visualization Manager:
+  Class: ""
+  Displays:
+  ...
+  Name: root
+  Tools:
+    ...
+    - Class: statemachine::PlantWaypointTool 
+  Value: true
+  ...
+```
 
 ## Nodes
