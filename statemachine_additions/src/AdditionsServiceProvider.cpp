@@ -16,21 +16,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	}
 
 	ros::NodeHandle nh("statemachine");
-	_start_stop_cmd_vel_recording_service = nh.advertiseService(
-			"startStopCmdVelRecording",
-			&AdditionsServiceProvider::startStopCmdVelRecording, this);
-	_get_cmd_vel_recording_service = nh.advertiseService("getCmdVelRecording",
-			&AdditionsServiceProvider::getCmdVelRecording, this);
-	_request_reverse_path_usage_service = nh.advertiseService(
-			"requestReversePathUsage",
-			&AdditionsServiceProvider::requestReversePathUsage, this);
-	_reset_reverse_path_usage_service = nh.advertiseService(
-			"resetReversePathUsage",
-			&AdditionsServiceProvider::resetReversePathUsage, this);
-	_reset_cmd_vel_recording_service = nh.advertiseService(
-			"resetCmdVelRecording",
-			&AdditionsServiceProvider::resetCmdVelRecording, this);
-
 	if (_navigation_plugin_used) {
 		_set_navigation_to_reverse_service = nh.advertiseService(
 				"setNavigationToReverse",
@@ -53,12 +38,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 			&AdditionsServiceProvider::frontierCallback, this);
 	exploration_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
 			"explorationGoals", 1);
-
-	double controller_frequency;
-	_nh.param("/move_base/controller_frequency", controller_frequency, 20.0);
-	_msg_buffer_size = controller_frequency * 2; //2 seconds recorded cmd vel messages
-	_cmd_vel_msgs.set_capacity(_msg_buffer_size);
-	_reverse_path_used = false;
 }
 
 AdditionsServiceProvider::~AdditionsServiceProvider() {
@@ -67,77 +46,6 @@ AdditionsServiceProvider::~AdditionsServiceProvider() {
 
 void AdditionsServiceProvider::publishTopics() {
 	publishExplorationGoals();
-}
-
-bool AdditionsServiceProvider::startStopCmdVelRecording(
-		std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
-	if (req.data) {
-		_reverse_path_cmd_vel_subscriber = _nh.subscribe(
-				_autonomy_cmd_vel_topic, 10,
-				&AdditionsServiceProvider::cmdVelCallback, this);
-		res.message = "Started Cmd Vel recording";
-	} else {
-		_reverse_path_cmd_vel_subscriber.shutdown();
-		res.message = "Stopped Cmd Vel recording";
-	}
-	res.success = 1;
-	return true;
-}
-
-bool AdditionsServiceProvider::getCmdVelRecording(
-		statemachine_msgs::GetCmdVelRecording::Request &req,
-		statemachine_msgs::GetCmdVelRecording::Response &res) {
-	std::vector<geometry_msgs::Twist> cmd_vel_msgs;
-	for (int i = 0; i < _cmd_vel_msgs.size(); i++) {
-		cmd_vel_msgs.push_back(_cmd_vel_msgs[i]);
-	}
-	res.cmdVelMsgs = cmd_vel_msgs;
-	return true;
-}
-
-bool AdditionsServiceProvider::resetCmdVelRecording(
-		std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-	_cmd_vel_msgs.clear();
-	res.success = 1;
-	res.message = "Cmd Vel recording reset";
-	return true;
-}
-
-bool AdditionsServiceProvider::requestReversePathUsage(
-		std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-	if (!_reverse_path_used) {
-		res.success = 1;
-		res.message = "Reverse Path available, used now";
-		_reverse_path_used = true;
-		ROS_INFO("Reverse Path Used");
-	} else {
-		res.success = 0;
-		res.message = "Reverse Path not available";
-	}
-	return true;
-}
-
-bool AdditionsServiceProvider::resetReversePathUsage(
-		std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-	if (_reverse_path_used) {
-		res.success = 1;
-		res.message = "Reverse Path Usage reset";
-		_reverse_path_used = false;
-		ROS_INFO("Reverse Path Available");
-	} else {
-		res.success = 0;
-		res.message = "Reverse Path was available";
-	}
-	return true;
-}
-
-void AdditionsServiceProvider::cmdVelCallback(
-		const geometry_msgs::Twist::ConstPtr& msg) {
-	if (msg->linear.x != 0 || msg->linear.y != 0 || msg->linear.z != 0
-			|| msg->angular.x != 0 || msg->angular.y != 0
-			|| msg->angular.z != 0) {
-		_cmd_vel_msgs.push_back(*msg);
-	}
 }
 
 bool AdditionsServiceProvider::setNavigationToReverse(
@@ -149,7 +57,6 @@ bool AdditionsServiceProvider::setNavigationToReverse(
 
 void AdditionsServiceProvider::reverseModeCmdVelCallback(
 		const geometry_msgs::Twist::ConstPtr& cmd_vel) {
-	ROS_INFO("message reversed");
 	geometry_msgs::Twist cmd_vel_reversed;
 	cmd_vel_reversed.linear.x = cmd_vel->linear.x * -1;
 	cmd_vel_reversed.linear.y = cmd_vel->linear.y * -1;

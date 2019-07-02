@@ -25,7 +25,6 @@ add_library(statemachine_plugins
     src/CalculateGoalState.cpp
     src/NavigationState.cpp
     src/MappingState.cpp
-    src/ReversePathState.cpp
     src/ReversingRoutineState.cpp)
 
 add_executable(bootUpNode src/BootUpNode.cpp)

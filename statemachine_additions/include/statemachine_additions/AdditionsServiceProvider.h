@@ -38,15 +38,7 @@ public:
 private:
 	ros::NodeHandle _nh;
 
-	ros::ServiceServer _start_stop_cmd_vel_recording_service;
-	ros::ServiceServer _get_cmd_vel_recording_service;
-	ros::ServiceServer _reset_cmd_vel_recording_service;
-	ros::ServiceServer _request_reverse_path_usage_service;
-	ros::ServiceServer _reset_reverse_path_usage_service;
-	ros::Subscriber _reverse_path_cmd_vel_subscriber;
-
 	ros::ServiceServer _set_navigation_to_reverse_service;
-
 	ros::Subscriber _reverse_mode_cmd_vel_subscriber;
 	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
@@ -57,18 +49,6 @@ private:
 	 * SimpleActionServer for making Explore Lite run and lead it to believe it talks to Move Base
 	 */
 	MoveBaseActionServer* as;
-	/**
-	 * Is reverse path state usage active
-	 */
-	bool _reverse_path_used;
-	/**
-	 * Circular buffer for the last cmd vel messages to be recorded
-	 */
-	boost::circular_buffer<geometry_msgs::Twist> _cmd_vel_msgs;
-	/**
-	 * Size of the circular buffer
-	 */
-	int _msg_buffer_size;
 	/**
 	 *Topic name for the autonomy cmd vel topic to be recorded
 	 */
@@ -83,16 +63,6 @@ private:
 	 */
 	bool _navigation_plugin_used;
 
-	bool startStopCmdVelRecording(std_srvs::SetBool::Request &req,
-			std_srvs::SetBool::Response &res);
-	bool getCmdVelRecording(statemachine_msgs::GetCmdVelRecording::Request &req,
-			statemachine_msgs::GetCmdVelRecording::Response &res);
-	bool resetCmdVelRecording(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	bool requestReversePathUsage(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	bool resetReversePathUsage(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
 	/**
 	 * Callback for receiving autonomy cmd vel messages and save the ones not equals zero in the cirular buffer
 	 * @param msg Cmd vel autonomy message

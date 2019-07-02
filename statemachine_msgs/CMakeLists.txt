@@ -33,7 +33,6 @@ add_service_files(
   AddFailedGoal.srv
   GetFailedGoals.srv
   GetRobotPose.srv
-  GetCmdVelRecording.srv
   SetOperationMode.srv
 )
 
