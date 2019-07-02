@@ -12,7 +12,7 @@ CalculateGoalState::~CalculateGoalState() {
 void CalculateGoalState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("statemachine");
-	_frontiers_sub = nh.subscribe<geometry_msgs::PoseArray>("frontiers", 10,
+	_frontiers_sub = nh.subscribe<geometry_msgs::PoseArray>("explorationGoals", 10,
 			&CalculateGoalState::frontiersCallback, this);
 	_get_failed_goals_service = nh.serviceClient<
 			statemachine_msgs::GetFailedGoals>("getFailedGoals");

@@ -77,7 +77,7 @@ private:
 
 	ros::ServiceServer _set_exploration_mode_service;
 	ros::ServiceServer _get_exploration_mode_service;
-	ros::Subscriber _frontier_goals_subscriber;
+	ros::Subscriber _exploration_goals_subscriber;
 	ros::Publisher _goal_obsolete_publisher;
 	ros::Publisher _exploration_mode_publisher;
 
@@ -126,19 +126,19 @@ private:
 	 */
 	std::string _robot_frame;
 	/**
-	 * List of all extracted frontier centers
+	 * List of all extracted exploration goals
 	 */
-	geometry_msgs::PoseArray _frontiers;
+	geometry_msgs::PoseArray _exploration_goals;
 	/**
-	 * Tolerance for comparing if the current goal is still in the list of frontiers
+	 * Tolerance for comparing if the current goal is still in the list of exploration goals
 	 */
 	double _exploration_goal_tolerance;
 	/**
-	 * Is navigation goal still a frontier
+	 * Is navigation goal still an exploration goal
 	 */
 	bool _goal_obsolete;
 	/**
-	 * Mode of exploration (0=complete goal, 1=interrupt goal when frontier vanished)
+	 * Mode of exploration (0=complete goal, 1=interrupt goal when exploration goals vanished)
 	 */
 	bool _exploration_mode;
 	/**
@@ -189,10 +189,10 @@ private:
 			std_srvs::Trigger::Response &res);
 	bool setExplorationMode(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
-	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
+	void explorationGoalCallback(const geometry_msgs::PoseArray::ConstPtr& exploration_goals);
 	/**
-	 * Checks if the current navigation goal is still present as the center of a frontier
-	 * @return Returns true if the current navigation goal is still the center of a frontier to be explored
+	 * Checks if the current navigation goal is still present as an exploration goal
+	 * @return Returns true if the current navigation goal is still an exploration goal to be explored
 	 */
 	bool navGoalIncludedInFrontiers();
 	void publishGoalObsolete();

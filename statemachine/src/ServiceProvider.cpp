@@ -297,24 +297,24 @@ bool ServiceProvider::setExplorationMode(std_srvs::SetBool::Request &req,
 		ros::NodeHandle nh("statemachine");
 		_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete",
 				1);
-		_frontier_goals_subscriber = nh.subscribe("frontiers", 1,
-				&ServiceProvider::frontiersCallback, this);
+		_exploration_goals_subscriber = nh.subscribe("explorationGoals", 1,
+				&ServiceProvider::explorationGoalCallback, this);
 	} else {
 		_goal_obsolete_publisher.shutdown();
-		_frontier_goals_subscriber.shutdown();
+		_exploration_goals_subscriber.shutdown();
 	}
 	res.success = 1;
 	res.message = "Exploration mode set";
 	return true;
 }
 
-void ServiceProvider::frontiersCallback(
-		const geometry_msgs::PoseArray::ConstPtr& frontiers) {
-	_frontiers = *frontiers;
+void ServiceProvider::explorationGoalCallback(
+		const geometry_msgs::PoseArray::ConstPtr& exploration_goals) {
+	_exploration_goals = *exploration_goals;
 }
 
 bool ServiceProvider::navGoalIncludedInFrontiers() {
-	for (auto iterator : _frontiers.poses) {
+	for (auto iterator : _exploration_goals.poses) {
 		double x_dif = abs(_navigation_goal.position.x - iterator.position.x);
 		double y_dif = abs(_navigation_goal.position.y - iterator.position.y);
 		double z_dif = abs(_navigation_goal.position.z - iterator.position.z);

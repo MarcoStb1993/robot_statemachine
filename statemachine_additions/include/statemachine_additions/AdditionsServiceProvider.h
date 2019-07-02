@@ -51,7 +51,7 @@ private:
 	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
 	ros::Subscriber frontiers_marker_array_subscriber;
-	ros::Publisher frontier_poses_publisher;
+	ros::Publisher exploration_goals_publisher;
 
 	/**
 	 * SimpleActionServer for making Explore Lite run and lead it to believe it talks to Move Base
@@ -77,7 +77,7 @@ private:
 	/**
 	 * List of all extracted frontier centers
 	 */
-	geometry_msgs::PoseArray _frontier_poses;
+	geometry_msgs::PoseArray _exploration_goals;
 	/**
 	 * Is the Navigation stack used as Plugin for navigation
 	 */
@@ -125,7 +125,7 @@ private:
 	/**
 	 * Publish list of extracted frontier centers for further calculation
 	 */
-	void publishFrontierPoses();
+	void publishExplorationGoals();
 };
 
 }

@@ -76,7 +76,7 @@ For setting and retrieving the current navigation goal the Service Provider is o
 
 The current robot pose can be retrieved and is calculated from the transform from the map to the robot's base footprint.
 
-The Service Provider also hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *Interrupt*, the Service Provider subscribes to the list of available frontiers and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not a frontier anymore, it becomes obsolete. This info is published when the mode is set to *Interrupt* as well.
+The Service Provider also hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *Interrupt*, the Service Provider subscribes to the list of available exploration goals and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not a exploration goal anymore, it becomes obsolete. This info is published when the mode is set to *Interrupt* as well.
 
 Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published. 
 
@@ -439,27 +439,99 @@ If additional data has to be passed between plugin states, that is not already c
 
 ### statemachineNode 
 
+This node realizes transitions between the different states.
+
+*Note:* All topics and services are in the **statemachine** namespace.
+
 #### Subscribed Topics
+
+**operationMode** ([statemachine_msgs/OperationMode](../statemachine_msgs/msg/OperationMode.msg))  
+The current operation mode as set by the GUI or interrupts
+
+**simpleGoal** ([geometry_msgs/PoseStamped](http://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html))  
+Navigation goal set in RViz
 
 #### Published Topics
 
+**stateInfo** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
+Current state info text
+
 #### Services
 
+**startStopExploration** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Call to start or stop exploration, depending on the bool value (true: start, false: stop)
+
+**startStopWaypointFollowing** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Call to start or stop waypoint following, depending on the bool value (true: start, false: stop)
+
+**stateInfo** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Get current state info text
+
 #### Parameters
+
+**~update_frequency** (float, default: 20)  
+Update rate in Hz
+
+**~calculate_goal_plugin** (string, default: "statemachine::CalculateGoalPlugin")  
+Sets the plugin's name for the state calculating the next goal.
+
+**~navigation_plugin** (string, default: "statemachine::NavigationPlugin")  
+Sets the plugin's name for the navigation state.
+
+**~mapping_plugin** (string, default: "statemachine::MappingPlugin")  
+Sets the plugin's name for the mapping state.
 
 ### robotControlMuxNode
 
+This node is for controlling if the robot is running autonomous, by teleoperation or is stopped.
+
+*Note:* All topics and services are in the **statemachine** namespace.
+
 #### Subscribed Topics
+
+**<teleoperation_cmd_vel_topic>** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
+Publishes teleoperation command velocities
+
+**<autonomy_operation_cmd_vel_topic>** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
+Publishes autonomy command velocities
 
 #### Published Topics
 
+**<cmd_vel_topic>** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
+Command velocity that the robot should follow.
+
+**operationMode** ([statemachine_msgs/OperationMode](../statemachine_msgs/msg/OperationMode.msg))  
+The current operation mode as set by the GUI or interrupts
+
 #### Services
+
+**setOperationMode** ([statemachine_msgs/SetOperationMode](../statemachine_msgs/msg/OperationMode.msg))  
+Sets the operation mode to the given parameter
 
 #### Parameters
 
+**~autonomy_cmd_vel_topic** (string, default: "autonomy/cmd_vel")  
+Topic name for the autonomy command velocity
+
+**~teleoperation_cmd_vel_topic** (string, default: "teleoperation/cmd_vel")  
+Topic name for the teleoperation command velocity
+
+**~cmd_vel_topic** (string, default: "cmd_vel")  
+Topic name for the command velocity the robot should follow
+
+**~teleoperation_idle_timer** (double, default: 0.5)  
+Time until teleoperation is stopped when no new command is received
+
 ### serviceProviderNode
 
+This node provides services for saving and receiving data needed by the volatile states.
+
+*Note:* All topics and services are in the **statemachine** namespace.
+
 #### Subscribed Topics
+
+**exploration_goals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
+List of all currently available exploration goals
 
 #### Published Topics
 

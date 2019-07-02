@@ -51,8 +51,8 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 
 	frontiers_marker_array_subscriber = _nh.subscribe("explore/frontiers", 1,
 			&AdditionsServiceProvider::frontierCallback, this);
-	frontier_poses_publisher = nh.advertise<geometry_msgs::PoseArray>(
-			"frontiers", 1);
+	exploration_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
+			"explorationGoals", 1);
 
 	double controller_frequency;
 	_nh.param("/move_base/controller_frequency", controller_frequency, 20.0);
@@ -66,7 +66,7 @@ AdditionsServiceProvider::~AdditionsServiceProvider() {
 }
 
 void AdditionsServiceProvider::publishTopics() {
-	publishFrontierPoses();
+	publishExplorationGoals();
 }
 
 bool AdditionsServiceProvider::startStopCmdVelRecording(
@@ -165,15 +165,15 @@ void AdditionsServiceProvider::navigationGoalCallback(
 	as->setSucceeded(move_base_msgs::MoveBaseResult(), "Goal reached.");
 }
 
-void AdditionsServiceProvider::publishFrontierPoses() {
-	_frontier_poses.header.frame_id = "map";
-	_frontier_poses.header.stamp = ros::Time::now();
-	frontier_poses_publisher.publish(_frontier_poses);
+void AdditionsServiceProvider::publishExplorationGoals() {
+	_exploration_goals.header.frame_id = "map";
+	_exploration_goals.header.stamp = ros::Time::now();
+	exploration_goals_publisher.publish(_exploration_goals);
 }
 
 void AdditionsServiceProvider::frontierCallback(
 		const visualization_msgs::MarkerArray::ConstPtr& frontiers) {
-	_frontier_poses.poses.clear();
+	_exploration_goals.poses.clear();
 	for (auto it : frontiers->markers) {
 		if (it.type == visualization_msgs::Marker::POINTS) {
 			int frontier_size = it.points.size();
@@ -183,7 +183,7 @@ void AdditionsServiceProvider::frontierCallback(
 				point.position.y = it.points[frontier_size / 2].y;
 				point.position.z = it.points[frontier_size / 2].z;
 				point.orientation.w = 1.0;
-				_frontier_poses.poses.push_back(point);
+				_exploration_goals.poses.push_back(point);
 			}
 		}
 	}
