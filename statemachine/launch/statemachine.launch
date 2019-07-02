@@ -33,8 +33,6 @@
 			value="$(arg update_frequency)" />
 		<param name="robot_frame" type="string"
 			value="$(arg robot_frame)" />
-		<param name="autonomy_cmd_vel_topic" type="string"
-			value="$(arg autonomy_cmd_vel_topic)" />
 		<rosparam param="waypoint_routines" subst_value="True">$(arg waypoint_routines)</rosparam>
 		<param name="exploration_goal_tolerance" type="double" value="$(arg exploration_goal_tolerance)" />
 	</node>

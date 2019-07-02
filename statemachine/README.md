@@ -78,7 +78,7 @@ The current robot pose can be retrieved and is calculated from the transform fro
 
 The Service Provider also hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *Interrupt*, the Service Provider subscribes to the list of available exploration goals and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not a exploration goal anymore, it becomes obsolete. This info is published when the mode is set to *Interrupt* as well.
 
-Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published. 
+Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published.  
 
 ### Non-customizable states
 
@@ -435,6 +435,26 @@ For a reference implementation of the **Calculate Goal State**, the **Navigation
 
 If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the **Additions Service Provider** in the package [statemachine addtions](../statemachine_additions) for an example.
 
+*Note*: If the robot should be able to move in reverse mode, a service needs to be implemented called `setNavigationToReverse` which changes the navigation's mode interface in the **Navigation State** plugin and switches between forward and reverse movement. A sample to include into the additional data handler can be seen below. If it is missing, activating reverse mode will only output a matching error.
+
+```cpp
+...
+ros::NodeHandle nh("statemachine");
+ros::ServiceServer set_navigation_to_reverse_service = nh.advertiseService("setNavigationToReverse", setNavigationToReverse);
+...
+
+bool setNavigationToReverse(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+	if (//set mode to forward/reverse depending on req.data) {
+		res.success = 1;
+		res.message = "Mode set";
+	} else {
+		res.success = 0;
+		res.message = "Mode not set";
+	}
+	return true;
+}
+```
+
 ## Nodes
 
 ### statemachineNode 
@@ -510,6 +530,9 @@ Sets the operation mode to the given parameter
 
 #### Parameters
 
+**~update_frequency** (float, default: 20)  
+Update rate in Hz
+
 **~autonomy_cmd_vel_topic** (string, default: "autonomy/cmd_vel")  
 Topic name for the autonomy command velocity
 
@@ -531,12 +554,99 @@ This node provides services for saving and receiving data needed by the volatile
 #### Subscribed Topics
 
 **exploration_goals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
-List of all currently available exploration goals
+List of all currently available exploration goals (only active is exploration mode is set to "interrupt")
 
 #### Published Topics
 
+**waypoints** ([statemachine_msgs/WaypointArray](../statemachine_msgs/msg/WaypointArray.msg))  
+List of all waypoints and their information
+
+**explorationMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
+The current exploration mode (true: interrupt, false: finish)
+
+**goalObsolete** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
+Information if the current goal is still viable (only active is exploration mode is set to "interrupt")
+
+**reverseMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
+Information if the robot is currently moving in reverse (true: reverse, false: forward)
+
 #### Services
+
+**addWaypoint** ([statemachine_msgs/AddWaypoint](../statemachine_msgs/srv/AddWaypoint.srv))  
+Add a waypoint to the list of waypoints
+
+**getWaypoints** ([statemachine_msgs/GetWaypoints](../statemachine_msgs/srv/GetWaypoints.srv))  
+Get list of waypoints
+
+**moveWaypoint** ([statemachine_msgs/MoveWaypoint](../statemachine_msgs/srv/moveWaypoint.srv))
+Move the waypoint at the given position in the waypoint list
+
+**removeWaypoint** ([statemachine_msgs/RemoveWaypoint](../statemachine_msgs/srv/RemoveWaypoint.srv))
+Remove the waypoint at the given position in the waypoint list
+
+**waypointVisited** ([statemachine_msgs/WaypointVisited](../statemachine_msgs/srv/WaypointVisited.srv))  
+Set the waypoint at the given position in the waypoint list to visited
+
+**waypointUnreachable** ([statemachine_msgs/WaypointUnreachable](../statemachine_msgs/srv/WaypointUnreachable.srv))  
+Set the waypoint at the given position in the waypoint list to unreachable
+
+**resetWaypoints** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Reset all waypoint's status to default
+
+**setWaypointFollowingMode** ([statemachine_msgs/SetWaypointFollowingMode](../statemachine_msgs/srv/SetWaypointFollowingMode.srv))  
+Sets the waypoint following mode (0: single, 1: roundtrip, 2: patrol)
+
+**setWaypointRoutine** ([statemachine_msgs/SetWaypointRoutine](../statemachine_msgs/srv/SetWaypointRoutine.srv))  
+Sets the routine of the waypoint at the given position in the waypoint list
+
+**getWaypointRoutines** ([statemachine_msgs/GetWaypointRoutines](../statemachine_msgs/srv/GetWaypointRoutines.srv))  
+Return the list of all waypoint routines available
+
+**setNavigationGoal** ([statemachine_msgs/SetNavigationGoal](../statemachine_msgs/srv/SetNavigationGoal.srv))  
+Sets the current navigation goal
+
+**getNavigationGoal** ([statemachine_msgs/GetNavigationGoal](../statemachine_msgs/srv/GetNavigationGoal.srv))  
+Gets the current navigation goal
+
+**addFailedGoal** ([statemachine_msgs/AddFailedGoal](../statemachine_msgs/srv/AddFailedGoal.srv))  
+Add an unreachable goal to the list of all failed goals
+
+**getFailedGoals** ([statemachine_msgs/GetFailedGoals](../statemachine_msgs/srv/GetFailedGoals.srv))  
+Return list of all previously failed goals  
+
+**resetFailedGoals** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Deletes the list of previously failed goals
+
+**getRobotPose** ([statemachine_msgs/GetRobotPose](../statemachine_msgs/srv/GetRobotPose.srv))   
+Return the current robot pose in relation to the map frame
+
+**setExplorationMode** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Set the exploration mode (true: interrupt, false: finish)
+
+**getExplorationMode** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Get the exploration mode
+
+**SetReverseMode** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Set the robot to reverse mode (true: reverse, false: forward)
+
+**GetReverseMode** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html)) 
+Return the reverse mode (true: reverse, false: forward) 
 
 #### Parameters
 
+**~update_frequency** (float, default: 20)  
+Update rate in Hz
+
+**~robot_frame** (string, default: "/base_link")  
+Transform frame for the robot
+
+**~waypoint_routines** (std::vector<string>, default: [])  
+Vector with waypoint routines available as state plugins
+
+**~exploration_goal_tolerance** (double, default: 0.05)  
+Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached
+
 #### Required tf Transforms
+
+**<robot_frame> -> map**  
+Usually provided by SLAM
