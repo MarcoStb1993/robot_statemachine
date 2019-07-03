@@ -12,7 +12,7 @@
 	<!-- Robot starting position in world -->
 	<arg name="x" default="0.0" />
 	<arg name="y" default="0.0" />
-	<arg name="z" default="1.0" />
+	<arg name="z" default="0.0" />
 	<arg name="yaw" default="0.0" />
 
 	<arg name="urdf_extras" default="$(optenv HUSKY_URDF_EXTRAS)" />	<!-- set to path with additions to Husky URDF -->
@@ -51,6 +51,10 @@
 
 		<node name="robot_state_publisher" pkg="robot_state_publisher"
 			type="robot_state_publisher" />
+			
+		<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+		<param name="use_gui" value="true"/>
+		</node>
 
 		<node pkg="twist_mux" type="twist_mux" name="twist_mux">
 			<rosparam command="load"
