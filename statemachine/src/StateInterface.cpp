@@ -23,6 +23,8 @@ StateInterface::StateInterface() :
 	_start_stop_waypoint_following_service = nh.advertiseService(
 			"startStopWaypointFollowing",
 			&StateInterface::startStopWaypointFollowingService, this);
+	_stop_2d_nav_goal_service = nh.advertiseService("stop2DNavGoal",
+			&StateInterface::stop2dNavGoal, this);
 	_state_info_publisher = nh.advertise<std_msgs::String>("stateInfo", 10);
 	_state_info_service = nh.advertiseService("stateInfo",
 			&StateInterface::stateInfoService, this);
@@ -130,14 +132,20 @@ void StateInterface::operationModeCallback(
 		const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
 	if (operation_mode->emergencyStop) {
 		_on_interrupt = true;
-		_current_state->onInterrupt(EMERGENCY_STOP_INTERRUPT);
+		if (_current_state) {
+			_current_state->onInterrupt(EMERGENCY_STOP_INTERRUPT);
+		}
 	} else if (operation_mode->mode == 2) {
 		_on_interrupt = true;
-		_current_state->onInterrupt(TELEOPERATION_INTERRUPT);
+		if (_current_state) {
+			_current_state->onInterrupt(TELEOPERATION_INTERRUPT);
+		}
 	} else {
 		if (_on_interrupt) {
 			_on_interrupt = false;
-			_current_state->onInterrupt(INTERRUPT_END);
+			if (_current_state) {
+				_current_state->onInterrupt(INTERRUPT_END);
+			}
 		}
 	}
 }
@@ -145,7 +153,9 @@ void StateInterface::operationModeCallback(
 void StateInterface::simpleGoalCallback(
 		const geometry_msgs::PoseStamped::ConstPtr& goal) {
 	_on_interrupt = true;
-	_current_state->onInterrupt(SIMPLE_GOAL_INTERRUPT);
+	if (_current_state) {
+		_current_state->onInterrupt(SIMPLE_GOAL_INTERRUPT);
+	}
 	statemachine_msgs::SetNavigationGoal srv;
 	srv.request.goal = goal->pose;
 	srv.request.navigationMode = SIMPLE_GOAL;
@@ -189,6 +199,14 @@ bool StateInterface::startStopWaypointFollowingService(
 	} else {
 		res.success = false;
 		res.message = "No active state";
+	}
+	return true;
+}
+
+bool StateInterface::stop2dNavGoal(std_srvs::Trigger::Request &req,
+		std_srvs::Trigger::Response &res) {
+	if(_current_state){
+		_current_state->onInterrupt(SIMPLE_GOAL_STOP_INTERRUPT);
 	}
 	return true;
 }

@@ -321,11 +321,22 @@ color: rgba(255,255,255,1);</string>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="reverse_checkbox">
-        <property name="text">
-         <string>Reverse Driving</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QCheckBox" name="reverse_checkbox">
+          <property name="text">
+           <string>Reverse Driving</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="stop_2d_nav_goal_button">
+          <property name="text">
+           <string>Stop 2D Nav Goal</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

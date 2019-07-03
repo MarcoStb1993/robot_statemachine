@@ -29,6 +29,7 @@ These functions handle commands issued from the GUI or the use of teleoperation 
 * EMERGENCY\_STOP\_INTERRUPT: Emergency Software Stop was pushed in the GUI
 * TELEOPERATION\_INTERRUPT: Teleoperation was used
 * SIMPLE\_GOAL\_INTERRUPT: A navigation goal was issued through the RViz GUI
+* SIMPLE\_GOAL\_STOP\_INTERRUPT: The navigation goal was stopped in the GUI
 
 The four other methods receive a reference to a bool and a string variable. The former informs if the request was successful and the desired action will be executed (true) or not (false) and the latter features a descriptive text.
 
@@ -208,7 +209,7 @@ The single mode lets the robot start from the first waypoint and then to all con
 
 The GUI also offers the possibility to set a waypoint at the robot's current location and with the robot's current orientation. These waypoint's routines can be set from drop-down box next to the button setting the actual waypoint. 
 
-Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse.
+Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse. A button next to the checkbox enables stopping the navigation when a simple navigation goal was set through RViz.
 
 When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool**. It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flag pole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
 
@@ -498,6 +499,9 @@ Call to start or stop waypoint following, depending on the bool value (true: sta
 
 **stateInfo** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
 Get current state info text
+
+**stop2DNavGoal** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))
+Call to stop navigation started through RViz tool **2D Nav Goal**
 
 #### Parameters
 

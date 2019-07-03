@@ -54,6 +54,8 @@ void StatemachineControlPanel::initCommunications() {
 			"setReverseMode");
 	_reverse_mode_subscriber = nh.subscribe<std_msgs::Bool>("reverseMode", 10,
 			&StatemachineControlPanel::reverseModeCallback, this);
+	_stop_2d_nav_goal_client = nh.serviceClient<std_srvs::Trigger>(
+			"stop2DNavGoal");
 
 	_add_waypoint_client = nh.serviceClient<statemachine_msgs::AddWaypoint>(
 			"addWaypoint");
@@ -79,6 +81,7 @@ connect(_gui->stopped_radio_button, SIGNAL(clicked(bool)), this, SLOT(stopOperat
 connect(_gui->autonomy_radio_button, SIGNAL(clicked(bool)), this, SLOT(setAutonomyOperation()));
 connect(_gui->teleoperation_radio_button, SIGNAL(clicked(bool)), this, SLOT(setTeleoperation()));
 
+connect(_gui->stop_2d_nav_goal_button, SIGNAL(clicked(bool)), this, SLOT(stop2dNavGoal()));
 }
 
 void StatemachineControlPanel::startStopExploration() {
@@ -236,6 +239,15 @@ void StatemachineControlPanel::setTeleoperation() {
 if (_operation_mode != statemachine_msgs::OperationMode::TELEOPERATION) {
 	_operation_mode = statemachine_msgs::OperationMode::TELEOPERATION;
 	callSetOperationMode();
+}
+}
+
+void StatemachineControlPanel::stop2dNavGoal() {
+std_srvs::Trigger srv;
+if (!_stop_2d_nav_goal_client.call(srv)) {
+	ROS_ERROR("Failed to call Stop 2D Nav Goal service");
+	_gui->movement_label->setText(
+			"Control: Stop 2D Nav Goal service not available");
 }
 }
 

@@ -67,6 +67,7 @@ private:
 	ros::Subscriber _simple_goal_sub;
 	ros::ServiceServer _start_stop_exploration_service;
 	ros::ServiceServer _start_stop_waypoint_following_service;
+	ros::ServiceServer _stop_2d_nav_goal_service;
 	ros::ServiceClient _set_navigation_goal_client;
 	ros::ServiceServer _state_info_service;
 	ros::Publisher _state_info_publisher;
@@ -117,6 +118,8 @@ private:
 			std_srvs::SetBool::Response &res);
 	bool startStopWaypointFollowingService(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
+	bool stop2dNavGoal(std_srvs::Trigger::Request &req,
+			std_srvs::Trigger::Response &res);
 	bool stateInfoService(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 

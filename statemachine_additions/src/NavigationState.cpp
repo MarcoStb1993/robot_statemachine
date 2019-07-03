@@ -306,6 +306,11 @@ void NavigationState::onInterrupt(int interrupt) {
 				_stateinterface->getPluginState(NAVIGATION_STATE));
 		_interrupt_occured = true;
 		break;
+	case SIMPLE_GOAL_STOP_INTERRUPT:
+		if(_navigation_mode==SIMPLE_GOAL){
+			_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());
+		}
+		break;
 	}
 }
 

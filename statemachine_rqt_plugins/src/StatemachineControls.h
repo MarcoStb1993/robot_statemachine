@@ -51,6 +51,7 @@ protected slots:
 	void stopOperation();
 	void setAutonomyOperation();
 	void setTeleoperation();
+	void stop2dNavGoal();
 
 private:
 	QWidget* _widget_main;
@@ -69,6 +70,7 @@ private:
 	ros::ServiceClient _set_operation_mode_client;
 	ros::ServiceClient _set_exploration_mode_client;
 	ros::ServiceClient _state_info_client;
+	ros::ServiceClient _stop_2d_nav_goal_client;
 	ros::Subscriber _state_info_subscriber;
 	ros::Subscriber _reverse_mode_subscriber;
 	ros::Subscriber _operation_mode_subcriber;
