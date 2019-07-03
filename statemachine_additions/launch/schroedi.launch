@@ -37,6 +37,7 @@
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
+		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"

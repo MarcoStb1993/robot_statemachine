@@ -25,14 +25,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 -->
 <robot name="husky" xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <xacro:arg name="laser_enabled" default="true" />
   <xacro:arg name="laser_xyz" default="$(optenv HUSKY_LMS1XX_XYZ 0.2206 0.0 0.00635)" />
   <xacro:arg name="laser_rpy" default="$(optenv HUSKY_LMS1XX_RPY 0.0 0.0 0.0)" />
 
-  <xacro:arg name="kinect_xyz" default="$(optenv HUSKY_KINECT_XYZ 0.4 0 -0.1)" />
-  <xacro:arg name="kinect_rpy" default="$(optenv HUSKY_KINECT_RPY 0 0 0)" />
+  <xacro:arg name="kinect_enabled" default="true" />
+  <xacro:arg name="kinect_xyz" default="$(optenv HUSKY_KINECT_XYZ 0 0 0)" />
+  <xacro:arg name="kinect_rpy" default="$(optenv HUSKY_KINECT_RPY 0 0.18 3.14)" />
 
-  <xacro:arg name="velodyne_xyz" default="$(optenv HUSKY_VELODYNE_XYZ 0 0 0.5)" />
-  <xacro:arg name="velodyne_rpy" default="$(optenv HUSKY_VELODYNE_RPY 0 0 0)" />
+  <xacro:property name="husky_front_bumper_extend" value="$(optenv HUSKY_FRONT_BUMPER_EXTEND 0)" />
+  <xacro:property name="husky_rear_bumper_extend" value="$(optenv HUSKY_REAR_BUMPER_EXTEND 0)" />
 
   <xacro:arg name="robot_namespace" default="/" />
   <xacro:arg name="urdf_extras" default="empty.urdf" />
@@ -70,15 +72,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0 ${base_z_size/4}" rpy="0 0 0" />
+      <origin xyz="${( husky_front_bumper_extend - husky_rear_bumper_extend ) / 2.0} 0 ${base_z_size/4}" rpy="0 0 0" />
       <geometry>
-        <box size="${base_x_size} ${base_y_size} ${base_z_size/2}"/>
+        <box size="${ base_x_size + husky_front_bumper_extend + husky_rear_bumper_extend } ${base_y_size} ${base_z_size/2}"/>
       </geometry>
     </collision>
     <collision>
-      <origin xyz="0 0 ${base_z_size*3/4}" rpy="0 0 0" />
+      <origin xyz="0 0 ${base_z_size*3/4-0.01}" rpy="0 0 0" />
       <geometry>
-        <box size="${base_x_size*4/5} ${base_y_size} ${base_z_size/2}"/>
+        <box size="${base_x_size*4/5} ${base_y_size} ${base_z_size/2-0.02}"/>
       </geometry>
     </collision>
   </link>
@@ -87,9 +89,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <link name="base_footprint"/>
 
   <joint name="base_footprint_joint" type="fixed">
-    <origin xyz="0 0 ${-wheel_vertical_offset + wheel_radius}" rpy="0 0 0" />
-    <parent link="base_footprint" />
-    <child link="base_link" />
+    <origin xyz="0 0 ${wheel_vertical_offset - wheel_radius}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="base_footprint" />
   </joint>
 
   <!-- Interial link stores the robot's inertial information -->
@@ -134,6 +136,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
 
   <xacro:husky_decorate />
 
+  <xacro:if value="$(arg laser_enabled)">
 
     <sick_lms1xx_mount prefix="base"/>
 
@@ -145,21 +148,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
       <child link="base_laser_mount" />
     </joint>
 
+  </xacro:if>
 
+  <xacro:if value="$(arg kinect_enabled)">
+
+    <xacro:sensor_arch prefix="" parent="top_plate_link">
+      <origin xyz="-0.35 0 0.51" rpy="0 0 -3.14"/>
+    </xacro:sensor_arch>
     <joint name="kinect_frame_joint" type="fixed">
       <origin xyz="$(arg kinect_xyz)" rpy="$(arg kinect_rpy)" />
-      <parent link="top_plate_link"/>
+      <parent link="sensor_arch_mount_link"/>
       <child link="camera_link"/>
     </joint>
 
     <xacro:kinect_camera prefix="camera" robot_namespace="$(arg robot_namespace)"/>
-
-
-  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
-  <VLP-16 parent="top_plate_link" name="velodyne" topic="/velodyne_points" hz="10" samples="440" gpu="true">
-    <origin xyz="0.25 0 0.25" rpy="0 0 0" />
-  </VLP-16>
-  
+  </xacro:if>
 
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
