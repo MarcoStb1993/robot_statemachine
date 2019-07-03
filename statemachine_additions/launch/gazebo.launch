@@ -12,7 +12,7 @@
 	<!-- Robot starting position in world -->
 	<arg name="x" default="0.0" />
 	<arg name="y" default="0.0" />
-	<arg name="z" default="0.0" />
+	<arg name="z" default="1.0" />
 	<arg name="yaw" default="0.0" />
 
 	<arg name="urdf_extras" default="$(optenv HUSKY_URDF_EXTRAS)" />	<!-- set to path with additions to Husky URDF -->

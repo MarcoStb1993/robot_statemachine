@@ -1,6 +1,6 @@
 <launch>
 	<node pkg="rviz" type="rviz" name="rviz"
-		args="-d $(find statemachine_additions)/config/georg/nav_georg.rviz">
+		args="-d $(find statemachine_additions)/config/georg/georg.rviz">
 		<remap from="/move_base_simple/goal"
 			to="/statemachine/simpleGoal" />
 	</node>
