@@ -211,7 +211,7 @@ The GUI also offers the possibility to set a waypoint at the robot's current loc
 
 Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse. A button next to the checkbox enables stopping the navigation when a simple navigation goal was set through RViz.
 
-When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool**. It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. Using the "w" hotkey works as well. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flag pole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
+When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool**. It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flag pole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
 
 The already placed waypoints can be seen by displaying the respective topic. The displayed markers are interactive and can be seen below. Using the circle around them, they can be dragged in the desired direction, changing their x-y-position and yaw-orientation. The arrows above and below can be used to drag them in the respective direction, altering it's z-coordinate. Clicking on the waypoint marker opens a menu that offers the options to set the routine to be executed when reaching the waypoint and to delete the waypoint. The routine can also be set to none.
 
@@ -237,7 +237,7 @@ Visualization Manager:
   ...
 ```
 
-If the **2D Nav Goal Tool** (Hotkey: "g") from RViz should be used, the respective topic from RViz needs to be remapped, so that that it works with the statemachine. The following remap needs to be added to the RViz launch, otherwise the **2D Nav Goal Tool** cannot be used:  
+If the **2D Nav Goal Tool** from RViz should be used, the respective topic from RViz needs to be remapped, so that that it works with the statemachine. The following remap needs to be added to the RViz launch, otherwise the **2D Nav Goal Tool** cannot be used:  
 
 ```
 <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" args="-d ...">

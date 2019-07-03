@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!-- This is a hand-made URDF XACRO file for the Microsoft Kinect-2 sensor (Xbox ONE) -->
+<!-- Copyright Universitaet Bremen - Instititute for Artificial Intelligence. Author: Alexis Maldonado -->
+<!-- License: GPLv3+ -->
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="velodyne_vlp16">
+  <material name="VeloGreen">
+    <!-- <color rgba="0.4 0.8 0.4 1.0"/> -->
+    <color rgba="0 0.3 0 1.0"/>
+  </material>
+  <material name="VeloGrey">
+    <color rgba="0.8 0.8 0.8 1.0"/>
+  </material>
+
+  <xacro:property name="M_PI" value="3.1415926535897931"/>
+  <xacro:include filename="$(find tubaf_common)/urdf/include/inertia_calc.urdf.xacro"/>
+
+  <xacro:macro name="velodyne_vlp16" params="name">
+
+    <link name="${name}_link">
+      <xacro:cylinder_inertial r="0.05165" h="0.0717" mass="0.830"/>
+      <visual>
+        <!--origin xyz="0 0 0.0358" rpy="0 0 0"/-->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.05165" length="0.0717"/>
+        </geometry>
+        <material name="VeloGrey"/>
+      </visual>
+      <collision>
+        <!--origin xyz="0 0 0.0358" rpy="0 0 0"/-->
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.05165" length="0.0717"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${name}_scan_frame">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.0517" length="0.0381"/>
+        </geometry>
+        <material name="VeloGreen"/>
+      </visual>
+    </link>
+
+    <!--define rgb-optical in same frame like root-link, just rotated-->
+    <joint name="${name}_link_scan_frame_joint" type="fixed">
+      <origin xyz="0 0 0.00195" rpy="0 0 0"/><!-- 37.8mm - (71.7mm)/2 = 1.95mm -->
+      <parent link="${name}_link"/>
+      <child link="${name}_scan_frame"/>
+    </joint>
+
+    <gazebo reference="${name}_link">
+      <material>Gazebo/White</material>
+      <turnGravityOff>false</turnGravityOff>
+      <sensor type="ray" name="${name}">
+        <pose>0.0 0.0 0.0 0.0 0.0 0.0</pose>
+        <visualize>false</visualize>
+        <update_rate>10</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>1875</samples>
+              <!--samples>1</samples-->
+              <resolution>1</resolution>
+              <min_angle>-${M_PI}</min_angle>
+              <max_angle>+${M_PI}</max_angle>
+              <!--min_angle>0</min_angle>
+              <max_angle>0</max_angle-->
+            </horizontal>
+            <vertical>
+              <samples>16</samples>
+              <!-- Resolution is multiplied by samples to determine number of
+              simulated beams vs interpolated beams. See:
+              http://sdformat.org/spec?ver=1.6&elem=sensor#horizontal_resolution -->
+              <resolution>1</resolution>
+              <min_angle>-${15.0*M_PI/180.0}</min_angle>
+              <max_angle> ${15.0*M_PI/180.0}</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.3</min>
+            <max>100</max>
+            <resolution>0.06</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.03</stddev>
+          </noise>
+        </ray>
+        <plugin name="${name}_laser_plugin" filename="libgazebo_ros_block_laser.so">
+          <topicName>${name}_points</topicName>
+          <frameName>${name}_scan_frame</frameName>
+          <updateRate>10.0</updateRate>
+	  <robotNamespace>${robot_namespace}</robotNamespace>
+        </plugin>
+      </sensor>
+    </gazebo>
+    <gazebo reference="${name}_scan_frame">
+        <material>Gazebo/Green</material>
+    </gazebo>
+
+
+  </xacro:macro>
+
+</robot>
