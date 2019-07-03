@@ -31,9 +31,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
   <xacro:arg name="kinect_xyz" default="$(optenv HUSKY_KINECT_XYZ 0.4 0 -0.1)" />
   <xacro:arg name="kinect_rpy" default="$(optenv HUSKY_KINECT_RPY 0 0 0)" />
 
-  <xacro:arg name="velodyne_xyz" default="$(optenv HUSKY_VELODYNE_XYZ 0 0 0.5)" />
-  <xacro:arg name="velodyne_rpy" default="$(optenv HUSKY_VELODYNE_RPY 0 0 0)" />
-
   <xacro:arg name="robot_namespace" default="/" />
   <xacro:arg name="urdf_extras" default="empty.urdf" />
 
@@ -152,14 +149,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSI
       <child link="camera_link"/>
     </joint>
 
-    <xacro:kinect_camera prefix="camera" robot_namespace="$(arg robot_namespace)"/>
-
-
-  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
-  <VLP-16 parent="top_plate_link" name="velodyne" topic="/velodyne_points" hz="10" samples="440" gpu="true">
-    <origin xyz="0.25 0 0.25" rpy="0 0 0" />
-  </VLP-16>
-  
+    <xacro:kinect_camera prefix="camera" robot_namespace="$(arg robot_namespace)"/>  
 
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
