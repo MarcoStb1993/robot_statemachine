@@ -55,9 +55,9 @@ TrajectoryPlannerROS:
 
 DWAPlannerROS:
   # Robot configuration parameters  
-  acc_lim_x: 2.5
+  acc_lim_x: 1.5
   acc_lim_y: 0
-  acc_lim_th: 3.2
+  acc_lim_th: 1.6
 
   max_vel_x: 0.2
   min_vel_x: 0.0
