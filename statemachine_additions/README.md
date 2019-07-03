@@ -1,4 +1,4 @@
-# statemachine_additions
+# Statemachine Additions
 
 Additions to the statemachine including all mandatory plugin states and a plugin routine 
 state. Also an additional service provider is included.
@@ -45,7 +45,7 @@ Reverse driving is realised by running two navigation stacks, one for forward dr
 and one for reverse driving. This is explained in more detail [later](#reverse-robot-movement-with-navigation-stack).
 For reverse driving the robot also features a transform 
 to a reverse base frame. When driving in reverse, all output command velocities are 
-negated by the [Additions Service Provider](#additions-service-provider). If the reverse mode
+negated by the [Additional Service Provider](#additional-service-provider). If the reverse mode
 is activated or deactivated, the goal is cancelled and sent to the reverse navigation.
 
 ### Mapping State
@@ -104,7 +104,7 @@ to allow the robot to navigate in forward and reverse depending on the set mode:
 ```
 
 Replace the dots with the usual parameters for the navigation stack. To use a particular 
-navigation stack, call it like in this [tutorial](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) 
+navigation stack, initiate it like in this [tutorial](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) 
 and call the action for forward movement with "move_base" and for reverse movement 
 with "move_base_reverse".
 
@@ -116,10 +116,32 @@ An additional data handler class that adds services to interface the exploration
 
 #### Published Topics
 
+**<_autonomy_cmd_vel_topic>** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
+Topic name for the autonomy command velocity
+
+**explorationGoals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
+List of all currently available exploration goals
+
 #### Subscribed Topics
+
+**<autonomy_cmd_vel_top>_reverse** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
+Topic name for the autonomy command velocity in reverse mode
+
+**explore/frontiers** ([visualization_msgs/MarkerArray](http://docs.ros.org/api/visualization_msgs/html/msg/MarkerArray.html))  
+All frontier grid cells as points and closest frontier points as spheres
 
 #### Services
 
+**setNavigationToReverse** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Needs to be implemented for reverse mode, just returns success
+
 #### Parameters
 
+**~update_frequency** (float, default: 20)  
+Update rate in Hz
 
+**~autonomy_cmd_vel_topic** (string, default: "autonomy/cmd_vel")  
+Topic name for the autonomy command velocity
+
+**~navigation_plugin** (string, default: "statemachine::NavigationPlugin")  
+Sets the plugin's name for the navigation state.

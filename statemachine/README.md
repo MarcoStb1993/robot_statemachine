@@ -216,6 +216,8 @@ The already placed waypoints can be seen by displaying the respective topic. The
 
 ![Waypoint in RViz](../images/waypoints.png)
 
+*Note*: When the robot is moving towards a waypoint, the specific waypoint can be manipulated but these changes will not be forwarded to the current navigation. So, changes made after the robot started to move towards the waypoint, will not be regarded until the waypoint and it's possible routine was finished.
+
 The [statemachine additions package](../statemachine_additions) features some exemplary RViz configuration files for the respective launch files that automatically include the GUI and **Plant Waypoint Tool** as well as adding the waypoint interactive marker topic to the display.
 
 *Note:* When saving the RViz configuration, the **Plant Waypoint Tool** sometimes does not get included in the configuration and has to be added each time RViz is started manually. To fix this, you can need to add `- Class: statemachine::PlantWaypointTool` to your RViz configuration file by hand. It has to be appended under *Visualization Manager: Tools* as can be seen in the snippet below.
@@ -233,6 +235,16 @@ Visualization Manager:
   Value: true
   ...
 ```
+
+If the **2D Nav Goal Tool** from RViz should be used, the respective topic from RViz needs to be remapped, so that that it works with the statemachine. The following remap needs to be added to the RViz launch, otherwise the **2D Nav Goal Tool** cannot be used:  
+
+```
+<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" args="-d ...">
+	<remap from="/move_base_simple/goal" to="/statemachine/simpleGoal" />
+</node>
+```
+
+*Note*: Replace the dots with the path to your configuration file.
 
 ### Writing a plugin state
 

@@ -22,6 +22,10 @@ WaypointFollowingVisualization::WaypointFollowingVisualization() :
 					_1));
 	_service_call_delay_timer = nh.createTimer(ros::Duration(2.0),
 			&WaypointFollowingVisualization::timerCallback, this, true);
+	_periodical_refresh_timer = nh.createTimer(ros::Duration(1.0),
+			&WaypointFollowingVisualization::periodicalRefreshTimerCallback,
+			this, false);
+	_refresh_waypoint_markers = false;
 }
 
 WaypointFollowingVisualization::~WaypointFollowingVisualization() {
@@ -67,13 +71,14 @@ void WaypointFollowingVisualization::setWaypointRoutine(
 
 void WaypointFollowingVisualization::waypointCallback(
 		const statemachine_msgs::WaypointArray::ConstPtr& waypoint_array) {
-	if (waypointArrayChanged(waypoint_array)) {
+	if (_refresh_waypoint_markers || waypointArrayChanged(waypoint_array)) {
 		_waypoints = *waypoint_array;
 		_waypoint_server.clear();
 		for (int i = 0; i < _waypoints.waypoints_size; i++) {
 			addWaypointMarkerToServer(i);
 		}
 		_waypoint_server.applyChanges();
+		_refresh_waypoint_markers = false;
 	}
 }
 
@@ -189,6 +194,11 @@ bool WaypointFollowingVisualization::waypointArrayChanged(
 	} else {
 		return true;
 	}
+}
+
+void WaypointFollowingVisualization::periodicalRefreshTimerCallback(
+		const ros::TimerEvent& event) {
+	_refresh_waypoint_markers = true;
 }
 
 }

@@ -76,6 +76,11 @@ private:
 	 */
 	bool waypointArrayChanged(
 			const statemachine_msgs::WaypointArray::ConstPtr& waypoint_array);
+	/**
+	 * Timer callback for periodically refreshing the displayed markers
+	 * @param event Timer event
+	 */
+	void periodicalRefreshTimerCallback(const ros::TimerEvent& event);
 
 	interactive_markers::InteractiveMarkerServer _waypoint_server;
 	interactive_markers::MenuHandler _menu_handler;
@@ -95,11 +100,18 @@ private:
 	 * List of all available waypoint routines
 	 */
 	std::vector<std::string> _waypoint_routines;
-
+	/**
+	 * If the waypoint markers should be redrawn on the next callback
+	 */
+	bool _refresh_waypoint_markers;
 	/**
 	 * Timer to call menu handle initialization with a delay so ServiceProvider's services will be available
 	 */
 	ros::Timer _service_call_delay_timer;
+	/**
+	 * Timer to periodically refresh the drawn markers to synchronize with the waypoint array in case of high system load
+	 */
+	ros::Timer _periodical_refresh_timer;
 };
 
 }

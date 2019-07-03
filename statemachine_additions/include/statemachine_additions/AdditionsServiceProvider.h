@@ -6,14 +6,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <std_srvs/SetBool.h>
-#include <std_msgs/Bool.h>
-#include <std_srvs/Empty.h>
-
-#include <statemachine_msgs/GetCmdVelRecording.h>
-#include <std_srvs/Trigger.h>
-#include <std_srvs/SetBool.h>
 #include <geometry_msgs/Twist.h>
-#include <boost/circular_buffer.hpp>
 
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/server/simple_action_server.h>
