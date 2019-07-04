@@ -11,23 +11,23 @@
 namespace statemachine {
 
 /**
- * @class   MappingState
+ * @class   MappingDummyState
  * @brief   Dummy state for mapping at a reached goal during exploration. Only initiates transition to
  * 			CalculateGoalState.
  */
-class MappingState: public BaseState {
+class MappingDummyState: public BaseState {
 
 public:
 
 	/**
 	 * Constructor
 	 */
-	MappingState();
+	MappingDummyState();
 
 	/**
 	 * Destructor
 	 */
-	~MappingState();
+	~MappingDummyState();
 
 	/**
 	 * Called once when registered at StateInterface

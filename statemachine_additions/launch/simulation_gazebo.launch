@@ -2,7 +2,7 @@
 
 <launch>
 	<arg name="world"
-		default="$(find husky_gazebo)/launch/playpen.launch" />
+		default="$(find husky_gazebo)/worlds/clearpath_playpen.world" />
 	<arg name="robot_frame" default="base_footprint" />
 	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
 	<arg name="teleoperation_cmd_vel_topic"

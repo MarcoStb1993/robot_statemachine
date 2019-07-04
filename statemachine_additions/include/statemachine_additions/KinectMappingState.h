@@ -1,0 +1,108 @@
+#ifndef MAPPINGSTATE_H
+#define MAPPINGSTATE_H
+
+#include <pluginlib/class_list_macros.h>
+#include <statemachine/BaseState.h>
+#include <statemachine/IdleState.h>
+#include <statemachine/EmergencyStopState.h>
+#include <statemachine/TeleoperationState.h>
+#include <statemachine/StateInterface.h>
+#include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64.h>
+
+#define MOVE_LEFT 0
+#define MOVE_RIGHT 1
+#define MOVE_TO_CENTER 2
+
+#define KINECT_LEFT_LIMIT 1.25
+#define KINECT_RIGHT_LIMIT -1.25
+#define KINECT_CENTER_POSITION 0.0
+
+namespace statemachine {
+
+/**
+ * @class   KinectMappingState
+ * @brief   Dummy state for mapping at a reached goal during exploration. Only initiates transition to
+ * 			CalculateGoalState.
+ */
+class KinectMappingState: public BaseState {
+
+public:
+
+	/**
+	 * Constructor
+	 */
+	KinectMappingState();
+
+	/**
+	 * Destructor
+	 */
+	~KinectMappingState();
+
+	/**
+	 * Called once when registered at StateInterface
+	 */
+	void onSetup();
+
+	/**
+	 * Called once when activated
+	 */
+	void onEntry();
+
+	/**
+	 * Process method (step-wise, never block this method)
+	 */
+	void onActive();
+
+	/**
+	 * Called once when left
+	 */
+	void onExit();
+
+	/**
+	 * Called when exploration was started manually
+	 */
+	void onExplorationStart(bool &success, std::string &message);
+
+	/**
+	 * Called when exploration was stopped manually
+	 */
+	void onExplorationStop(bool &success, std::string &message);
+
+	/**
+	 * Called when waypoint following was started/paused manually
+	 */
+	void onWaypointFollowingStart(bool &success, std::string &message);
+
+	/**
+	 * Called when waypoint following was stopped manually
+	 */
+	void onWaypointFollowingStop(bool &success, std::string &message);
+
+	/**
+	 * @brief Called when an operation mode interrupt was received
+	 * @param interrupt Kind of interrupt (0=EmergencyStop, 1=TeleoperationInterupt)
+	 */
+	void onInterrupt(int interrupt);
+
+private:
+
+	ros::NodeHandle _nh;
+	ros::Subscriber _joint_states_subscriber;
+	ros::Publisher _kinetic_joint_controller;
+
+	/**
+	 * Current state of swiveling the Kinect camera from left to right and back (0: to left, 1: left to right: 2: back to center)
+	 */
+	int _swivel_state;
+
+	/**
+	 * Callback for joint states to check if camera reached the desired position
+	 * @param joint_state joint state message
+	 */
+	void jointStateCallback(sensor_msgs::JointState::ConstPtr joint_state);
+};
+
+}
+
+#endif

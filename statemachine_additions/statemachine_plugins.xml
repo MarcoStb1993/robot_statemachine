@@ -7,9 +7,13 @@
 		base_class_type="statemachine::BaseState">
 		<description>This is a state for navigating using the ROS navigation stack.</description>
 	</class>
-	<class type="statemachine::MappingState"
+	<class type="statemachine::MappingDummyState"
 		base_class_type="statemachine::BaseState">
 		<description>This is a dummy mapping state, without functions.</description>
+	</class>
+	<class type="statemachine::KinectMappingState"
+		base_class_type="statemachine::BaseState">
+		<description>This state moves a Kinect depth camera from left to right and back, mapping the area.</description>
 	</class>
 	<class type="statemachine::ReversingRoutineState"
 		base_class_type="statemachine::BaseState">

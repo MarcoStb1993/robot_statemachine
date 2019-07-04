@@ -50,11 +50,11 @@
 		filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
 
 	<xacro:include
-		filename="$(find husky_description)/urdf/accessories/kinect_camera.urdf.xacro" />
+		filename="$(find statemachine_additions)/config/gazebo_sim/urdf/kinect_camera.urdf.xacro" />
 	<xacro:include
 		filename="$(find husky_description)/urdf/accessories/sick_lms1xx_mount.urdf.xacro" />
 	<xacro:include
-		filename="$(find husky_description)/urdf/accessories/sensor_arch.urdf.xacro" />
+		filename="$(find statemachine_additions)/config/gazebo_sim/urdf/sensor_arch.urdf.xacro" />
 
 	<xacro:property name="M_PI" value="3.14159" />
 
@@ -179,14 +179,24 @@
 		<xacro:sensor_arch prefix="" parent="top_plate_link">
 			<origin xyz="-0.35 0 0.51" rpy="0 0 -3.14" />
 		</xacro:sensor_arch>
-		<joint name="kinect_frame_joint" type="revolute">
+
+		<joint name="camera_swivel" type="revolute">
 			<axis xyz="0 0 1" />
-			<limit effort="1000.0" lower="-1.57" upper="1.57"
-				velocity="0.5" />
+			<limit upper="1.3" lower="-1.3" velocity="0.87" effort="1"/>
 			<origin xyz="$(arg kinect_xyz)" rpy="$(arg kinect_rpy)" />
 			<parent link="sensor_arch_mount_link" />
-			<child link="camera_link"/>
+			<child link="camera_link" />
 		</joint>
+
+		<transmission name="camera_swivel_trans">
+			<type>transmission_interface/SimpleTransmission</type>
+			<actuator name="$camera_swivel_motor">
+				<mechanicalReduction>1</mechanicalReduction>
+			</actuator>
+			<joint name="camera_swivel">
+				<hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+			</joint>
+		</transmission>
 
 		<xacro:kinect_camera prefix="camera"
 			robot_namespace="$(arg robot_namespace)" />

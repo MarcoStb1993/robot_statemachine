@@ -1,21 +1,26 @@
-#include <statemachine_additions/MappingState.h>
+#include <statemachine_additions/KinectMappingState.h>
 
 namespace statemachine {
 
-MappingState::MappingState() {
+KinectMappingState::KinectMappingState() {
 }
 
-MappingState::~MappingState() {
+KinectMappingState::~KinectMappingState() {
 }
 
-void MappingState::onSetup() {
+void KinectMappingState::onSetup() {
+	_joint_states_subscriber = _nh.subscribe(
+			"joint_states", 10, &KinectMappingState::jointStateCallback, this);
+	_kinetic_joint_controller = _nh.advertise<std_msgs::Float64>("kinetic_controller/command", 1);
 	_name = "Mapping";
+	_swivel_state = -1;
 }
 
-void MappingState::onEntry() {
+void KinectMappingState::onEntry() {
+	_swivel_state = MOVE_LEFT;
 }
 
-void MappingState::onActive() {
+void KinectMappingState::onActive() {
 	//do mapping stuff
 	if (!_interrupt_occured) {
 		_stateinterface->transitionToVolatileState(
@@ -23,33 +28,35 @@ void MappingState::onActive() {
 	}
 }
 
-void MappingState::onExit() {
+void KinectMappingState::onExit() {
 }
 
-void MappingState::onExplorationStart(bool &success, std::string &message) {
+void KinectMappingState::onExplorationStart(bool &success,
+		std::string &message) {
 	success = false;
 	message = "Exploration running";
 }
 
-void MappingState::onExplorationStop(bool &success, std::string &message) {
+void KinectMappingState::onExplorationStop(bool &success,
+		std::string &message) {
 	success = true;
 	message = "Exploration stopped";
 	_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());
 }
 
-void MappingState::onWaypointFollowingStart(bool &success,
+void KinectMappingState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
 	success = false;
 	message = "Exploration running";
 }
 
-void MappingState::onWaypointFollowingStop(bool &success,
+void KinectMappingState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
 	success = false;
 	message = "Exploration running";
 }
 
-void MappingState::onInterrupt(int interrupt) {
+void KinectMappingState::onInterrupt(int interrupt) {
 	switch (interrupt) {
 	case EMERGENCY_STOP_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
@@ -71,4 +78,5 @@ void MappingState::onInterrupt(int interrupt) {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::MappingState, statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(statemachine::KinectMappingState,
+		statemachine::BaseState)
