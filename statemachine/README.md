@@ -150,8 +150,8 @@ In general, a tool for navigation, a tool for mapping and a tool for exploration
 The statemachine's core functionality is distributed over several nodes that can simply be started with the launchfile `statemachine.launch` which requires the following arguments:
 * `update_frequency`: The update rate in Hz of the statemachine (default: 20)
 * `robot_frame`: The robot base frame (default: "base_footprint")
-* `mapping_plugin`: The plugin used for mapping (default: ("statemachine::MappingDummyState")[../statemachine_additions#mapping-dummy-state]])
-* `calculate_goal_plugin`: The plugin used to calculate the next goal for exploration	 (default: ("statemachine::CalculateGoalState")[../statemachine_additions#calculate-goal-stae])
+* `mapping_plugin`: The plugin used for mapping (default: ["statemachine::MappingDummyState"](../statemachine_additions#mapping-dummy-state))
+* `calculate_goal_plugin`: The plugin used to calculate the next goal for exploration	 (default: ["statemachine::CalculateGoalState"](../statemachine_additions#calculate-goal-state))
 * `navigation_plugin`: The plugin used for navigation (default: ["statemachine::NavigationState"](../statemachine_additions#navigation_state))
 * `autonomy_cmd_vel_topic`: The name of the command velocity topic for messages from exploration, waypoint following or simple goals (default: "/autonomy/cmd_vel")
 * `teleoperation_cmd_vel_topic`:	The name of the command velocity topic for messages from teleoperation (default: "/teleoperation/cmd_vel")
