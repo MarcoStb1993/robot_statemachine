@@ -10,7 +10,7 @@
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::RonaNavigationState" />
-	<arg name="mapping_plugin" default="statemachine::MappingState" />
+	<arg name="mapping_plugin" default="statemachine::MappingDummyState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 

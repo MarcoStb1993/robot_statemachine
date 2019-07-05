@@ -9,8 +9,8 @@ StateInterface::StateInterface() :
 			_calculate_goal_plugin, "statemachine::CalculateGoalState");
 	private_nh.param<std::string>("navigation_plugin", _navigation_plugin,
 			"statemachine::NavigationState");
-	private_nh.param<std::string>("mapping_goal_plugin", _mapping_plugin,
-			"statemachine::MappingState");
+	private_nh.param<std::string>("mapping_plugin", _mapping_plugin,
+			"statemachine::MappingDummyState");
 
 	ros::NodeHandle nh("statemachine");
 	_operation_mode_sub = nh.subscribe<statemachine_msgs::OperationMode>(

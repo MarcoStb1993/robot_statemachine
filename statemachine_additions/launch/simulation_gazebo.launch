@@ -11,7 +11,7 @@
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::NavigationState" />
-	<arg name="mapping_plugin" default="statemachine::MappingState" />
+	<arg name="mapping_plugin" default="statemachine::KinectMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 
@@ -47,6 +47,7 @@
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
+		<param name="mapping_plugin" value="$(arg mapping_plugin)" />
 	</node>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping"

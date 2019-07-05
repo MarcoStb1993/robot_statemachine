@@ -8,6 +8,9 @@
 #include <std_srvs/SetBool.h>
 #include <geometry_msgs/Twist.h>
 
+#include <std_srvs/Trigger.h>
+#include <std_msgs/Float64.h>
+
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/server/simple_action_server.h>
 
@@ -37,6 +40,9 @@ private:
 
 	ros::Subscriber frontiers_marker_array_subscriber;
 	ros::Publisher exploration_goals_publisher;
+
+	ros::ServiceServer _reset_kinect_position_serivce;
+	ros::Publisher _kinetic_joint_controller;
 
 	/**
 	 * SimpleActionServer for making Explore Lite run and lead it to believe it talks to Move Base
@@ -89,6 +95,9 @@ private:
 	 * Publish list of extracted frontier centers for further calculation
 	 */
 	void publishExplorationGoals();
+
+	bool resetKinectPosition(std_srvs::Trigger::Request &req,
+			std_srvs::Trigger::Response &res);
 };
 
 }

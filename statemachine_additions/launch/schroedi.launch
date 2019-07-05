@@ -8,7 +8,7 @@
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::NavigationState" />
-	<arg name="mapping_plugin" default="statemachine::MappingState" />
+	<arg name="mapping_plugin" default="statemachine::MappingDummyState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 
 	<include file="$(find statemachine)/launch/statemachine.launch">

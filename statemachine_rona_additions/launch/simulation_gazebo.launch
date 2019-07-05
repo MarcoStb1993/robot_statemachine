@@ -11,7 +11,8 @@
 	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
 	<arg name="navigation_plugin"
 		default="statemachine::RonaNavigationState" />
-	<arg name="mapping_plugin" default="statemachine::MappingState" />
+	<arg name="mapping_plugin"
+		default="statemachine::KinectMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 
@@ -46,11 +47,12 @@
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
+		<param name="mapping_plugin" value="$(arg mapping_plugin)" />
 	</node>
 
 	<node pkg="statemachine_rona_additions"
 		type="ronaAdditionsServiceProviderNode"
-		name="ronaAdditionsServiceProviderNode" output="screen"/>
+		name="ronaAdditionsServiceProviderNode" output="screen" />
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping"
 		output="screen">

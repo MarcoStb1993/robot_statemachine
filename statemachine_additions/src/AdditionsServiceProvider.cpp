@@ -16,6 +16,7 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	}
 
 	ros::NodeHandle nh("statemachine");
+
 	if (_navigation_plugin_used) {
 		_set_navigation_to_reverse_service = nh.advertiseService(
 				"setNavigationToReverse",
@@ -27,6 +28,16 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 				&AdditionsServiceProvider::reverseModeCmdVelCallback, this);
 		_reverse_mode_cmd_vel_publisher = _nh.advertise<geometry_msgs::Twist>(
 				_autonomy_cmd_vel_topic, 10);
+	}
+
+	std::string mapping_plugin;
+	private_nh.param<std::string>("mapping_plugin", mapping_plugin, "");
+	if (mapping_plugin.compare("statemachine::KinectMappingState") == 0) {
+		_reset_kinect_position_serivce = nh.advertiseService(
+				"resetKinectPosition",
+				&AdditionsServiceProvider::resetKinectPosition, this);
+		_kinetic_joint_controller = _nh.advertise<std_msgs::Float64>(
+				"kinetic_controller/command", 1, true);
 	}
 
 	as = new MoveBaseActionServer(_nh, "frontier_move_base",
@@ -94,5 +105,13 @@ void AdditionsServiceProvider::frontierCallback(
 			}
 		}
 	}
+}
+
+bool AdditionsServiceProvider::resetKinectPosition(
+		std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
+	std_msgs::Float64 kinetic_command;
+	kinetic_command.data = 0.0;	//center position of kinect camera
+	_kinetic_joint_controller.publish(kinetic_command);
+	return true;
 }
 }

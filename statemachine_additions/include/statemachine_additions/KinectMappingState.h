@@ -9,14 +9,17 @@
 #include <statemachine/StateInterface.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
+#include <std_srvs/Trigger.h>
 
 #define MOVE_LEFT 0
 #define MOVE_RIGHT 1
 #define MOVE_TO_CENTER 2
 
-#define KINECT_LEFT_LIMIT 1.25
-#define KINECT_RIGHT_LIMIT -1.25
+#define KINECT_LEFT_LIMIT 1.30
+#define KINECT_RIGHT_LIMIT -1.30
 #define KINECT_CENTER_POSITION 0.0
+
+#define POS_TOLERANCE 0.05
 
 namespace statemachine {
 
@@ -89,12 +92,21 @@ private:
 
 	ros::NodeHandle _nh;
 	ros::Subscriber _joint_states_subscriber;
-	ros::Publisher _kinetic_joint_controller;
+	ros::Publisher _kinect_joint_controller;
+	ros::ServiceClient _reset_kinect_position_client;
 
 	/**
 	 * Current state of swiveling the Kinect camera from left to right and back (0: to left, 1: left to right: 2: back to center)
 	 */
 	int _swivel_state;
+	/**
+	 * If the current state reached it's goal already
+	 */
+	bool _position_reached;
+	/**
+	 * Move command sent to kinect controller
+	 */
+	bool _message_send;
 
 	/**
 	 * Callback for joint states to check if camera reached the desired position
