@@ -50,8 +50,16 @@ is activated or deactivated, the goal is cancelled and sent to the reverse navig
 
 ### Mapping State
 
-The Mapping State is merely a dummy that transitions back to the Calculate Goal State as
+There are two mapping plugins included. The first state is just a dummy state while the latter is swiveling a simulated kinect camera from left to right around a revoluting joint.
+
+#### Mapping Dummy State
+
+The Mapping Dummy State is just transitioning back to the Calculate Goal State as
 specific mapping procedures are only relevant for the particular robot.
+
+#### Kinect Mapping State
+
+Swivels a kinect camera mounted on a joint revoluting around the z-axis from left to right and back to it's centered position to map the surrounding area. This only works for the implemented Gazebo simulation.
 
 ### Reversing Routine State
 
@@ -70,6 +78,9 @@ stack are also subscribed to and republished with negated linear velocities. It 
 provides a service that is called when reverse mode should be activated. Since nothing 
 needs to be changed in the configuration to change to reverse mode, this service just 
 replies that it was successful.
+
+If the kinect mapping is interrupted, a service is provided that moves the camera back to it's centered
+position while the statemachine is continuing.
 
 ## Examples
 
@@ -122,6 +133,9 @@ Topic name for the autonomy command velocity
 **explorationGoals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
 List of all currently available exploration goals
 
+**kinect_controller/command** ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html))  
+Position the kinect revolute joint will move to
+
 #### Subscribed Topics
 
 **<autonomy_cmd_vel_top>_reverse** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
@@ -145,3 +159,6 @@ Topic name for the autonomy command velocity
 
 **~navigation_plugin** (string, default: "statemachine::NavigationPlugin")  
 Sets the plugin's name for the navigation state.
+
+**~mapping_plugin** (string, default: "statemachine::MappingDummyPlugin")  
+Sets the plugin's name for the mapping state.
