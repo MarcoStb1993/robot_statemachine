@@ -8,7 +8,7 @@ state. Also an additional service provider is included.
 This package implements plugins for the [Calculate Goal State](#calculate-goal-state), 
 the [Navigation State](#navigation-state) and the [Mapping State](#mapping-state). Furthermore, 
 the [Reversing Routine State](#reversing-routine-state) is an optional routine state 
-plugin. The [Additional Service Provider](#additional-service-provider) handles the 
+plugin. The [Additions Service Provider](#additions-service-provider) handles the 
 data to be transferred between these plugins.
 
 ### Calculate Goal State
@@ -45,7 +45,7 @@ Reverse driving is realised by running two navigation stacks, one for forward dr
 and one for reverse driving. This is explained in more detail [later](#reverse-robot-movement-with-navigation-stack).
 For reverse driving the robot also features a transform 
 to a reverse base frame. When driving in reverse, all output command velocities are 
-negated by the [Additional Service Provider](#additional-service-provider). If the reverse mode
+negated by the [Additions Service Provider](#additions-service-provider). If the reverse mode
 is activated or deactivated, the goal is cancelled and sent to the reverse navigation.
 
 ### Mapping State
@@ -59,7 +59,7 @@ specific mapping procedures are only relevant for the particular robot.
 
 #### Kinect Mapping State
 
-Swivels a kinect camera mounted on a joint revoluting around the z-axis from left to right and back to it's centered position to map the surrounding area. This only works for the implemented Gazebo simulation.
+Swivels a kinect camera mounted on a joint revoluting around the z-axis from left to right and back to it's centered position to map the surrounding area. This only works for the implemented Gazebo simulation as it publishes commands to the joint the kinect is mounted on.
 
 ### Reversing Routine State
 
@@ -67,7 +67,7 @@ A Routine State called Reversing Routine is also include and toggles the reverse
 the routine is executed. This means the robot is driving in reverse when it was going forward
 before and vice versa.
 
-### Additional Service Provider
+### Additions Service Provider
 
 This data handler class retrieved the frontiers published by [explore lite](http://wiki.ros.org/explore_lite) 
 for visualization, extracts each frontier's center and republishes them as possible 
@@ -84,11 +84,11 @@ position while the statemachine is continuing.
 
 ## Examples
 
-A example to move a robot backwards and forwards with the [navigation stack](http://wiki.ros.org/navigation). 
+An example to move a robot backwards and forwards with the [navigation stack](http://wiki.ros.org/navigation).
 
 ### Reverse robot movement with navigation stack
 
-The following code needs to be included in your launch file (or nodes launched respectively) 
+The following code needs to be included in your launch file (or the nodes launched respectively) 
 to allow the robot to navigate in forward and reverse depending on the set mode:
 
 ```xml
@@ -114,7 +114,7 @@ to allow the robot to navigate in forward and reverse depending on the set mode:
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_reverse" args="0 0 0 3.1415 0 0 (arg robot_frame) $(arg robot_frame)_reverse 10" />
 ```
 
-Replace the dots with the usual parameters for the navigation stack. To use a particular 
+Replace the dots with the usual parameters for the navigation stack. Both packages share the same parameters but for the robot base frame. To use a particular 
 navigation stack, initiate it like in this [tutorial](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) 
 and call the action for forward movement with "move_base" and for reverse movement 
 with "move_base_reverse".

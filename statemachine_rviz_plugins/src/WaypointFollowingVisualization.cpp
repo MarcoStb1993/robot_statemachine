@@ -113,7 +113,6 @@ void WaypointFollowingVisualization::addWaypointMarkerToServer(
 	} else {
 		box_marker.color.b = 1.0;
 	}
-	box_marker.color.r = 0.0;
 	box_marker.color.a = 1.0;
 
 // create a non-interactive control which contains the box

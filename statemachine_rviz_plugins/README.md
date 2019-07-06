@@ -8,9 +8,9 @@ The [Waypoint Following Visualization](#waypoint-following-visualization) realiz
 
 ### Waypoint Following Visualization
 
-This class subscribes to the list of waypoints published by the [statemachine package](../statemachine) and visualizes them as [interactive markers](http://wiki.ros.org/interactive_markers). For each waypoint a flagpole with the waypoint's number overhead is shown. The waypoints can be moved on the x-y-plane by dragging them around, clicking on the surrounding circle or on the z-axis by dragging them at the arrows pointing up or down. Right clicking on the flag pole opens a menu, that shows the options to delete the waypoint or assign a routine.
+This class subscribes to the list of waypoints published by the [statemachine package](../statemachine#statemachine) and visualizes them as [interactive markers](http://wiki.ros.org/interactive_markers). For each waypoint a flagpole with the waypoint's number overhead is shown. The waypoints can be moved on the x-y-plane by dragging them around, clicking on the surrounding circle or on the z-axis by dragging them at the arrows pointing up or down. Right clicking on the flagpole opens a menu, that shows the options to delete the waypoint or assign a routine.
 
-All changes made to the waypoint in RViz are immediately forwarded to the [statemachine data handler](../statemachine#service-provider). The markers are only redrawn when one of the following changes occures in the waypoint array:
+All changes made to the waypoint in RViz are immediately forwarded to the [statemachine data handler](../statemachine#service-provider). The markers are only redrawn when one of the following changes occurs in the waypoint array:
 * Waypoint list size changed
 * Waypoint routine changed
 * Waypoint visited status changed
