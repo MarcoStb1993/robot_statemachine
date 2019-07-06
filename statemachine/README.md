@@ -171,12 +171,12 @@ To demonstrate the statemachine and get used to it's controls, the [statemachine
 The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the statemachine has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
 
 <p float="left" align="center">
-  <img src="../images/gazebo2.png" width="500" />
-  <img src="../images/gazebo.png" width="500" /> 
+  <img src="../images/gazebo2.png" width="300" />
+  <img src="../images/gazebo.png" width="300" /> 
 </p>
 <p float="left" align="center">
-  <img src="../images/stdr2.png" width="500" />
-  <img src="../images/stdr.png" width="500" /> 
+  <img src="../images/stdr2.png" width="300" />
+  <img src="../images/stdr.png" width="300" /> 
 </p>
 
 Both simulations use the plugins implemented in [statemachine additions](../statemachine_additions#statemachine-additions) which need the following packages to be installed:
