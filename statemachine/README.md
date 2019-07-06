@@ -446,15 +446,7 @@ For a transition to another state, in your implementation of a state the `transi
 
 For a reference implementation of the [Calculate Goal State](../statemachine_additions#calculate-goal-state), the [Navigation State](../statemachine_additions#navigation-state), the [Mapping State](../statemachine_additions#mapping-state) and a routine plugin called [Reversing Routine State](../statemachine_additions#reversing-routine-state), see the [statemachine additions package](../statemachine_additions#statemachine-additions).
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the [Additions Service Provider](../statemachine_additions#additions-service-provider) in the package [statemachine addtions](../statemachine_additions#statemachine-additions) for an example.
-=======
-If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the [Additions Service Provider](../statemachine_additions##additions-service-provider) in the package [statemachine addtions](../statemachine_additions#statemachine-additions) for an example.
->>>>>>> 4152e76... Fixed waypoint color on unreachable status and checked documentation
-=======
-If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the [Additions Service Provider](../statemachine_additions#additions-service-provider) in the package [statemachine addtions](../statemachine_additions#statemachine-additions) for an example.
->>>>>>> 559b204... Small fix to documentation
 
 *Note*: If the robot should be able to move in reverse mode, a service needs to be implemented called `setNavigationToReverse` which changes the navigation's mode interface in the [Navigation State](../statemachine_additions#navigation-state) plugin and switches between forward and reverse movement. A sample to include into the additional data handler can be seen below. If it is missing, activating reverse mode will only output a matching error.
 
