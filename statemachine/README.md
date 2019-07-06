@@ -168,13 +168,9 @@ The nodes can of course be started separately though it is easier to use the lau
 
 To demonstrate the statemachine and get used to it's controls, the [statemachine additions package](../statemachine_additions#statemachine-additions) offers two launch files that start a simulation including a complete robot and environment to start right away.
 
-<<<<<<< HEAD
-The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the statemachine has to offer, stick with the stdr simulator.
-=======
 The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the statemachine has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
 
 ![Simulations](../images/simulations.png)
->>>>>>> 9f47834... Fixed images (for the last time, hopefully)
 
 Both simulations use the plugins implemented in [statemachine additions](../statemachine_additions#statemachine-additions) which need the following packages to be installed:
 * [gmapping](http://wiki.ros.org/gmapping) for SLAM
