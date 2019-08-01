@@ -46,3 +46,24 @@ target_link_libraries(bootUpNode
 add_dependencies(statemachine_plugins ${catkin_EXPORTED_TARGETS})
 add_dependencies(bootUpNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(additionsServiceProviderNode ${catkin_EXPORTED_TARGETS})
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  
+install(TARGETS statemachine_plugins
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
+install(TARGETS additionsServiceProviderNode bootUpNode
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+  
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config)
+  
+install(FILES
+  statemachine_plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

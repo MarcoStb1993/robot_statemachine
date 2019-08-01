@@ -63,3 +63,15 @@ include_directories(${INC_DIR} ${catkin_INCLUDE_DIRS})
 add_library(statemachine_rqt_plugins ${SRCS_CONTROLS} ${MOCS_SRCS_CONTROLS} ${UI_HEADER_CONTROLS})
 target_link_libraries(statemachine_rqt_plugins ${catkin_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
 add_dependencies(statemachine_rqt_plugins ${catkin_EXPORTED_TARGETS})
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  
+install(TARGETS statemachine_rqt_plugins
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+          
+install(FILES
+  statemachine_rqt_plugins.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

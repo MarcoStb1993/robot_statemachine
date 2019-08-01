@@ -55,3 +55,9 @@ add_dependencies(robotControlMuxNode ${catkin_EXPORTED_TARGETS})
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+install(TARGETS statemachineNode serviceProviderNode robotControlMuxNode
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

@@ -107,9 +107,17 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   )
+  
+install(TARGETS waypointFollowingVisualizationNode
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # Mark config files for installation
 install(FILES
   statemachine_rviz_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+install(DIRECTORY media/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/media)
+
+
