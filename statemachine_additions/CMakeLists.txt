@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   statemachine
   statemachine_msgs
   visualization_msgs
+  move_base_msgs
 )
 
 catkin_package(
