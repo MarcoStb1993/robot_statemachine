@@ -23,6 +23,12 @@
 	<build_depend>statemachine_msgs</build_depend>
 	<build_export_depend>statemachine_msgs</build_export_depend>
 	<exec_depend>statemachine_msgs</exec_depend>
+	<build_depend>cmake_modules</build_depend>
+	<build_export_depend>cmake_modules</build_export_depend>
+	<exec_depend>cmake_modules</exec_depend>
+	<build_depend>Qt5Widgets</build_depend>
+	<build_export_depend>Qt5Widgets</build_export_depend>
+	<exec_depend>Qt5Widgets</exec_depend>
 
 	<export>
 		<rviz plugin="${prefix}/statemachine_rviz_plugins.xml" />
