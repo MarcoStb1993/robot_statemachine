@@ -5,11 +5,10 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  tf
   pluginlib
   actionlib
   actionlib_msgs
-  pcl_conversions
-  pcl_ros
   statemachine_msgs
 )
 
