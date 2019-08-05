@@ -1,4 +1,4 @@
-#  RMS Core
+#  RSM Core
 
 The Robot Statemachine's core components will be explained first and it's usage afterwards, including examples and tutorials for writing plugins, including them into the RSM and setting up a robot. Also, handling the GUI and starting a simulation with the RSM is explained.
 

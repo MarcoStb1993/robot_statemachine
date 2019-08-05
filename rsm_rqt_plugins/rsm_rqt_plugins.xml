@@ -1,10 +1,10 @@
-<library path="lib/libstatemachine_rqt_plugins">
-  <class name="StatemachineControlPanel" type="statemachine::StatemachineControlPanel" base_class_type="rqt_gui_cpp::Plugin">
+<library path="lib/librsm_rqt_plugins">
+  <class name="RSMControlPanel" type="rsm::RSMControlPanel" base_class_type="rqt_gui_cpp::Plugin">
     <description>
-      Robot statemachine control panel for exploration and waypoint following as well as high-level robot supervision.
+      Robot Statemachine control panel for exploration and waypoint following as well as high-level robot supervision.
     </description>
     <qtgui>
-      <label>Statemachine Control</label>
+      <label>RSM Control</label>
       <icon type="theme">display-capplet</icon>
       <statustip>Robot Statemachine control panel.</statustip>
     </qtgui>

@@ -5,7 +5,7 @@
 			Tool for planting waypoints on the ground plane in rviz.
 		</description>
 	</class>
-	<class type="rsm::StatemachineControlPanel"
+	<class type="rsm::RSMControlPanel"
 		base_class_type="rviz::Panel">
 		<description>
 			 RSM control panel for exploration and waypoint following as well as high-level robot supervision.

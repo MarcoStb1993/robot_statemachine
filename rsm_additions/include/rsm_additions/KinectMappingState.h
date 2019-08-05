@@ -2,11 +2,11 @@
 #define MAPPINGSTATE_H
 
 #include <pluginlib/class_list_macros.h>
-#include <rsm/BaseState.h>
-#include <rsm/IdleState.h>
-#include <rsm/EmergencyStopState.h>
-#include <rsm/TeleoperationState.h>
-#include <rsm/StateInterface.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/IdleState.h>
+#include <rsm_core/EmergencyStopState.h>
+#include <rsm_core/TeleoperationState.h>
+#include <rsm_core/StateInterface.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
 #include <std_srvs/Trigger.h>

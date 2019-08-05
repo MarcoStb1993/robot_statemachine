@@ -2,12 +2,12 @@
 #define REVERSINGROUTINESTATE_H
 
 #include <pluginlib/class_list_macros.h>
-#include <rsm/BaseState.h>
-#include <rsm/IdleState.h>
-#include <rsm/EmergencyStopState.h>
-#include <rsm/WaypointFollowingState.h>
-#include <rsm/TeleoperationState.h>
-#include <rsm/StateInterface.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/IdleState.h>
+#include <rsm_core/EmergencyStopState.h>
+#include <rsm_core/WaypointFollowingState.h>
+#include <rsm_core/TeleoperationState.h>
+#include <rsm_core/StateInterface.h>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Trigger.h>
 #include <std_srvs/Empty.h>

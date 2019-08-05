@@ -3,7 +3,7 @@
 namespace rsm {
 
 StateInterface::StateInterface() :
-		_plugin_loader("rsm", "rsm::BaseState") {
+		_plugin_loader("rsm_core", "rsm::BaseState") {
 	ros::NodeHandle private_nh("~");
 	private_nh.param<std::string>("calculate_goal_plugin",
 			_calculate_goal_plugin, "rsm::CalculateGoalState");

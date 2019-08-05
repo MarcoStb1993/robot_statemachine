@@ -1,4 +1,4 @@
-<!-- launch state machine rviz plugins-->
+<!-- launch RSM rviz plugins-->
 <launch>
     <arg name="update_frequency" default="20" />
 

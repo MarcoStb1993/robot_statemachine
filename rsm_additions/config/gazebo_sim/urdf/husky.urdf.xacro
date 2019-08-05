@@ -50,11 +50,11 @@
 		filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
 
 	<xacro:include
-		filename="$(find statemachine_additions)/config/gazebo_sim/urdf/kinect_camera.urdf.xacro" />
+		filename="$(find rsm_additions)/config/gazebo_sim/urdf/kinect_camera.urdf.xacro" />
 	<xacro:include
 		filename="$(find husky_description)/urdf/accessories/sick_lms1xx_mount.urdf.xacro" />
 	<xacro:include
-		filename="$(find statemachine_additions)/config/gazebo_sim/urdf/sensor_arch.urdf.xacro" />
+		filename="$(find rsm_additions)/config/gazebo_sim/urdf/sensor_arch.urdf.xacro" />
 
 	<xacro:property name="M_PI" value="3.14159" />
 

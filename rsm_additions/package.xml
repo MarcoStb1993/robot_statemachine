@@ -32,6 +32,6 @@
 	<exec_depend>move_base_msgs</exec_depend>
 
 	<export>
-		<rsm plugin="${prefix}/rsm_plugins.xml" />
+		<rsm_core plugin="${prefix}/rsm_plugins.xml" />
 	</export>
 </package>
