@@ -1,5 +1,5 @@
-#ifndef STATEMACHINE_CONTROLS_H
-#define STATEMACHINE_CONTROLS_H
+#ifndef RSM_CONTROLS_H
+#define RSM_CONTROLS_H
 
 #include <ros/ros.h>
 #include <rviz/panel.h>
@@ -8,34 +8,34 @@
 #include <QStringList>
 #include <QDebug>
 #include <QObject>
-#include "ui_statemachine_controls.h"
+#include "ui_rsm_controls.h"
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Trigger.h>
 #include <std_msgs/String.h>
-#include <statemachine_msgs/OperationMode.h>
-#include <statemachine_msgs/SetWaypointFollowingMode.h>
-#include <statemachine_msgs/AddWaypoint.h>
-#include <statemachine_msgs/GetWaypointRoutines.h>
-#include <statemachine_msgs/GetRobotPose.h>
-#include <statemachine_msgs/SetOperationMode.h>
+#include <rsm_msgs/OperationMode.h>
+#include <rsm_msgs/SetWaypointFollowingMode.h>
+#include <rsm_msgs/AddWaypoint.h>
+#include <rsm_msgs/GetWaypointRoutines.h>
+#include <rsm_msgs/GetRobotPose.h>
+#include <rsm_msgs/SetOperationMode.h>
 #include <std_srvs/SetBool.h>
 #include <std_msgs/Bool.h>
 #include <pluginlib/class_list_macros.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
- * @class   StatemachineControlPanel
- * @brief   Panel plugin for RViz which adds buttons to interface the statemachine
+ * @class   RSMControlPanel
+ * @brief   Panel plugin for RViz which adds buttons to interface the RSM
  */
-class StatemachineControlPanel: public rviz::Panel {
+class RSMControlPanel: public rviz::Panel {
 	Q_OBJECT
 public:
 	/**
 	 * @brief Constructor
 	 * @param Parent widget
 	 */
-	StatemachineControlPanel(QWidget *parent = 0);
+	RSMControlPanel(QWidget *parent = 0);
 
 	/**
 	 * @brief Saves configuration data from this panel to the Config object
@@ -61,7 +61,7 @@ protected slots:
 	void stop2dNavGoal();
 
 private:
-	Ui::statemachine_controls* _gui;
+	Ui::rsm_controls* _gui;
 
 	ros::NodeHandle _nh;
 
@@ -111,7 +111,7 @@ private:
 	void stateInfoCallback(const std_msgs::String::ConstPtr& state_info);
 	void reverseModeCallback(const std_msgs::Bool::ConstPtr& reverse_mode);
 	void operationModeCallback(
-			const statemachine_msgs::OperationMode::ConstPtr& operation_mode);
+			const rsm_msgs::OperationMode::ConstPtr& operation_mode);
 	void initCommunications();
 	void connectSlots();
 	void initRoutineComboBox();
@@ -121,6 +121,6 @@ private:
 	void updateOperationModeGUI();
 };
 
-}  // end namespace statemachine
+}  // end namespace rsm
 
-#endif  // STATEMACHINE_CONTROLS_H
+#endif  // RSM_CONTROLS_H

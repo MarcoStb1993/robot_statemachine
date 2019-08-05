@@ -1,6 +1,6 @@
-# Statemachine Additions
+# RSM Additions
 
-Additions to the statemachine including all mandatory plugin states and a plugin routine 
+Additions to the RSM including all mandatory plugin states and a plugin routine 
 state. Also an additional service provider is included.
 
 ## Documentation
@@ -18,7 +18,7 @@ subscribes to it's visualization topic that shows frontiers on a 2D map and extr
 point to the robot as navigation goal. Therefore, it retrieves the robot's pose and 
 calculates it's distance to each of the frontier's center points. Also, previously 
 failed goals are disregarded as potential navigation goals. If it fails to find a suitable goal 
-for exploration, it returns an error message and transitions back to the [Idle State](../statemachine#non-customizable-states)
+for exploration, it returns an error message and transitions back to the [Idle State](../rsm-core#non-customizable-states)
 
 To have [explore lite](http://wiki.ros.org/explore_lite) running without directly sending 
 commands to the [navigation stack](http://wiki.ros.org/navigation), a mock action server 
@@ -35,11 +35,11 @@ It forwards received goals to the navigation stack and also gets feedback from i
 If it fails, the goal is added to the failed goals list. If it succeeds, the failed 
 goal list will be reset.
 
-When standing still for too long, it transitions to the [Idle State](../statemachine#non-customizable-states).
+When standing still for too long, it transitions to the [Idle State](../rsm-core#non-customizable-states).
 Reaching the goal will initiate a transition to the [Mapping State](#mapping-state) 
 or the particular routine state if there is one available. If not, [Waypoint Following 
-State](../statemachine#non-customizable-states) is called. After reaching a navigation 
-goal provided by RViz and if waypoint following has ended, it transitions to [Idle State](../statemachine#non-customizable-states).
+State](../rsm-core#non-customizable-states) is called. After reaching a navigation 
+goal provided by RViz and if waypoint following has ended, it transitions to [Idle State](../rsm-core#non-customizable-states).
 
 Reverse driving is realised by running two navigation stacks, one for forward driving 
 and one for reverse driving. This is explained in more detail [later](#reverse-robot-movement-with-navigation-stack).
@@ -80,7 +80,7 @@ needs to be changed in the configuration to change to reverse mode, this service
 replies that it was successful.
 
 If the kinect mapping is interrupted, a service is provided that moves the camera back to it's centered
-position while the statemachine is continuing.
+position while the RSM is continuing.
 
 ## Examples
 
@@ -157,8 +157,8 @@ Update rate in Hz
 **~autonomy_cmd_vel_topic** (string, default: "autonomy/cmd_vel")  
 Topic name for the autonomy command velocity
 
-**~navigation_plugin** (string, default: "statemachine::NavigationPlugin")  
+**~navigation_plugin** (string, default: "rsm::NavigationPlugin")  
 Sets the plugin's name for the navigation state.
 
-**~mapping_plugin** (string, default: "statemachine::MappingDummyPlugin")  
+**~mapping_plugin** (string, default: "rsm::MappingDummyPlugin")  
 Sets the plugin's name for the mapping state.

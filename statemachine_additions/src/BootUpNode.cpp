@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 	ros::NodeHandle privateNh("~");
 	double wait_time;
 	privateNh.param<double>("wait_time", wait_time, 1);
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	ros::ServiceServer bootup_service = nh.advertiseService("bootUpFinished",
 			bootUpService);
 	ros::Timer timer = nh.createTimer(ros::Duration(wait_time), timerCallback,

@@ -1,6 +1,6 @@
-#include "statemachine/WaypointFollowingState.h"
+#include <rsm_core/WaypointFollowingState.h>
 
-namespace statemachine {
+namespace rsm {
 
 WaypointFollowingState::WaypointFollowingState() {
 }
@@ -10,18 +10,18 @@ WaypointFollowingState::~WaypointFollowingState() {
 
 void WaypointFollowingState::onSetup() {
 	//initialize services, publisher and subscriber
-	ros::NodeHandle nh("statemachine");
-	_get_waypoints_service = nh.serviceClient<statemachine_msgs::GetWaypoints>(
+	ros::NodeHandle nh("rsm");
+	_get_waypoints_service = nh.serviceClient<rsm_msgs::GetWaypoints>(
 			"getWaypoints");
 	_set_waypoint_following_mode_service = nh.serviceClient<
-			statemachine_msgs::SetWaypointFollowingMode>(
+			rsm_msgs::SetWaypointFollowingMode>(
 			"setWaypointFollowingMode");
 	_reset_waypoints_service = nh.serviceClient<std_srvs::Trigger>(
 			"resetWaypoints");
 	_waypoint_visited_service = nh.serviceClient<
-			statemachine_msgs::WaypointVisited>("waypointVisited");
+			rsm_msgs::WaypointVisited>("waypointVisited");
 	_set_navigation_goal_service = nh.serviceClient<
-			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
+			rsm_msgs::SetNavigationGoal>("setNavigationGoal");
 	//initialize variables
 	_name = "Waypoint Following";
 	_next_waypoint_position = -1;
@@ -72,7 +72,7 @@ void WaypointFollowingState::onActive() {
 		}
 		case 2:		//PATROL
 		{
-			statemachine_msgs::SetWaypointFollowingMode srv2;
+			rsm_msgs::SetWaypointFollowingMode srv2;
 			srv2.request.mode = _waypoint_array.mode;
 			srv2.request.reverse = !_waypoint_array.reverse;
 			if (!_set_waypoint_following_mode_service.call(srv2)) {
@@ -93,7 +93,7 @@ void WaypointFollowingState::onActive() {
 void WaypointFollowingState::onExit() {
 	//Set Navigation goal
 	if (_next_waypoint_position >= 0) {
-		statemachine_msgs::SetNavigationGoal srv;
+		rsm_msgs::SetNavigationGoal srv;
 		srv.request.goal =
 				_waypoint_array.waypoints[_next_waypoint_position].pose;
 		srv.request.navigationMode = WAYPOINT_FOLLOWING;
@@ -160,7 +160,7 @@ void WaypointFollowingState::abortWaypointFollowing() {
 }
 
 void WaypointFollowingState::getWaypoints() {
-	statemachine_msgs::GetWaypoints srv;
+	rsm_msgs::GetWaypoints srv;
 	if (_get_waypoints_service.call(srv)) {
 		_waypoint_array = srv.response.waypointArray;
 		if (!_waypoint_array.waypoints_size) {
@@ -176,7 +176,7 @@ void WaypointFollowingState::getWaypoints() {
 
 void WaypointFollowingState::setCurrentWaypointVisited() {
 	//Set first/last waypoint to visited, so the routine won't be called twice
-	statemachine_msgs::WaypointVisited srv;
+	rsm_msgs::WaypointVisited srv;
 	if (_waypoint_array.reverse) {
 		srv.request.position = 0;
 	} else {

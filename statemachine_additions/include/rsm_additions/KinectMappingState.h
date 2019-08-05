@@ -2,32 +2,45 @@
 #define MAPPINGSTATE_H
 
 #include <pluginlib/class_list_macros.h>
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/TeleoperationState.h>
-#include <statemachine/StateInterface.h>
+#include <rsm/BaseState.h>
+#include <rsm/IdleState.h>
+#include <rsm/EmergencyStopState.h>
+#include <rsm/TeleoperationState.h>
+#include <rsm/StateInterface.h>
+#include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64.h>
+#include <std_srvs/Trigger.h>
 
-namespace statemachine {
+#define MOVE_LEFT 0
+#define MOVE_RIGHT 1
+#define MOVE_TO_CENTER 2
+
+#define KINECT_LEFT_LIMIT 1.30
+#define KINECT_RIGHT_LIMIT -1.30
+#define KINECT_CENTER_POSITION 0.0
+
+#define POS_TOLERANCE 0.05
+
+namespace rsm {
 
 /**
- * @class   MappingDummyState
+ * @class   KinectMappingState
  * @brief   Dummy state for mapping at a reached goal during exploration. Only initiates transition to
  * 			CalculateGoalState.
  */
-class MappingDummyState: public BaseState {
+class KinectMappingState: public BaseState {
 
 public:
 
 	/**
 	 * Constructor
 	 */
-	MappingDummyState();
+	KinectMappingState();
 
 	/**
 	 * Destructor
 	 */
-	~MappingDummyState();
+	~KinectMappingState();
 
 	/**
 	 * Called once when registered at StateInterface
@@ -75,6 +88,31 @@ public:
 	 */
 	void onInterrupt(int interrupt);
 
+private:
+
+	ros::NodeHandle _nh;
+	ros::Subscriber _joint_states_subscriber;
+	ros::Publisher _kinect_joint_controller;
+	ros::ServiceClient _reset_kinect_position_client;
+
+	/**
+	 * Current state of swiveling the Kinect camera from left to right and back (0: to left, 1: left to right: 2: back to center)
+	 */
+	int _swivel_state;
+	/**
+	 * If the current state reached it's goal already
+	 */
+	bool _position_reached;
+	/**
+	 * Move command sent to kinect controller
+	 */
+	bool _message_send;
+
+	/**
+	 * Callback for joint states to check if camera reached the desired position
+	 * @param joint_state joint state message
+	 */
+	void jointStateCallback(sensor_msgs::JointState::ConstPtr joint_state);
 };
 
 }

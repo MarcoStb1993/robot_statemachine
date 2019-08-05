@@ -2,18 +2,18 @@
 #define CALCULATEGOALSTATE_H
 
 #include <pluginlib/class_list_macros.h>
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/TeleoperationState.h>
-#include <statemachine/StateInterface.h>
+#include <rsm/BaseState.h>
+#include <rsm/IdleState.h>
+#include <rsm/EmergencyStopState.h>
+#include <rsm/TeleoperationState.h>
+#include <rsm/StateInterface.h>
 #include <geometry_msgs/PoseArray.h>
-#include <statemachine_msgs/SetNavigationGoal.h>
-#include <statemachine_msgs/GetFailedGoals.h>
-#include <statemachine_msgs/GetRobotPose.h>
+#include <rsm_msgs/SetNavigationGoal.h>
+#include <rsm_msgs/GetFailedGoals.h>
+#include <rsm_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class   CalculateGoalState

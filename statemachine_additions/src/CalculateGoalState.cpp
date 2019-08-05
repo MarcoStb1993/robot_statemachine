@@ -1,6 +1,6 @@
-#include <statemachine_additions/CalculateGoalState.h>
+#include <rsm_additions/CalculateGoalState.h>
 
-namespace statemachine {
+namespace rsm {
 
 CalculateGoalState::CalculateGoalState() {
 
@@ -11,14 +11,14 @@ CalculateGoalState::~CalculateGoalState() {
 
 void CalculateGoalState::onSetup() {
 	//initialize services, publisher and subscriber
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_frontiers_sub = nh.subscribe<geometry_msgs::PoseArray>("explorationGoals", 10,
 			&CalculateGoalState::frontiersCallback, this);
 	_get_failed_goals_service = nh.serviceClient<
-			statemachine_msgs::GetFailedGoals>("getFailedGoals");
+			rsm_msgs::GetFailedGoals>("getFailedGoals");
 	_set_navigation_goal_service = nh.serviceClient<
-			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
-	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
+			rsm_msgs::SetNavigationGoal>("setNavigationGoal");
+	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
 	_idle_timer = nh.createTimer(ros::Duration(5.0),
 			&CalculateGoalState::timerCallback, this, true);
@@ -29,7 +29,7 @@ void CalculateGoalState::onSetup() {
 
 void CalculateGoalState::onEntry() {
 	//Request list of failed goals from Service Provider
-	statemachine_msgs::GetFailedGoals srv;
+	rsm_msgs::GetFailedGoals srv;
 	if (_get_failed_goals_service.call(srv)) {
 		_failed_goals = srv.response.failedGoals.poses;
 	} else {
@@ -40,7 +40,7 @@ void CalculateGoalState::onEntry() {
 void CalculateGoalState::onActive() {
 	if (_frontiers_received) {
 		//Calculate frontier center closest to the robot
-		statemachine_msgs::GetRobotPose srv;
+		rsm_msgs::GetRobotPose srv;
 		if (_get_robot_pose_service.call(srv)) {
 			geometry_msgs::Pose current_pose = srv.response.pose;
 			double min_distance = std::numeric_limits<double>::infinity();
@@ -79,7 +79,7 @@ void CalculateGoalState::onActive() {
 }
 
 void CalculateGoalState::onExit() {
-	statemachine_msgs::SetNavigationGoal srv;
+	rsm_msgs::SetNavigationGoal srv;
 	srv.request.goal = _goal;
 	srv.request.navigationMode = EXPLORATION;
 	if (_set_navigation_goal_service.call(srv)) {
@@ -165,5 +165,5 @@ void CalculateGoalState::abortCalculateGoal() {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::CalculateGoalState,
-		statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::CalculateGoalState,
+		rsm::BaseState)

@@ -16,12 +16,12 @@
 
 typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseActionServer;
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class AdditionsServiceProvider
- * @brief Class that establishes communication between the different states and the statemachine's
- * 		  periphery including the GUI for the states and classes defined in statemachine additions package. It offers
+ * @brief Class that establishes communication between the different states and the RSM's
+ * 		  periphery including the GUI for the states and classes defined in rsm_additions package. It offers
  * 		  services and publishes topics based on the variables that need to be saved during state transitions.
  */
 class AdditionsServiceProvider {

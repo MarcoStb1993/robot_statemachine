@@ -1,6 +1,6 @@
-#include <statemachine_additions/KinectMappingState.h>
+#include <rsm_additions/KinectMappingState.h>
 
-namespace statemachine {
+namespace rsm {
 
 KinectMappingState::KinectMappingState() {
 }
@@ -13,7 +13,7 @@ void KinectMappingState::onSetup() {
 			&KinectMappingState::jointStateCallback, this);
 	_kinect_joint_controller = _nh.advertise<std_msgs::Float64>(
 			"kinetic_controller/command", 1, true);
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_reset_kinect_position_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetKinectPosition");
 	_name = "Mapping";
@@ -163,5 +163,5 @@ void KinectMappingState::jointStateCallback(
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::KinectMappingState,
-		statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::KinectMappingState,
+		rsm::BaseState)

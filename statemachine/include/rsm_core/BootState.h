@@ -1,13 +1,13 @@
 #ifndef BOOTSTATE_H
 #define BOOTSTATE_H
 
-#include <statemachine/BaseState.h>
-#include <statemachine/StateInterface.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
 #include <std_srvs/SetBool.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/EmergencyStopState.h>
+#include <rsm_core/IdleState.h>
+#include <rsm_core/StateInterface.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class   BootState

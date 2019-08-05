@@ -1,29 +1,33 @@
-#ifndef EMERGENCYSTOPSTATE_H_
-#define EMERGENCYSTOPSTATE_H_
+#ifndef MAPPINGSTATE_H
+#define MAPPINGSTATE_H
 
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/StateInterface.h>
+#include <pluginlib/class_list_macros.h>
+#include <rsm/BaseState.h>
+#include <rsm/IdleState.h>
+#include <rsm/EmergencyStopState.h>
+#include <rsm/TeleoperationState.h>
+#include <rsm/StateInterface.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
- * @class   EmergencyStopState
- * @brief   State being active when the software emergency stop was pushed in the GUI
+ * @class   MappingDummyState
+ * @brief   Dummy state for mapping at a reached goal during exploration. Only initiates transition to
+ * 			CalculateGoalState.
  */
-class EmergencyStopState: public BaseState {
+class MappingDummyState: public BaseState {
 
 public:
 
 	/**
 	 * Constructor
 	 */
-	EmergencyStopState();
+	MappingDummyState();
 
 	/**
 	 * Destructor
 	 */
-	~EmergencyStopState();
+	~MappingDummyState();
 
 	/**
 	 * Called once when registered at StateInterface
@@ -70,8 +74,9 @@ public:
 	 * @param interrupt Kind of interrupt (0=EmergencyStop, 1=TeleoperationInterupt)
 	 */
 	void onInterrupt(int interrupt);
+
 };
 
-} /* namespace statemachine */
+}
 
-#endif /* EMERGENCYSTOPSTATE_H_ */
+#endif

@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
-	<name>statemachine_rviz_plugins</name>
-	<version>0.0.0</version>
-	<description>The statemachine_rviz_plugins package includes a robot statemachine GUI plugin for RViz and the waypoint visualization</description>
-	<maintainer email="marco.steinbrink@outlook.de">marco</maintainer>
+	<name>rsm_rviz_plugins</name>
+	<version>1.1.0</version>
+	<description>The rsm_rviz_plugins package includes the Robot Statemachine GUI plugin for RViz and the waypoint visualization</description>
+	<maintainer email="marco.stb1993@gmail.com">marco</maintainer>
 	<license>BSD</license>
-	<url type="repository">https://github.com/MarcoStb1993/robot_statemachine</url>
-	<url type="bugtracker">https://github.com/MarcoStb1993/robot_statemachine/issues</url>
-	<maintainer email="marco.steinbrink@outlook.de">Marco Steinbrink</maintainer>
-	<author email="marco.steinbrink@outlook.de">Marco Steinbrink</author> 
+	<url type="repository">https://github.com/MarcoStb1993/robot_rsm</url>
+	<url type="bugtracker">https://github.com/MarcoStb1993/robot_rsm/issues</url>
+	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
+	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author> 
 
 	<buildtool_depend>catkin</buildtool_depend>
 
@@ -20,15 +20,14 @@
 	<exec_depend>interactive_markers</exec_depend>
 	<build_depend>visualization_msgs</build_depend>
 	<exec_depend>visualization_msgs</exec_depend>
-	<build_depend>statemachine_msgs</build_depend>
-	<build_export_depend>statemachine_msgs</build_export_depend>
-	<exec_depend>statemachine_msgs</exec_depend>
+	<build_depend>rsm_msgs</build_depend>
+	<build_export_depend>rsm_msgs</build_export_depend>
+	<exec_depend>rsm_msgs</exec_depend>
 	<build_depend>cmake_modules</build_depend>
 	<build_export_depend>cmake_modules</build_export_depend>
 	<exec_depend>cmake_modules</exec_depend>
 
 	<export>
-		<rviz plugin="${prefix}/statemachine_rviz_plugins.xml" />
+		<rviz plugin="${prefix}/rsm_rviz_plugins.xml" />
 	</export>
-
 </package>

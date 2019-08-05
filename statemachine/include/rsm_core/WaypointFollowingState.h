@@ -1,19 +1,19 @@
 #ifndef WAYPOINTFOLLOWINGSTATE_H
 #define WAYPOINTFOLLOWINGSTATE_H
 
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/TeleoperationState.h>
-#include <statemachine/StateInterface.h>
-#include <statemachine_msgs/WaypointArray.h>
-#include <statemachine_msgs/GetWaypoints.h>
-#include <statemachine_msgs/SetWaypointFollowingMode.h>
-#include <statemachine_msgs/WaypointVisited.h>
+#include <rsm_msgs/WaypointArray.h>
+#include <rsm_msgs/GetWaypoints.h>
+#include <rsm_msgs/SetWaypointFollowingMode.h>
+#include <rsm_msgs/WaypointVisited.h>
 #include <std_srvs/Trigger.h>
-#include <statemachine_msgs/SetNavigationGoal.h>
+#include <rsm_msgs/SetNavigationGoal.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/EmergencyStopState.h>
+#include <rsm_core/IdleState.h>
+#include <rsm_core/StateInterface.h>
+#include <rsm_core/TeleoperationState.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class   WaypointFollowingState
@@ -89,7 +89,7 @@ private:
 	/**
 	 * List of all waypoints
 	 */
-	statemachine_msgs::WaypointArray _waypoint_array;
+	rsm_msgs::WaypointArray _waypoint_array;
 	/**
 	 * Position of the next waypoint to navigate to in the list
 	 */

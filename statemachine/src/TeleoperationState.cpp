@@ -1,6 +1,6 @@
-#include "statemachine/TeleoperationState.h"
+#include <rsm_core/TeleoperationState.h>
 
-namespace statemachine {
+namespace rsm {
 
 TeleoperationState::TeleoperationState() {
 }

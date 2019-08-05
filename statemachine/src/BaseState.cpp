@@ -1,6 +1,6 @@
-#include <statemachine/BaseState.h>
+#include <rsm_core/BaseState.h>
 
-namespace statemachine {
+namespace rsm {
 
 BaseState::BaseState() {
 	_stateinterface = NULL;

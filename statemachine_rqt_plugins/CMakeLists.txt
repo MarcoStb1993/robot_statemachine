@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(statemachine_rqt_plugins)
+project(rsm_rqt_plugins)
 
 add_compile_options(-std=c++11)
 
@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rqt_gui
   rqt_gui_cpp
-  statemachine_msgs
+  rsm_msgs
 )
 
 set(CMAKE_AUTORCC ON)
@@ -33,13 +33,13 @@ catkin_package(
 
 ## set variables for Statemachine Control node
 set(SRCS_CONTROLS
-  src/StatemachineControls.cpp
+  src/RSMControls.cpp
 )
 set(HDRS_CONTROLS
-  src/StatemachineControls.h
+  src/RSMControls.h
 )
 set(UIS_CONTROLS
-  src/statemachine_controls.ui
+  src/rsm_controls.ui
 )
 
 set(INC_DIR
@@ -60,15 +60,15 @@ qt5_wrap_ui(UI_HEADER_CONTROLS ${UIS_CONTROLS})
 include_directories(${INC_DIR} ${catkin_INCLUDE_DIRS})
 
 ## Statemachine Control:
-add_library(statemachine_rqt_plugins ${SRCS_CONTROLS} ${MOCS_SRCS_CONTROLS} ${UI_HEADER_CONTROLS})
-target_link_libraries(statemachine_rqt_plugins ${catkin_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-add_dependencies(statemachine_rqt_plugins ${catkin_EXPORTED_TARGETS})
+add_library(rsm_rqt_plugins ${SRCS_CONTROLS} ${MOCS_SRCS_CONTROLS} ${UI_HEADER_CONTROLS})
+target_link_libraries(rsm_rqt_plugins ${catkin_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+add_dependencies(rsm_rqt_plugins ${catkin_EXPORTED_TARGETS})
   
-install(TARGETS statemachine_rqt_plugins
+install(TARGETS rsm_rqt_plugins
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
           
 install(FILES
-  statemachine_rqt_plugins.xml
+  rsm_rqt_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

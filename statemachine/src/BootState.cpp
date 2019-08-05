@@ -1,6 +1,6 @@
-#include "statemachine/BootState.h"
+#include <rsm_core/BootState.h>
 
-namespace statemachine {
+namespace rsm {
 
 BootState::BootState() {
 }
@@ -10,7 +10,7 @@ BootState::~BootState() {
 
 void BootState::onSetup() {
 	//initialize services, publisher and subscriber
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_bootupClient = nh.serviceClient<std_srvs::SetBool>("bootUpFinished");
 	//initialize variables
 	_name = "Boot";

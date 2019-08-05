@@ -1,30 +1,31 @@
-#ifndef TELEOPERATIONSTATE_H
-#define TELEOPERATIONSTATE_H
+#ifndef IDLESTATE_H
+#define IDLESTATE_H
 
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/StateInterface.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/EmergencyStopState.h>
+#include <rsm_core/StateInterface.h>
+#include <rsm_core/TeleoperationState.h>
+#include <rsm_core/WaypointFollowingState.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
- * @class   TeleoperationState
- * @brief   State being active while the robot is teleoperated
+ * @class   IdleState
+ * @brief   State being active when waiting for new inout
  */
-class TeleoperationState: public BaseState {
+class IdleState: public BaseState {
 
 public:
 
 	/**
 	 * Constructor
 	 */
-	TeleoperationState();
+	IdleState();
 
 	/**
 	 * Destructor
 	 */
-	~TeleoperationState();
+	~IdleState();
 
 	/**
 	 * Called once when registered at StateInterface
@@ -71,7 +72,6 @@ public:
 	 * @param interrupt Kind of interrupt (0=EmergencyStop, 1=TeleoperationInterupt)
 	 */
 	void onInterrupt(int interrupt);
-
 };
 
 }

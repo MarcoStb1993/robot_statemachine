@@ -1,0 +1,14 @@
+<library path="lib/librsm_rviz_plugins">
+	<class type="rsm::PlantWaypointTool"
+		base_class_type="rviz::Tool">
+		<description>
+			Tool for planting waypoints on the ground plane in rviz.
+		</description>
+	</class>
+	<class type="rsm::StatemachineControlPanel"
+		base_class_type="rviz::Panel">
+		<description>
+			 RSM control panel for exploration and waypoint following as well as high-level robot supervision.
+		</description>
+	</class>
+</library>

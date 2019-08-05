@@ -1,6 +1,6 @@
-#include <statemachine_additions/ReversingRoutineState.h>
+#include <rsm_additions/ReversingRoutineState.h>
 
-namespace statemachine {
+namespace rsm {
 
 ReversingRoutineState::ReversingRoutineState() {
 }
@@ -11,7 +11,7 @@ ReversingRoutineState::~ReversingRoutineState() {
 void ReversingRoutineState::onSetup() {
 
 	//initialize services, publisher and subscriber
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_set_reverse_moving_service = nh.serviceClient<std_srvs::SetBool>(
 			"setReverseMode");
 	_get_reverse_moving_service = nh.serviceClient<std_srvs::Trigger>(
@@ -98,5 +98,5 @@ void ReversingRoutineState::onInterrupt(int interrupt) {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::ReversingRoutineState,
-		statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::ReversingRoutineState,
+		rsm::BaseState)

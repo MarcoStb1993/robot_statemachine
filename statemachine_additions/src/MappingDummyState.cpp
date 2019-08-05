@@ -1,6 +1,6 @@
-#include <statemachine_additions/MappingDummyState.h>
+#include <rsm_additions/MappingDummyState.h>
 
-namespace statemachine {
+namespace rsm {
 
 MappingDummyState::MappingDummyState() {
 }
@@ -71,4 +71,4 @@ void MappingDummyState::onInterrupt(int interrupt) {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::MappingDummyState, statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::MappingDummyState, rsm::BaseState)

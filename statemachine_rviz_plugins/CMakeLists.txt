@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(statemachine_rviz_plugins)
+project(rsm_rviz_plugins)
 
 # C++ 11
 add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   rviz
-  statemachine_msgs
+  rsm_msgs
   visualization_msgs
   interactive_markers
 )
@@ -54,13 +54,13 @@ catkin_package(
 ## set variables for Statemachine Control node
 set(SRCS_CONTROLS
   src/PlantWaypointTool.cpp
-  src/StatemachineControls.cpp
+  src/RSMControls.cpp
 )
 set(HDRS_CONTROLS
-  src/StatemachineControls.h
+  src/RSMControls.h
 )
 set(UIS_CONTROLS
-  src/statemachine_controls.ui
+  src/rsm_controls.ui
 )
 
 set(INC_DIR
@@ -113,7 +113,7 @@ install(TARGETS waypointFollowingVisualizationNode
 
 # Mark config files for installation
 install(FILES
-  statemachine_rviz_plugins.xml
+  rsm_rviz_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

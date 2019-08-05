@@ -1,4 +1,4 @@
-<!-- Simulation of Husky UGV with GMapping and Frontier Exploration -->
+<!-- Simulation of Husky UGV in Gazebo running Robot Statemachine with GMapping and Explore Lite -->
 
 <launch>
 	<arg name="world"
@@ -8,19 +8,19 @@
 	<arg name="teleoperation_cmd_vel_topic"
 		default="/teleoperation/cmd_vel" />
 	<arg name="cmd_vel_topic" default="/cmd_vel" />
-	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
+	<arg name="goal_plugin" default="rsm::CalculateGoalState" />
 	<arg name="navigation_plugin"
-		default="statemachine::NavigationState" />
-	<arg name="mapping_plugin" default="statemachine::KinectMappingState" />
+		default="rsm::NavigationState" />
+	<arg name="mapping_plugin" default="rsm::KinectMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 
 	<include
-		file="$(find statemachine_additions)/launch/gazebo.launch">
+		file="$(find rsm_additions)/launch/gazebo.launch">
 		<arg name="world_file" value="$(arg world)" />
 	</include>
 
-	<include file="$(find statemachine)/launch/statemachine.launch">
+	<include file="$(find rsm_core)/launch/rsm.launch">
 		<arg name="update_frequency" value="20" />
 		<arg name="robot_frame" value="$(arg robot_frame)" />
 		<arg name="autonomy_cmd_vel_topic"
@@ -35,12 +35,12 @@
 		<arg name="exploration_goal_tolerance" value="0.05" />
 	</include>
 
-	<node pkg="statemachine_additions" type="bootUpNode"
+	<node pkg="rsm_additions" type="bootUpNode"
 		name="bootUpNode" output="screen">
 		<param name="wait_time" value="2" />
 	</node>
 
-	<node pkg="statemachine_additions"
+	<node pkg="rsm_additions"
 		type="additionsServiceProviderNode"
 		name="additionsServiceProviderNode">
 		<param name="update_frequency" value="20" />
@@ -58,19 +58,19 @@
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base" output="screen">
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_local.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_local.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_global.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_global.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/planner.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/planner.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg 
@@ -84,19 +84,19 @@
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base_reverse" output="screen">
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_local.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_local.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/costmap_global.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/costmap_global.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/gazebo_sim/planner.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/planner.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg robot_frame)_reverse" />
@@ -134,12 +134,12 @@
 
 	<!-- RViz für Exploration -->
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
-		args="-d $(find statemachine_additions)/config/gazebo_sim/gazebo_simulation.rviz">
+		args="-d $(find rsm_additions)/config/gazebo_sim/gazebo_simulation.rviz">
 		<remap from="/move_base_simple/goal"
-			to="/statemachine/simpleGoal" />
+			to="/rsm/simpleGoal" />
 	</node>
 	<include if="$(arg rviz)"
-		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">
+		file="$(find rsm_rviz_plugins)/launch/rsm_rviz_plugins.launch">
 		<arg name="update_frequency" value="20" />
 	</include>
 </launch>

@@ -3,10 +3,10 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <statemachine_msgs/OperationMode.h>
-#include <statemachine_msgs/SetOperationMode.h>
+#include <rsm_msgs/OperationMode.h>
+#include <rsm_msgs/SetOperationMode.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class RobotControlMux
@@ -87,11 +87,11 @@ private:
 	 * @param event
 	 */
 	void teleoperationIdleTimerCallback(const ros::TimerEvent& event);
-	bool setOperationMode(statemachine_msgs::SetOperationMode::Request &req,
-			statemachine_msgs::SetOperationMode::Response &res);
+	bool setOperationMode(rsm_msgs::SetOperationMode::Request &req,
+			rsm_msgs::SetOperationMode::Response &res);
 
 };
 
-} /* namespace statemachine */
+} /* namespace rsm */
 
 #endif /* ROBOTCONTROLMUX_H_ */

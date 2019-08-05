@@ -1,26 +1,26 @@
 #include <ros/ros.h>
 
-#include <statemachine_msgs/Waypoint.h>
-#include <statemachine_msgs/WaypointArray.h>
-#include <statemachine_msgs/AddWaypoint.h>
-#include <statemachine_msgs/GetWaypoints.h>
-#include <statemachine_msgs/MoveWaypoint.h>
-#include <statemachine_msgs/RemoveWaypoint.h>
-#include <statemachine_msgs/WaypointVisited.h>
-#include <statemachine_msgs/WaypointUnreachable.h>
-#include <statemachine_msgs/SetWaypointFollowingMode.h>
-#include <statemachine_msgs/SetWaypointRoutine.h>
-#include <statemachine_msgs/GetWaypointRoutines.h>
+#include <rsm_msgs/Waypoint.h>
+#include <rsm_msgs/WaypointArray.h>
+#include <rsm_msgs/AddWaypoint.h>
+#include <rsm_msgs/GetWaypoints.h>
+#include <rsm_msgs/MoveWaypoint.h>
+#include <rsm_msgs/RemoveWaypoint.h>
+#include <rsm_msgs/WaypointVisited.h>
+#include <rsm_msgs/WaypointUnreachable.h>
+#include <rsm_msgs/SetWaypointFollowingMode.h>
+#include <rsm_msgs/SetWaypointRoutine.h>
+#include <rsm_msgs/GetWaypointRoutines.h>
 #include <std_srvs/Trigger.h>
 
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
-#include <statemachine_msgs/SetNavigationGoal.h>
-#include <statemachine_msgs/GetNavigationGoal.h>
-#include <statemachine_msgs/AddFailedGoal.h>
-#include <statemachine_msgs/GetFailedGoals.h>
+#include <rsm_msgs/SetNavigationGoal.h>
+#include <rsm_msgs/GetNavigationGoal.h>
+#include <rsm_msgs/AddFailedGoal.h>
+#include <rsm_msgs/GetFailedGoals.h>
 
-#include <statemachine_msgs/GetRobotPose.h>
+#include <rsm_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
 
 #include <std_srvs/SetBool.h>
@@ -28,11 +28,11 @@
 
 #include <geometry_msgs/PoseStamped.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class ServiceProvider
- * @brief Establishes communication between the different states and the statemachine's
+ * @brief Establishes communication between the different states and the RSM's
  * 		  periphery including the GUI. It offers services and publishes topics based on the variables that need
  * 		  to be saved during state transitions.
  */
@@ -97,7 +97,7 @@ private:
 	/**
 	 * List of all waypoints
 	 */
-	statemachine_msgs::WaypointArray _waypoint_array;
+	rsm_msgs::WaypointArray _waypoint_array;
 	/**
 	 * Mode of navigation (Exploration=0, Waypoint following=1 and Simple Goal=2)
 	 */
@@ -146,44 +146,44 @@ private:
 	 */
 	bool _reverse_mode_active;
 
-	bool addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
-			statemachine_msgs::AddWaypoint::Response &res);
-	bool getWaypoints(statemachine_msgs::GetWaypoints::Request &req,
-			statemachine_msgs::GetWaypoints::Response &res);
-	bool moveWaypoint(statemachine_msgs::MoveWaypoint::Request &req,
-			statemachine_msgs::MoveWaypoint::Response &res);
-	bool removeWaypoint(statemachine_msgs::RemoveWaypoint::Request &req,
-			statemachine_msgs::RemoveWaypoint::Response &res);
-	bool waypointVisited(statemachine_msgs::WaypointVisited::Request &req,
-			statemachine_msgs::WaypointVisited::Response &res);
+	bool addWaypoint(rsm_msgs::AddWaypoint::Request &req,
+			rsm_msgs::AddWaypoint::Response &res);
+	bool getWaypoints(rsm_msgs::GetWaypoints::Request &req,
+			rsm_msgs::GetWaypoints::Response &res);
+	bool moveWaypoint(rsm_msgs::MoveWaypoint::Request &req,
+			rsm_msgs::MoveWaypoint::Response &res);
+	bool removeWaypoint(rsm_msgs::RemoveWaypoint::Request &req,
+			rsm_msgs::RemoveWaypoint::Response &res);
+	bool waypointVisited(rsm_msgs::WaypointVisited::Request &req,
+			rsm_msgs::WaypointVisited::Response &res);
 	bool waypointUnreachable(
-			statemachine_msgs::WaypointUnreachable::Request &req,
-			statemachine_msgs::WaypointUnreachable::Response &res);
+			rsm_msgs::WaypointUnreachable::Request &req,
+			rsm_msgs::WaypointUnreachable::Response &res);
 	bool resetWaypoints(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 	bool setWaypointFollowingMode(
-			statemachine_msgs::SetWaypointFollowingMode::Request &req,
-			statemachine_msgs::SetWaypointFollowingMode::Response &res);
-	bool setWaypointRoutine(statemachine_msgs::SetWaypointRoutine::Request &req,
-			statemachine_msgs::SetWaypointRoutine::Response &res);
+			rsm_msgs::SetWaypointFollowingMode::Request &req,
+			rsm_msgs::SetWaypointFollowingMode::Response &res);
+	bool setWaypointRoutine(rsm_msgs::SetWaypointRoutine::Request &req,
+			rsm_msgs::SetWaypointRoutine::Response &res);
 	bool getWaypointRoutines(
-			statemachine_msgs::GetWaypointRoutines::Request &req,
-			statemachine_msgs::GetWaypointRoutines::Response &res);
+			rsm_msgs::GetWaypointRoutines::Request &req,
+			rsm_msgs::GetWaypointRoutines::Response &res);
 	void publishWaypoints();
 
-	bool setNavigationGoal(statemachine_msgs::SetNavigationGoal::Request &req,
-			statemachine_msgs::SetNavigationGoal::Response &res);
-	bool getNavigationGoal(statemachine_msgs::GetNavigationGoal::Request &req,
-			statemachine_msgs::GetNavigationGoal::Response &res);
-	bool addFailedGoal(statemachine_msgs::AddFailedGoal::Request &req,
-			statemachine_msgs::AddFailedGoal::Response &res);
-	bool getFailedGoals(statemachine_msgs::GetFailedGoals::Request &req,
-			statemachine_msgs::GetFailedGoals::Response &res);
+	bool setNavigationGoal(rsm_msgs::SetNavigationGoal::Request &req,
+			rsm_msgs::SetNavigationGoal::Response &res);
+	bool getNavigationGoal(rsm_msgs::GetNavigationGoal::Request &req,
+			rsm_msgs::GetNavigationGoal::Response &res);
+	bool addFailedGoal(rsm_msgs::AddFailedGoal::Request &req,
+			rsm_msgs::AddFailedGoal::Response &res);
+	bool getFailedGoals(rsm_msgs::GetFailedGoals::Request &req,
+			rsm_msgs::GetFailedGoals::Response &res);
 	bool resetFailedGoals(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 
-	bool getRobotPose(statemachine_msgs::GetRobotPose::Request &req,
-			statemachine_msgs::GetRobotPose::Response &res);
+	bool getRobotPose(rsm_msgs::GetRobotPose::Request &req,
+			rsm_msgs::GetRobotPose::Response &res);
 
 	bool getExplorationMode(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);

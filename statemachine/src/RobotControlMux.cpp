@@ -1,6 +1,6 @@
-#include <statemachine/RobotControlMux.h>
+#include <rsm_core/RobotControlMux.h>
 
-namespace statemachine {
+namespace rsm {
 
 RobotControlMux::RobotControlMux() {
 	ros::NodeHandle privateNh("~");
@@ -12,7 +12,7 @@ RobotControlMux::RobotControlMux() {
 	privateNh.param("teleoperation_idle_timer",
 			_teleoperation_idle_timer_duration, 0.5);
 
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_set_operation_mode_service = nh.advertiseService("setOperationMode",
 			&RobotControlMux::setOperationMode, this);
 
@@ -22,7 +22,7 @@ RobotControlMux::RobotControlMux() {
 			&RobotControlMux::teleoperationCmdVelCallback, this);
 
 	_cmd_vel_pub = _nh.advertise<geometry_msgs::Twist>(_cmd_vel_topic, 1);
-	_operation_mode_pub = nh.advertise<statemachine_msgs::OperationMode>(
+	_operation_mode_pub = nh.advertise<rsm_msgs::OperationMode>(
 			"operationMode", 1);
 
 	_teleoperation_idle_timer = _nh.createTimer(
@@ -31,7 +31,7 @@ RobotControlMux::RobotControlMux() {
 			false);
 
 	_emergency_stop_active = 0;
-	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 }
 
 RobotControlMux::~RobotControlMux() {
@@ -46,10 +46,10 @@ void RobotControlMux::publishTopics() {
 void RobotControlMux::publishCmdVel() {
 	geometry_msgs::Twist cmd_vel;
 	if (!_emergency_stop_active) {
-		if (_operation_mode == statemachine_msgs::OperationMode::AUTONOMOUS) {
+		if (_operation_mode == rsm_msgs::OperationMode::AUTONOMOUS) {
 			cmd_vel = _autonomy_cmd_vel;
 		} else if (_operation_mode
-				== statemachine_msgs::OperationMode::TELEOPERATION) {
+				== rsm_msgs::OperationMode::TELEOPERATION) {
 			cmd_vel = _teleoperation_cmd_vel;
 		}
 	}
@@ -57,15 +57,15 @@ void RobotControlMux::publishCmdVel() {
 }
 
 void RobotControlMux::publishOperationMode() {
-	statemachine_msgs::OperationMode msg;
+	rsm_msgs::OperationMode msg;
 	msg.emergencyStop = _emergency_stop_active;
 	msg.mode = _operation_mode;
 	_operation_mode_pub.publish(msg);
 }
 
 bool RobotControlMux::setOperationMode(
-		statemachine_msgs::SetOperationMode::Request &req,
-		statemachine_msgs::SetOperationMode::Response &res) {
+		rsm_msgs::SetOperationMode::Request &req,
+		rsm_msgs::SetOperationMode::Response &res) {
 	_emergency_stop_active = req.operationMode.emergencyStop;
 	_operation_mode = req.operationMode.mode;
 	res.success = 1;
@@ -88,10 +88,10 @@ void RobotControlMux::teleoperationCmdVelCallback(
 				|| _teleoperation_cmd_vel.angular.x != 0.0
 				|| _teleoperation_cmd_vel.angular.y != 0.0
 				|| _teleoperation_cmd_vel.angular.z != 0.0) {
-			_operation_mode = statemachine_msgs::OperationMode::TELEOPERATION;
+			_operation_mode = rsm_msgs::OperationMode::TELEOPERATION;
 			_teleoperation_idle_timer.stop();
 		}
-		if (_operation_mode == statemachine_msgs::OperationMode::TELEOPERATION) {
+		if (_operation_mode == rsm_msgs::OperationMode::TELEOPERATION) {
 			_teleoperation_idle_timer.start();
 		}
 	}
@@ -99,10 +99,10 @@ void RobotControlMux::teleoperationCmdVelCallback(
 
 void RobotControlMux::teleoperationIdleTimerCallback(
 		const ros::TimerEvent& event) {
-	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 	geometry_msgs::Twist empty_cmd_vel;
 	_teleoperation_cmd_vel = empty_cmd_vel;
 	_teleoperation_idle_timer.stop();
 }
 
-} /* namespace statemachine */
+} /* namespace rsm */

@@ -1,5 +1,5 @@
-#ifndef STATEMACHINECONTROLS_H_
-#define STATEMACHINECONTROLS_H_
+#ifndef RSMCONTROLS_H_
+#define RSMCONTROLS_H_
 
 #include <ros/ros.h>
 #include <rqt_gui_cpp/plugin.h>
@@ -8,32 +8,32 @@
 #include <QStringList>
 #include <QDebug>
 #include <QObject>
-#include "ui_statemachine_controls.h"
+#include "ui_rsm_controls.h"
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Trigger.h>
 #include <std_msgs/String.h>
-#include <statemachine_msgs/OperationMode.h>
-#include <statemachine_msgs/SetWaypointFollowingMode.h>
-#include <statemachine_msgs/AddWaypoint.h>
-#include <statemachine_msgs/GetWaypointRoutines.h>
-#include <statemachine_msgs/GetRobotPose.h>
-#include <statemachine_msgs/SetOperationMode.h>
+#include <rsm_msgs/OperationMode.h>
+#include <rsm_msgs/SetWaypointFollowingMode.h>
+#include <rsm_msgs/AddWaypoint.h>
+#include <rsm_msgs/GetWaypointRoutines.h>
+#include <rsm_msgs/GetRobotPose.h>
+#include <rsm_msgs/SetOperationMode.h>
 #include <std_srvs/SetBool.h>
 #include <std_msgs/Bool.h>
 #include <pluginlib/class_list_macros.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
- * @class   StatemachineControlPanel
- * @brief   Plugin for rqt which adds buttons to interface the statemachine
+ * @class   RSMControlPanel
+ * @brief   Plugin for rqt which adds buttons to interface the rsm
  */
-class StatemachineControlPanel: public rqt_gui_cpp::Plugin {
+class RSMControlPanel: public rqt_gui_cpp::Plugin {
 	Q_OBJECT
 
 public:
-	StatemachineControlPanel();
-	virtual ~StatemachineControlPanel();
+	RSMControlPanel();
+	virtual ~RSMControlPanel();
 	virtual void initPlugin(qt_gui_cpp::PluginContext& context);
 	virtual void shutdownPlugin();
 	virtual void saveSettings(qt_gui_cpp::Settings& plugin_settings,
@@ -55,7 +55,7 @@ protected slots:
 
 private:
 	QWidget* _widget_main;
-	Ui::statemachine_controls* _gui;
+	Ui::rsm_controls* _gui;
 
 	ros::NodeHandle _nh;
 
@@ -109,7 +109,7 @@ private:
 	void stateInfoCallback(const std_msgs::String::ConstPtr& state_info);
 	void reverseModeCallback(const std_msgs::Bool::ConstPtr& reverse_mode);
 	void operationModeCallback(
-			const statemachine_msgs::OperationMode::ConstPtr& operation_mode);
+			const rsm_msgs::OperationMode::ConstPtr& operation_mode);
 	void initCommunications();
 	void connectSlots();
 	void initRoutineComboBox();
@@ -120,6 +120,6 @@ private:
 
 };
 
-} /* namespace statemachine */
+} /* namespace rsm */
 
-#endif /* STATEMACHINECONTROLS_H_ */
+#endif /* RSMCONTROLS_H_ */

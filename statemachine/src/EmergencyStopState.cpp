@@ -1,6 +1,6 @@
-#include <statemachine/EmergencyStopState.h>
+#include <rsm_core/EmergencyStopState.h>
 
-namespace statemachine {
+namespace rsm {
 EmergencyStopState::EmergencyStopState() {
 }
 
@@ -52,4 +52,4 @@ void EmergencyStopState::onInterrupt(int interrupt) {
 	}
 }
 
-} /* namespace statemachine */
+} /* namespace rsm */

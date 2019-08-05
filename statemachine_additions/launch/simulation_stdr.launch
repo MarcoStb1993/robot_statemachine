@@ -7,10 +7,10 @@
 	<arg name="teleoperation_cmd_vel_topic"
 		default="/robot0/teleoperation/cmd_vel" />
 	<arg name="cmd_vel_topic" default="/robot0/cmd_vel" />
-	<arg name="goal_plugin" default="statemachine::CalculateGoalState" />
+	<arg name="goal_plugin" default="rsm::CalculateGoalState" />
 	<arg name="navigation_plugin"
-		default="statemachine::NavigationState" />
-	<arg name="mapping_plugin" default="statemachine::MappingDummyState" />
+		default="rsm::NavigationState" />
+	<arg name="mapping_plugin" default="rsm::MappingDummyState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 
@@ -27,12 +27,12 @@
 
 	<node pkg="stdr_robot" type="robot_handler"
 		name="$(anon robot_spawn)"
-		args="add $(find statemachine_additions)/config/stdr_sim/robot1.yaml 1 2 0" />
+		args="add $(find rsm_additions)/config/stdr_sim/robot1.yaml 1 2 0" />
 
 	<!--include file="$(find stdr_launchers)/launch/server_with_map_and_gui_plus_robot.launch" 
 		/ -->
 
-	<include file="$(find statemachine)/launch/statemachine.launch">
+	<include file="$(find rsm_core)/launch/rsm.launch">
 		<arg name="update_frequency" value="20" />
 		<arg name="robot_frame" value="$(arg robot_frame)" />
 		<arg name="autonomy_cmd_vel_topic"
@@ -47,12 +47,12 @@
 		<arg name="exploration_goal_tolerance" value="0.05" />
 	</include>
 
-	<node pkg="statemachine_additions" type="bootUpNode"
+	<node pkg="rsm_additions" type="bootUpNode"
 		name="bootUpNode" output="screen">
 		<param name="wait_time" value="2" />
 	</node>
 
-	<node pkg="statemachine_additions"
+	<node pkg="rsm_additions"
 		type="additionsServiceProviderNode"
 		name="additionsServiceProviderNode">
 		<param name="update_frequency" value="20" />
@@ -71,19 +71,19 @@
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base" output="screen">
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_common.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_common.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_local.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_local.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_global.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_global.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/planner.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/planner.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg robot_frame)" />
@@ -96,19 +96,19 @@
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base_reverse" output="screen">
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_common.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_common.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_local.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_local.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/costmap_global.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/costmap_global.yaml"
 			command="load" />
 		<rosparam
-			file="$(find statemachine_additions)/config/stdr_sim/planner.yaml"
+			file="$(find rsm_additions)/config/stdr_sim/planner.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg robot_frame)_reverse" />
@@ -146,12 +146,12 @@
 	</node>
 
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
-		args="-d $(find statemachine_additions)/config/stdr_sim/statemachine_simulation.rviz">
+		args="-d $(find rsm_additions)/config/stdr_sim/rsm_simulation.rviz">
 		<remap from="/move_base_simple/goal"
-			to="/statemachine/simpleGoal" />
+			to="/rsm/simpleGoal" />
 	</node>
 	<include if="$(arg rviz)"
-		file="$(find statemachine_rviz_plugins)/launch/statemachine_rviz_plugins.launch">
+		file="$(find rsm_rviz_plugins)/launch/rsm_rviz_plugins.launch">
 		<arg name="update_frequency" value="20" />
 	</include>
 </launch>

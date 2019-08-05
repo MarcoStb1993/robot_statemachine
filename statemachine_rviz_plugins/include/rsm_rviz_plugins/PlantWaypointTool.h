@@ -16,10 +16,10 @@
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 
-#include <statemachine_msgs/AddWaypoint.h>
-#include <statemachine_msgs/GetWaypoints.h>
-#include <statemachine_msgs/RemoveWaypoint.h>
-#include <statemachine_msgs/WaypointVisited.h>
+#include <rsm_msgs/AddWaypoint.h>
+#include <rsm_msgs/GetWaypoints.h>
+#include <rsm_msgs/RemoveWaypoint.h>
+#include <rsm_msgs/WaypointVisited.h>
 
 namespace Ogre {
 class SceneNode;
@@ -32,7 +32,7 @@ class VisualizationManager;
 class ViewportMouseEvent;
 }
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class PlantWaypointTool

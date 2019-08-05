@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 
-namespace statemachine {
+namespace rsm {
 
 #define INTERRUPT_END 0
 #define EMERGENCY_STOP_INTERRUPT 1

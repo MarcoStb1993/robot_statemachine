@@ -1,6 +1,6 @@
-#include <statemachine/ServiceProvider.h>
+#include <rsm_core/ServiceProvider.h>
 
-namespace statemachine {
+namespace rsm {
 
 ServiceProvider::ServiceProvider() {
 	ros::NodeHandle private_nh("~");
@@ -10,7 +10,7 @@ ServiceProvider::ServiceProvider() {
 	private_nh.param<double>("exploration_goal_tolerance",
 			_exploration_goal_tolerance, 0.05);
 
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_add_waypoint_service = nh.advertiseService("addWaypoint",
 			&ServiceProvider::addWaypoint, this);
 	_get_waypoints_service = nh.advertiseService("getWaypoints",
@@ -32,7 +32,7 @@ ServiceProvider::ServiceProvider() {
 			&ServiceProvider::setWaypointRoutine, this);
 	_get_waypoint_routines_service = nh.advertiseService("getWaypointRoutines",
 			&ServiceProvider::getWaypointRoutines, this);
-	_waypoints_publisher = nh.advertise<statemachine_msgs::WaypointArray>(
+	_waypoints_publisher = nh.advertise<rsm_msgs::WaypointArray>(
 			"waypoints", 10);
 
 	_set_navigation_goal_service = nh.advertiseService("setNavigationGoal",
@@ -94,8 +94,8 @@ void ServiceProvider::publishTopics() {
 	}
 }
 
-bool ServiceProvider::addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
-		statemachine_msgs::AddWaypoint::Response &res) {
+bool ServiceProvider::addWaypoint(rsm_msgs::AddWaypoint::Request &req,
+		rsm_msgs::AddWaypoint::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints.insert(
 				_waypoint_array.waypoints.begin() + req.position, req.waypoint);
@@ -110,15 +110,15 @@ bool ServiceProvider::addWaypoint(statemachine_msgs::AddWaypoint::Request &req,
 }
 
 bool ServiceProvider::getWaypoints(
-		statemachine_msgs::GetWaypoints::Request &req,
-		statemachine_msgs::GetWaypoints::Response &res) {
+		rsm_msgs::GetWaypoints::Request &req,
+		rsm_msgs::GetWaypoints::Response &res) {
 	res.waypointArray = _waypoint_array;
 	return true;
 }
 
 bool ServiceProvider::moveWaypoint(
-		statemachine_msgs::MoveWaypoint::Request &req,
-		statemachine_msgs::MoveWaypoint::Response &res) {
+		rsm_msgs::MoveWaypoint::Request &req,
+		rsm_msgs::MoveWaypoint::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints[req.position].pose = req.pose;
 		res.success = 1;
@@ -131,8 +131,8 @@ bool ServiceProvider::moveWaypoint(
 }
 
 bool ServiceProvider::removeWaypoint(
-		statemachine_msgs::RemoveWaypoint::Request &req,
-		statemachine_msgs::RemoveWaypoint::Response &res) {
+		rsm_msgs::RemoveWaypoint::Request &req,
+		rsm_msgs::RemoveWaypoint::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints.erase(
 				_waypoint_array.waypoints.begin() + req.position);
@@ -147,8 +147,8 @@ bool ServiceProvider::removeWaypoint(
 }
 
 bool ServiceProvider::waypointVisited(
-		statemachine_msgs::WaypointVisited::Request &req,
-		statemachine_msgs::WaypointVisited::Response &res) {
+		rsm_msgs::WaypointVisited::Request &req,
+		rsm_msgs::WaypointVisited::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints[req.position].visited = true;
 		res.success = 1;
@@ -161,8 +161,8 @@ bool ServiceProvider::waypointVisited(
 }
 
 bool ServiceProvider::waypointUnreachable(
-		statemachine_msgs::WaypointUnreachable::Request &req,
-		statemachine_msgs::WaypointUnreachable::Response &res) {
+		rsm_msgs::WaypointUnreachable::Request &req,
+		rsm_msgs::WaypointUnreachable::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints[req.position].unreachable = true;
 		res.success = 1;
@@ -186,8 +186,8 @@ bool ServiceProvider::resetWaypoints(std_srvs::Trigger::Request &req,
 }
 
 bool ServiceProvider::setWaypointFollowingMode(
-		statemachine_msgs::SetWaypointFollowingMode::Request &req,
-		statemachine_msgs::SetWaypointFollowingMode::Response &res) {
+		rsm_msgs::SetWaypointFollowingMode::Request &req,
+		rsm_msgs::SetWaypointFollowingMode::Response &res) {
 	_waypoint_array.mode = req.mode;
 	_waypoint_array.reverse = req.reverse;
 	res.success = 1;
@@ -196,8 +196,8 @@ bool ServiceProvider::setWaypointFollowingMode(
 }
 
 bool ServiceProvider::setWaypointRoutine(
-		statemachine_msgs::SetWaypointRoutine::Request &req,
-		statemachine_msgs::SetWaypointRoutine::Response &res) {
+		rsm_msgs::SetWaypointRoutine::Request &req,
+		rsm_msgs::SetWaypointRoutine::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints[req.position].routine = req.routine;
 		res.success = 1;
@@ -210,8 +210,8 @@ bool ServiceProvider::setWaypointRoutine(
 }
 
 bool ServiceProvider::getWaypointRoutines(
-		statemachine_msgs::GetWaypointRoutines::Request &req,
-		statemachine_msgs::GetWaypointRoutines::Response &res) {
+		rsm_msgs::GetWaypointRoutines::Request &req,
+		rsm_msgs::GetWaypointRoutines::Response &res) {
 	res.waypointRoutines = _waypoint_routines;
 	return true;
 }
@@ -221,8 +221,8 @@ void ServiceProvider::publishWaypoints() {
 }
 
 bool ServiceProvider::setNavigationGoal(
-		statemachine_msgs::SetNavigationGoal::Request &req,
-		statemachine_msgs::SetNavigationGoal::Response &res) {
+		rsm_msgs::SetNavigationGoal::Request &req,
+		rsm_msgs::SetNavigationGoal::Response &res) {
 	_navigation_goal = req.goal;
 	_navigation_mode = req.navigationMode;
 	_waypoint_position = req.waypointPosition;
@@ -233,8 +233,8 @@ bool ServiceProvider::setNavigationGoal(
 }
 
 bool ServiceProvider::getNavigationGoal(
-		statemachine_msgs::GetNavigationGoal::Request &req,
-		statemachine_msgs::GetNavigationGoal::Response &res) {
+		rsm_msgs::GetNavigationGoal::Request &req,
+		rsm_msgs::GetNavigationGoal::Response &res) {
 	res.goal = _navigation_goal;
 	res.failedGoals = _failed_goals;
 	res.navigationMode = _navigation_mode;
@@ -244,8 +244,8 @@ bool ServiceProvider::getNavigationGoal(
 }
 
 bool ServiceProvider::addFailedGoal(
-		statemachine_msgs::AddFailedGoal::Request &req,
-		statemachine_msgs::AddFailedGoal::Response &res) {
+		rsm_msgs::AddFailedGoal::Request &req,
+		rsm_msgs::AddFailedGoal::Response &res) {
 	_failed_goals.poses.push_back(req.failedGoal);
 	res.success = 1;
 	res.message = "Failed goal added";
@@ -253,8 +253,8 @@ bool ServiceProvider::addFailedGoal(
 }
 
 bool ServiceProvider::getFailedGoals(
-		statemachine_msgs::GetFailedGoals::Request &req,
-		statemachine_msgs::GetFailedGoals::Response &res) {
+		rsm_msgs::GetFailedGoals::Request &req,
+		rsm_msgs::GetFailedGoals::Response &res) {
 	res.failedGoals = _failed_goals;
 	return true;
 }
@@ -267,8 +267,8 @@ bool ServiceProvider::resetFailedGoals(std_srvs::Trigger::Request &req,
 	return true;
 }
 bool ServiceProvider::getRobotPose(
-		statemachine_msgs::GetRobotPose::Request &req,
-		statemachine_msgs::GetRobotPose::Response &res) {
+		rsm_msgs::GetRobotPose::Request &req,
+		rsm_msgs::GetRobotPose::Response &res) {
 	_transform_listener.lookupTransform("/map", _robot_frame, ros::Time(0),
 			_transform);
 	geometry_msgs::Pose pose;
@@ -294,7 +294,7 @@ bool ServiceProvider::setExplorationMode(std_srvs::SetBool::Request &req,
 		std_srvs::SetBool::Response &res) {
 	_exploration_mode = req.data;
 	if (_exploration_mode) {
-		ros::NodeHandle nh("statemachine");
+		ros::NodeHandle nh("rsm");
 		_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete",
 				1);
 		_exploration_goals_subscriber = nh.subscribe("explorationGoals", 1,

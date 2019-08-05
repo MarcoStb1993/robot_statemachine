@@ -2,19 +2,19 @@
 #define NAVIGATIONSTATE_H
 
 #include <pluginlib/class_list_macros.h>
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/StateInterface.h>
+#include <rsm/BaseState.h>
+#include <rsm/IdleState.h>
+#include <rsm/EmergencyStopState.h>
+#include <rsm/StateInterface.h>
 #include <geometry_msgs/PoseArray.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
-#include <statemachine_msgs/GetNavigationGoal.h>
-#include <statemachine_msgs/AddFailedGoal.h>
-#include <statemachine_msgs/WaypointVisited.h>
-#include <statemachine_msgs/WaypointUnreachable.h>
-#include <statemachine_msgs/GetRobotPose.h>
-#include <statemachine_msgs/OperationMode.h>
+#include <rsm_msgs/GetNavigationGoal.h>
+#include <rsm_msgs/AddFailedGoal.h>
+#include <rsm_msgs/WaypointVisited.h>
+#include <rsm_msgs/WaypointUnreachable.h>
+#include <rsm_msgs/GetRobotPose.h>
+#include <rsm_msgs/OperationMode.h>
 #include <std_srvs/Trigger.h>
 #include <std_srvs/SetBool.h>
 #include <tf/transform_datatypes.h>
@@ -22,7 +22,7 @@
 
 #define POSE_TOLERANCE 0.05
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class   NavigationState
@@ -175,7 +175,7 @@ private:
 	 * @param operation_mode Mode of operation (0=stopped, 1=autonomous, 2=teleoperation)
 	 */
 	void operationModeCallback(
-			const statemachine_msgs::OperationMode::ConstPtr& operation_mode);
+			const rsm_msgs::OperationMode::ConstPtr& operation_mode);
 	/**
 	 * Initiate transition to Idle State
 	 */

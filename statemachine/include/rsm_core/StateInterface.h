@@ -1,10 +1,8 @@
 #ifndef StateInterface_H_
 #define StateInterface_H_
 
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine_msgs/OperationMode.h>
-#include <statemachine_msgs/SetNavigationGoal.h>
+#include <rsm_msgs/OperationMode.h>
+#include <rsm_msgs/SetNavigationGoal.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -13,8 +11,10 @@
 #include <std_srvs/Trigger.h>
 #include <pluginlib/class_loader.h>
 #include <map>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/IdleState.h>
 
-namespace statemachine {
+namespace rsm {
 
 #define CALCULATEGOAL_STATE 1
 #define NAVIGATION_STATE 2
@@ -23,7 +23,7 @@ namespace statemachine {
 
 /**
  * @class StateInterface
- * @brief Handles the statemachine transitions between the different state classes
+ * @brief Handles the RSM transitions between the different state classes
  * 		  and holds a reference to the current and the upcoming state class
  */
 class StateInterface {
@@ -46,7 +46,7 @@ public:
 	 * @param Routine plugin name
 	 * @return Pointer to plugin state
 	 */
-	boost::shared_ptr<statemachine::BaseState> getPluginState(int plugin_type,
+	boost::shared_ptr<rsm::BaseState> getPluginState(int plugin_type,
 			std::string routine = "");
 
 	/**
@@ -59,7 +59,7 @@ public:
 	 * @param nextState
 	 */
 	void transitionToVolatileState(
-			boost::shared_ptr<statemachine::BaseState> next_state);
+			boost::shared_ptr<rsm::BaseState> next_state);
 
 private:
 	ros::NodeHandle _nh;
@@ -75,11 +75,11 @@ private:
 	/**
 	 * @brief Currently active state
 	 */
-	boost::shared_ptr<statemachine::BaseState> _current_state;
+	boost::shared_ptr<rsm::BaseState> _current_state;
 	/**
 	 * @brief Upcoming state
 	 */
-	boost::shared_ptr<statemachine::BaseState> _next_state;
+	boost::shared_ptr<rsm::BaseState> _next_state;
 	/**
 	 * Interrupt happened before
 	 */
@@ -100,14 +100,14 @@ private:
 	/**
 	 * @brief Plugin loader for state plugins
 	 */
-	pluginlib::ClassLoader<statemachine::BaseState> _plugin_loader;
+	pluginlib::ClassLoader<rsm::BaseState> _plugin_loader;
 
 	/**
 	 * Callback to receive the current operation mode and issue interrupts to the current state accordingly
 	 * @param operation_mode Mode of operation
 	 */
 	void operationModeCallback(
-			const statemachine_msgs::OperationMode::ConstPtr& operation_mode);
+			const rsm_msgs::OperationMode::ConstPtr& operation_mode);
 	/**
 	 * Callback receiving goals issued in RViz GUI with the 2D Nav Goal Tool and calling the respective
 	 * interrupt in the current state

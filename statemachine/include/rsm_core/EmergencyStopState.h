@@ -1,31 +1,29 @@
-#ifndef IDLESTATE_H
-#define IDLESTATE_H
+#ifndef EMERGENCYSTOPSTATE_H_
+#define EMERGENCYSTOPSTATE_H_
 
-#include <statemachine/BaseState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/TeleoperationState.h>
-#include <statemachine/WaypointFollowingState.h>
-#include <statemachine/StateInterface.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/IdleState.h>
+#include <rsm_core/StateInterface.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
- * @class   IdleState
- * @brief   State being active when waiting for new inout
+ * @class   EmergencyStopState
+ * @brief   State being active when the software emergency stop was pushed in the GUI
  */
-class IdleState: public BaseState {
+class EmergencyStopState: public BaseState {
 
 public:
 
 	/**
 	 * Constructor
 	 */
-	IdleState();
+	EmergencyStopState();
 
 	/**
 	 * Destructor
 	 */
-	~IdleState();
+	~EmergencyStopState();
 
 	/**
 	 * Called once when registered at StateInterface
@@ -74,6 +72,6 @@ public:
 	void onInterrupt(int interrupt);
 };
 
-}
+} /* namespace rsm */
 
-#endif
+#endif /* EMERGENCYSTOPSTATE_H_ */

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(statemachine)
+project(rsm_core)
 
 add_compile_options(-std=c++11)
 
@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   actionlib
   actionlib_msgs
-  statemachine_msgs
+  rsm_msgs
 )
 
 catkin_package(
@@ -20,8 +20,8 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(statemachineNode
-	src/StatemachineNode.cpp
+add_executable(rsmNode
+	src/RSMNode.cpp
     src/StateInterface.cpp
     src/BaseState.cpp
     src/BootState.cpp
@@ -38,7 +38,7 @@ add_executable(robotControlMuxNode
 	src/RobotControlMuxNode.cpp
 	src/RobotControlMux.cpp)
 
-target_link_libraries(statemachineNode
+target_link_libraries(rsmNode
   ${catkin_LIBRARIES}
   )
 target_link_libraries(serviceProviderNode
@@ -48,14 +48,14 @@ target_link_libraries(robotControlMuxNode
   ${catkin_LIBRARIES}
   )
   
-add_dependencies(statemachineNode ${catkin_EXPORTED_TARGETS})
+add_dependencies(rsmNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(serviceProviderNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(robotControlMuxNode ${catkin_EXPORTED_TARGETS})
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-install(TARGETS statemachineNode serviceProviderNode robotControlMuxNode
+install(TARGETS rsmNode serviceProviderNode robotControlMuxNode
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
   
 install(DIRECTORY launch/

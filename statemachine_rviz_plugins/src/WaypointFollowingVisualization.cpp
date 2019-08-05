@@ -1,22 +1,22 @@
-#include <statemachine_rviz_plugins/WaypointFollowingVisualization.h>
+#include <rsm_rviz_plugins/WaypointFollowingVisualization.h>
 
-namespace statemachine {
+namespace rsm {
 
 WaypointFollowingVisualization::WaypointFollowingVisualization() :
 		_waypoint_server("waypoint_marker") {
-	ros::NodeHandle nh("statemachine");
-	_waypoint_subscriber = nh.subscribe<statemachine_msgs::WaypointArray>(
+	ros::NodeHandle nh("rsm");
+	_waypoint_subscriber = nh.subscribe<rsm_msgs::WaypointArray>(
 			"waypoints", 10, &WaypointFollowingVisualization::waypointCallback,
 			this);
-	_move_waypoint_client = nh.serviceClient<statemachine_msgs::MoveWaypoint>(
+	_move_waypoint_client = nh.serviceClient<rsm_msgs::MoveWaypoint>(
 			"moveWaypoint");
 	_remove_waypoint_client =
-			nh.serviceClient<statemachine_msgs::RemoveWaypoint>(
+			nh.serviceClient<rsm_msgs::RemoveWaypoint>(
 					"removeWaypoint");
 	_set_waypoint_routine_client = nh.serviceClient<
-			statemachine_msgs::SetWaypointRoutine>("setWaypointRoutine");
+			rsm_msgs::SetWaypointRoutine>("setWaypointRoutine");
 	_get_waypoint_routines_client = nh.serviceClient<
-			statemachine_msgs::GetWaypointRoutines>("getWaypointRoutines");
+			rsm_msgs::GetWaypointRoutines>("getWaypointRoutines");
 	_menu_handler.insert("Delete",
 			boost::bind(&WaypointFollowingVisualization::removeWaypoint, this,
 					_1));
@@ -33,7 +33,7 @@ WaypointFollowingVisualization::~WaypointFollowingVisualization() {
 
 void WaypointFollowingVisualization::processFeedback(
 		const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback) {
-	statemachine_msgs::MoveWaypoint srv;
+	rsm_msgs::MoveWaypoint srv;
 	srv.request.position = std::stoi(feedback->marker_name);
 	srv.request.pose = feedback->pose;
 	if (_move_waypoint_client.call(srv)) {
@@ -45,7 +45,7 @@ void WaypointFollowingVisualization::processFeedback(
 
 void WaypointFollowingVisualization::removeWaypoint(
 		const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback) {
-	statemachine_msgs::RemoveWaypoint srv;
+	rsm_msgs::RemoveWaypoint srv;
 	srv.request.position = std::stoi(feedback->marker_name);
 	if (_remove_waypoint_client.call(srv)) {
 		//ROS_INFO("Successful call to service Remove Waypoint");
@@ -56,7 +56,7 @@ void WaypointFollowingVisualization::removeWaypoint(
 
 void WaypointFollowingVisualization::setWaypointRoutine(
 		const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback) {
-	statemachine_msgs::SetWaypointRoutine srv;
+	rsm_msgs::SetWaypointRoutine srv;
 	srv.request.position = std::stoi(feedback->marker_name);
 	if (feedback->menu_entry_id == 3) {	//Set to none
 		srv.request.routine = "";
@@ -70,7 +70,7 @@ void WaypointFollowingVisualization::setWaypointRoutine(
 }
 
 void WaypointFollowingVisualization::waypointCallback(
-		const statemachine_msgs::WaypointArray::ConstPtr& waypoint_array) {
+		const rsm_msgs::WaypointArray::ConstPtr& waypoint_array) {
 	if (_refresh_waypoint_markers || waypointArrayChanged(waypoint_array)) {
 		_waypoints = *waypoint_array;
 		_waypoint_server.clear();
@@ -101,7 +101,7 @@ void WaypointFollowingVisualization::addWaypointMarkerToServer(
 	visualization_msgs::Marker box_marker;
 	box_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
 	box_marker.mesh_resource =
-			"package://statemachine_rviz_plugins/media/flag.dae";
+			"package://rsm_rviz_plugins/media/flag.dae";
 	box_marker.mesh_use_embedded_materials = false;
 	box_marker.scale.x = 1.0;
 	box_marker.scale.y = 1.0;
@@ -162,7 +162,7 @@ void WaypointFollowingVisualization::timerCallback(
 	_menu_handler.insert(sub_menu_handle, "None",
 			boost::bind(&WaypointFollowingVisualization::setWaypointRoutine,
 					this, _1));
-	statemachine_msgs::GetWaypointRoutines srv;
+	rsm_msgs::GetWaypointRoutines srv;
 	if (_get_waypoint_routines_client.call(srv)) {
 		_waypoint_routines = srv.response.waypointRoutines;
 		for (auto it : _waypoint_routines) {
@@ -177,7 +177,7 @@ void WaypointFollowingVisualization::timerCallback(
 }
 
 bool WaypointFollowingVisualization::waypointArrayChanged(
-		const statemachine_msgs::WaypointArray::ConstPtr& waypoint_array) {
+		const rsm_msgs::WaypointArray::ConstPtr& waypoint_array) {
 	if (waypoint_array->waypoints_size == _waypoints.waypoints_size) {
 		for (int i = 0; i < _waypoints.waypoints_size; i++) {
 			if (_waypoints.waypoints[i].routine.compare(

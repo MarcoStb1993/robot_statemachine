@@ -1,6 +1,6 @@
-#include "statemachine/IdleState.h"
+#include <rsm_core/IdleState.h>
 
-namespace statemachine {
+namespace rsm {
 
 IdleState::IdleState() {
 }

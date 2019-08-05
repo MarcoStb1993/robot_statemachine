@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <package format="2">
 	<name>robot_statemachine</name>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 	<description>The robot_statemachine package bundles all functionalities and the GUI</description>
-	<maintainer email="marco.steinbrink@outlook.de">marco</maintainer>
+	<maintainer email="marco.stb1993@gmail.de">marco</maintainer>
 	<license>BSD</license>
 	<url type="repository">https://github.com/MarcoStb1993/robot_statemachine</url>
 	<url type="bugtracker">https://github.com/MarcoStb1993/robot_statemachine/issues</url>
-	<maintainer email="marco.steinbrink@outlook.de">Marco Steinbrink</maintainer>
-	<author email="marco.steinbrink@outlook.de">Marco Steinbrink</author> 
+	<maintainer email="marco.stb1993@gmail.de">Marco Steinbrink</maintainer>
+	<author email="marco.stb1993@gmail.de">Marco Steinbrink</author> 
 	
 	<buildtool_depend>catkin</buildtool_depend>
-	<exec_depend>statemachine</exec_depend>
-	<exec_depend>statemachine_msgs</exec_depend>
-	<exec_depend>statemachine_additions</exec_depend>
-	<exec_depend>statemachine_rviz_plugins</exec_depend>
-	<exec_depend>statemachine_rqt_plugins</exec_depend>
+	<exec_depend>rsm_core</exec_depend>
+	<exec_depend>rsm_msgs</exec_depend>
+	<exec_depend>rsm_additions</exec_depend>
+	<exec_depend>rsm_rviz_plugins</exec_depend>
+	<exec_depend>rsm_rqt_plugins</exec_depend>
 
 	<export>
 		<metapackage />

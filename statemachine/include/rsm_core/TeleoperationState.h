@@ -1,36 +1,30 @@
-#ifndef REVERSINGROUTINESTATE_H
-#define REVERSINGROUTINESTATE_H
+#ifndef TELEOPERATIONSTATE_H
+#define TELEOPERATIONSTATE_H
 
-#include <pluginlib/class_list_macros.h>
-#include <statemachine/BaseState.h>
-#include <statemachine/IdleState.h>
-#include <statemachine/EmergencyStopState.h>
-#include <statemachine/WaypointFollowingState.h>
-#include <statemachine/TeleoperationState.h>
-#include <statemachine/StateInterface.h>
-#include <std_srvs/SetBool.h>
-#include <std_srvs/Trigger.h>
-#include <std_srvs/Empty.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/EmergencyStopState.h>
+#include <rsm_core/IdleState.h>
+#include <rsm_core/StateInterface.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
- * @class   ReversingRoutineState
- * @brief   Routine state that toggles the reverse mode.
+ * @class   TeleoperationState
+ * @brief   State being active while the robot is teleoperated
  */
-class ReversingRoutineState: public BaseState {
+class TeleoperationState: public BaseState {
 
 public:
 
 	/**
 	 * Constructor
 	 */
-	ReversingRoutineState();
+	TeleoperationState();
 
 	/**
 	 * Destructor
 	 */
-	~ReversingRoutineState();
+	~TeleoperationState();
 
 	/**
 	 * Called once when registered at StateInterface
@@ -74,19 +68,10 @@ public:
 
 	/**
 	 * @brief Called when an operation mode interrupt was received
-	 * @param interrupt Kind of interrupt (1=EmergencyStop, 2=TeleoperationInterupt)
+	 * @param interrupt Kind of interrupt (0=EmergencyStop, 1=TeleoperationInterupt)
 	 */
 	void onInterrupt(int interrupt);
 
-private:
-	ros::NodeHandle _nh;
-	ros::ServiceClient _set_reverse_moving_service;
-	ros::ServiceClient _get_reverse_moving_service;
-
-	/**
-	 * Is the robot currently driving in reverse
-	 */
-	bool _reverse_mode_active;
 };
 
 }

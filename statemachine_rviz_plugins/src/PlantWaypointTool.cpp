@@ -1,12 +1,12 @@
-#include <statemachine_rviz_plugins/PlantWaypointTool.h>
+#include <rsm_rviz_plugins/PlantWaypointTool.h>
 
-namespace statemachine {
+namespace rsm {
 
 PlantWaypointTool::PlantWaypointTool() :
 		moving_flag_node_( NULL), current_flag_property_( NULL) {
 	shortcut_key_ = 'w';
-	ros::NodeHandle nh("statemachine");
-	_add_waypoint_client = nh.serviceClient<statemachine_msgs::AddWaypoint>(
+	ros::NodeHandle nh("rsm");
+	_add_waypoint_client = nh.serviceClient<rsm_msgs::AddWaypoint>(
 			"addWaypoint");
 }
 
@@ -17,7 +17,7 @@ PlantWaypointTool::~PlantWaypointTool() {
 }
 
 void PlantWaypointTool::onInitialize() {
-	flag_resource_ = "package://statemachine_rviz_plugins/media/flag.dae";
+	flag_resource_ = "package://rsm_rviz_plugins/media/flag.dae";
 
 	if (rviz::loadMeshFromResource(flag_resource_).isNull()) {
 		ROS_ERROR("PlantWaypointTool: failed to load model resource '%s'.",
@@ -98,8 +98,8 @@ int PlantWaypointTool::processMouseEvent(rviz::ViewportMouseEvent& event) {
 }
 
 void PlantWaypointTool::makeFlag(const Ogre::Vector3& position, double angle) {
-	statemachine_msgs::AddWaypoint srv;
-	statemachine_msgs::Waypoint waypoint;
+	rsm_msgs::AddWaypoint srv;
+	rsm_msgs::Waypoint waypoint;
 	waypoint.pose.position.x = position.x;
 	waypoint.pose.position.y = position.y;
 	waypoint.pose.position.z = position.z;
@@ -118,6 +118,6 @@ void PlantWaypointTool::save(rviz::Config config) const {
 void PlantWaypointTool::load(const rviz::Config& config) {
 }
 
-} // end namespace statemachine
+} // end namespace rsm
 
-PLUGINLIB_EXPORT_CLASS(statemachine::PlantWaypointTool, rviz::Tool)
+PLUGINLIB_EXPORT_CLASS(rsm::PlantWaypointTool, rviz::Tool)

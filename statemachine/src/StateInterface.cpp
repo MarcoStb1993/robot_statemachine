@@ -1,19 +1,19 @@
-#include <statemachine/StateInterface.h>
+#include <rsm_core/StateInterface.h>
 
-namespace statemachine {
+namespace rsm {
 
 StateInterface::StateInterface() :
-		_plugin_loader("statemachine", "statemachine::BaseState") {
+		_plugin_loader("rsm", "rsm::BaseState") {
 	ros::NodeHandle private_nh("~");
 	private_nh.param<std::string>("calculate_goal_plugin",
-			_calculate_goal_plugin, "statemachine::CalculateGoalState");
+			_calculate_goal_plugin, "rsm::CalculateGoalState");
 	private_nh.param<std::string>("navigation_plugin", _navigation_plugin,
-			"statemachine::NavigationState");
+			"rsm::NavigationState");
 	private_nh.param<std::string>("mapping_plugin", _mapping_plugin,
-			"statemachine::MappingDummyState");
+			"rsm::MappingDummyState");
 
-	ros::NodeHandle nh("statemachine");
-	_operation_mode_sub = nh.subscribe<statemachine_msgs::OperationMode>(
+	ros::NodeHandle nh("rsm");
+	_operation_mode_sub = nh.subscribe<rsm_msgs::OperationMode>(
 			"operationMode", 1, &StateInterface::operationModeCallback, this);
 	_simple_goal_sub = nh.subscribe<geometry_msgs::PoseStamped>("simpleGoal", 1,
 			&StateInterface::simpleGoalCallback, this);
@@ -29,7 +29,7 @@ StateInterface::StateInterface() :
 	_state_info_service = nh.advertiseService("stateInfo",
 			&StateInterface::stateInfoService, this);
 	_set_navigation_goal_client = nh.serviceClient<
-			statemachine_msgs::SetNavigationGoal>("setNavigationGoal");
+			rsm_msgs::SetNavigationGoal>("setNavigationGoal");
 
 	_current_state = NULL;
 	_next_state = NULL;
@@ -42,7 +42,7 @@ StateInterface::~StateInterface() {
 	}
 }
 
-boost::shared_ptr<statemachine::BaseState> StateInterface::getPluginState(
+boost::shared_ptr<rsm::BaseState> StateInterface::getPluginState(
 		int plugin_type, std::string routine) {
 	try {
 		switch (plugin_type) {
@@ -60,14 +60,14 @@ boost::shared_ptr<statemachine::BaseState> StateInterface::getPluginState(
 		}
 		case 4: {
 			std::ostringstream s;
-			s << "statemachine::" << routine << "RoutineState";
+			s << "rsm::" << routine << "RoutineState";
 			return _plugin_loader.createInstance(s.str());
 			break;
 		}
 		default: {
 			if (!routine.empty()) {
 				std::ostringstream s;
-				s << "statemachine::" << routine;
+				s << "rsm::" << routine;
 				return _plugin_loader.createInstance(s.str());
 			} else {
 				ROS_ERROR(
@@ -115,7 +115,7 @@ void StateInterface::awake() {
 }
 
 void StateInterface::transitionToVolatileState(
-		boost::shared_ptr<statemachine::BaseState> nextState) {
+		boost::shared_ptr<rsm::BaseState> nextState) {
 	if (_current_state != nextState) {
 		if (nextState != NULL && nextState->getStateInterface() == NULL) {
 			_next_state = nextState;
@@ -129,7 +129,7 @@ void StateInterface::transitionToVolatileState(
 }
 
 void StateInterface::operationModeCallback(
-		const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
+		const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
 	if (operation_mode->emergencyStop) {
 		_on_interrupt = true;
 		if (_current_state) {
@@ -156,7 +156,7 @@ void StateInterface::simpleGoalCallback(
 	if (_current_state) {
 		_current_state->onInterrupt(SIMPLE_GOAL_INTERRUPT);
 	}
-	statemachine_msgs::SetNavigationGoal srv;
+	rsm_msgs::SetNavigationGoal srv;
 	srv.request.goal = goal->pose;
 	srv.request.navigationMode = SIMPLE_GOAL;
 	if (_set_navigation_goal_client.call(srv)) {

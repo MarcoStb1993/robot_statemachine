@@ -1,33 +1,22 @@
-#include "StatemachineControls.h"
+#include "RSMControls.h"
 
-namespace statemachine {
+namespace rsm {
 
-StatemachineControlPanel::StatemachineControlPanel() :
-		rqt_gui_cpp::Plugin(), _widget_main(NULL), _gui(NULL) {
-	setObjectName("Statemachine Controls");
-}
-
-StatemachineControlPanel::~StatemachineControlPanel() {
-}
-
-void StatemachineControlPanel::initPlugin(qt_gui_cpp::PluginContext& context) {
-	QStringList argv = context.argv();
-	_gui = new Ui::statemachine_controls;
-	_widget_main = new QWidget();
-	_gui->setupUi(_widget_main);
-	context.addWidget(_widget_main);
+RSMControlPanel::RSMControlPanel(QWidget* parent) :
+		rviz::Panel(parent), _gui(new Ui::rsm_controls()) {
+	_gui->setupUi(this);
 	initCommunications();
 	connectSlots();
 	_exploration_running = false;
 	_waypoint_following_running = false;
 	_emergency_stop_active = false;
-	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 	initRoutineComboBox();
 	getStateInfo();
 }
 
-void StatemachineControlPanel::initCommunications() {
-	ros::NodeHandle nh("statemachine");
+void RSMControlPanel::initCommunications() {
+	ros::NodeHandle nh("rsm");
 	_start_stop_exploration_client = nh.serviceClient<std_srvs::SetBool>(
 			"startStopExploration");
 	_set_exploration_mode_client = nh.serviceClient<std_srvs::SetBool>(
@@ -38,35 +27,35 @@ void StatemachineControlPanel::initCommunications() {
 	_waypoint_reset_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetWaypoints");
 	_set_waypoint_following_mode_client = nh.serviceClient<
-			statemachine_msgs::SetWaypointFollowingMode>(
+			rsm_msgs::SetWaypointFollowingMode>(
 			"setWaypointFollowingMode");
 
 	_state_info_subscriber = nh.subscribe("stateInfo", 10,
-			&StatemachineControlPanel::stateInfoCallback, this);
+			&RSMControlPanel::stateInfoCallback, this);
 	_state_info_client = nh.serviceClient<std_srvs::Trigger>("stateInfo");
 	_set_operation_mode_client = nh.serviceClient<
-			statemachine_msgs::SetOperationMode>("setOperationMode");
-	_operation_mode_subcriber = nh.subscribe<statemachine_msgs::OperationMode>(
+			rsm_msgs::SetOperationMode>("setOperationMode");
+	_operation_mode_subcriber = nh.subscribe<rsm_msgs::OperationMode>(
 			"operationMode", 1,
-			&StatemachineControlPanel::operationModeCallback, this);
+			&RSMControlPanel::operationModeCallback, this);
 
 	_set_reverse_mode_client = nh.serviceClient<std_srvs::SetBool>(
 			"setReverseMode");
 	_reverse_mode_subscriber = nh.subscribe<std_msgs::Bool>("reverseMode", 10,
-			&StatemachineControlPanel::reverseModeCallback, this);
+			&RSMControlPanel::reverseModeCallback, this);
 	_stop_2d_nav_goal_client = nh.serviceClient<std_srvs::Trigger>(
 			"stop2DNavGoal");
 
-	_add_waypoint_client = nh.serviceClient<statemachine_msgs::AddWaypoint>(
+	_add_waypoint_client = nh.serviceClient<rsm_msgs::AddWaypoint>(
 			"addWaypoint");
 	_get_waypoint_routines_client = nh.serviceClient<
-			statemachine_msgs::GetWaypointRoutines>("getWaypointRoutines");
+			rsm_msgs::GetWaypointRoutines>("getWaypointRoutines");
 
-	_get_robot_pose_client = nh.serviceClient<statemachine_msgs::GetRobotPose>(
+	_get_robot_pose_client = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
 }
 
-void StatemachineControlPanel::connectSlots() {
+void RSMControlPanel::connectSlots() {
 connect(_gui->start_exploration_button, SIGNAL(clicked(bool)), this, SLOT(startStopExploration()));
 
 connect(_gui->start_waypoint_following_button, SIGNAL(clicked(bool)), this, SLOT(startStopWaypointFollowing()));
@@ -84,7 +73,7 @@ connect(_gui->teleoperation_radio_button, SIGNAL(clicked(bool)), this, SLOT(setT
 connect(_gui->stop_2d_nav_goal_button, SIGNAL(clicked(bool)), this, SLOT(stop2dNavGoal()));
 }
 
-void StatemachineControlPanel::startStopExploration() {
+void RSMControlPanel::startStopExploration() {
 std_srvs::SetBool srv;
 if (_exploration_running) {
 	srv.request.data = false;
@@ -117,7 +106,7 @@ if (_start_stop_exploration_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::startStopWaypointFollowing() {
+void RSMControlPanel::startStopWaypointFollowing() {
 std_srvs::SetBool srv;
 if (_waypoint_following_running) {
 	srv.request.data = false;
@@ -154,7 +143,7 @@ if (_start_stop_waypoint_following_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::resetWaypoints() {
+void RSMControlPanel::resetWaypoints() {
 std_srvs::Trigger srv;
 if (_waypoint_reset_client.call(srv)) {
 	//ROS_INFO("State was changed: %s -> message: %s",	srv.response.success ? "true" : "false", srv.response.message.c_str()	);
@@ -172,15 +161,15 @@ if (_waypoint_reset_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::addWaypoint() {
-statemachine_msgs::GetRobotPose srv;
+void RSMControlPanel::addWaypoint() {
+rsm_msgs::GetRobotPose srv;
 if (!_get_robot_pose_client.call(srv)) {
 	ROS_ERROR("Failed to call Get Robot Pose service");
 	_gui->waypoint_following_info_text->setText(
 			"Get Robot Pose service not available");
 } else {
-	statemachine_msgs::AddWaypoint srv2;
-	statemachine_msgs::Waypoint waypoint;
+	rsm_msgs::AddWaypoint srv2;
+	rsm_msgs::Waypoint waypoint;
 	waypoint.pose = srv.response.pose;
 	if (_gui->routine_combo_box->currentIndex() == 0) {
 		waypoint.routine = "";
@@ -198,7 +187,7 @@ if (!_get_robot_pose_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::setReverseMode() {
+void RSMControlPanel::setReverseMode() {
 std_srvs::SetBool srv;
 srv.request.data = !_reverse_mode;
 if (_set_reverse_mode_client.call(srv)) {
@@ -215,34 +204,34 @@ if (_set_reverse_mode_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::emergencyStop() {
+void RSMControlPanel::emergencyStop() {
 _emergency_stop_active = !_emergency_stop_active;
-_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+_operation_mode = rsm_msgs::OperationMode::STOPPED;
 callSetOperationMode();
 }
 
-void StatemachineControlPanel::stopOperation() {
-if (_operation_mode != statemachine_msgs::OperationMode::STOPPED) {
-	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+void RSMControlPanel::stopOperation() {
+if (_operation_mode != rsm_msgs::OperationMode::STOPPED) {
+	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 	callSetOperationMode();
 }
 }
 
-void StatemachineControlPanel::setAutonomyOperation() {
-if (_operation_mode != statemachine_msgs::OperationMode::AUTONOMOUS) {
-	_operation_mode = statemachine_msgs::OperationMode::AUTONOMOUS;
+void RSMControlPanel::setAutonomyOperation() {
+if (_operation_mode != rsm_msgs::OperationMode::AUTONOMOUS) {
+	_operation_mode = rsm_msgs::OperationMode::AUTONOMOUS;
 	callSetOperationMode();
 }
 }
 
-void StatemachineControlPanel::setTeleoperation() {
-if (_operation_mode != statemachine_msgs::OperationMode::TELEOPERATION) {
-	_operation_mode = statemachine_msgs::OperationMode::TELEOPERATION;
+void RSMControlPanel::setTeleoperation() {
+if (_operation_mode != rsm_msgs::OperationMode::TELEOPERATION) {
+	_operation_mode = rsm_msgs::OperationMode::TELEOPERATION;
 	callSetOperationMode();
 }
 }
 
-void StatemachineControlPanel::stop2dNavGoal() {
+void RSMControlPanel::stop2dNavGoal() {
 std_srvs::Trigger srv;
 if (!_stop_2d_nav_goal_client.call(srv)) {
 	ROS_ERROR("Failed to call Stop 2D Nav Goal service");
@@ -251,8 +240,8 @@ if (!_stop_2d_nav_goal_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::callSetOperationMode() {
-statemachine_msgs::SetOperationMode srv;
+void RSMControlPanel::callSetOperationMode() {
+rsm_msgs::SetOperationMode srv;
 srv.request.operationMode.emergencyStop = _emergency_stop_active;
 srv.request.operationMode.mode = _operation_mode;
 if (_set_operation_mode_client.call(srv)) {
@@ -264,9 +253,9 @@ if (_set_operation_mode_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::setWaypointFollowingMode() {
+void RSMControlPanel::setWaypointFollowingMode() {
 ROS_INFO("set waypoint following mode");
-statemachine_msgs::SetWaypointFollowingMode srv;
+rsm_msgs::SetWaypointFollowingMode srv;
 srv.request.mode = _gui->mode_box->currentIndex();
 if (_set_waypoint_following_mode_client.call(srv)) {
 	if (!srv.response.success) {
@@ -283,7 +272,7 @@ if (_set_waypoint_following_mode_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::setExplorationMode() {
+void RSMControlPanel::setExplorationMode() {
 std_srvs::SetBool srv;
 srv.request.data = _gui->exploration_mode_box->currentIndex();
 if (!_set_exploration_mode_client.call(srv)) {
@@ -293,7 +282,7 @@ if (!_set_exploration_mode_client.call(srv)) {
 }
 }
 
-void StatemachineControlPanel::stateInfoCallback(
+void RSMControlPanel::stateInfoCallback(
 	const std_msgs::String::ConstPtr& state_info) {
 QString text = QString("Current state: %1").arg(state_info->data.c_str());
 _gui->current_state_text->setText(text);
@@ -330,23 +319,23 @@ if (state_info->data.compare("Idle") == 0
 }
 }
 
-void StatemachineControlPanel::reverseModeCallback(
+void RSMControlPanel::reverseModeCallback(
 	const std_msgs::Bool::ConstPtr& reverse_mode) {
 _reverse_mode = reverse_mode->data;
 _gui->reverse_checkbox->setChecked(_reverse_mode);
 }
 
-void StatemachineControlPanel::operationModeCallback(
-	const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
+void RSMControlPanel::operationModeCallback(
+	const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
 _emergency_stop_active = operation_mode->emergencyStop;
 _operation_mode = operation_mode->mode;
 updateOperationModeGUI();
 }
 
-void StatemachineControlPanel::initRoutineComboBox() {
+void RSMControlPanel::initRoutineComboBox() {
 QStringList list;
 list.append("None");
-statemachine_msgs::GetWaypointRoutines srv;
+rsm_msgs::GetWaypointRoutines srv;
 if (_get_waypoint_routines_client.call(srv)) {
 	_waypoint_routines = srv.response.waypointRoutines;
 	for (auto it : _waypoint_routines) {
@@ -358,18 +347,18 @@ if (_get_waypoint_routines_client.call(srv)) {
 _gui->routine_combo_box->addItems(list);
 }
 
-void StatemachineControlPanel::getStateInfo() {
-	std_srvs::Trigger srv;
-	if (_state_info_client.call(srv)) {
-		QString text = QString("Current state: %1").arg(
-				srv.response.message.c_str());
-		_gui->current_state_text->setText(text);
-	} else {
-		ROS_ERROR("Failed to call State Info service");
-	}
+void RSMControlPanel::getStateInfo() {
+std_srvs::Trigger srv;
+if (_state_info_client.call(srv)) {
+	QString text = QString("Current state: %1").arg(
+			srv.response.message.c_str());
+	_gui->current_state_text->setText(text);
+} else {
+	ROS_ERROR("Failed to call State Info service");
+}
 }
 
-void StatemachineControlPanel::updateOperationModeGUI() {
+void RSMControlPanel::updateOperationModeGUI() {
 _gui->stopped_radio_button->setChecked(_operation_mode == 0);
 _gui->autonomy_radio_button->setChecked(_operation_mode == 1);
 _gui->teleoperation_radio_button->setChecked(_operation_mode == 2);
@@ -386,24 +375,14 @@ if (_emergency_stop_active) {
 }
 }
 
-void StatemachineControlPanel::shutdownPlugin() {
-ros::shutdown();
+void RSMControlPanel::save(rviz::Config config) const {
+rviz::Panel::save(config);
 }
 
-void StatemachineControlPanel::saveSettings(
-	qt_gui_cpp::Settings& plugin_settings,
-	qt_gui_cpp::Settings& instance_settings) const {
-
+void RSMControlPanel::load(const rviz::Config& config) {
+rviz::Panel::load(config);
 }
 
-void StatemachineControlPanel::restoreSettings(
-	const qt_gui_cpp::Settings& plugin_settings,
-	const qt_gui_cpp::Settings& instance_settings) {
+}  // end namespace moveit_dashboard
 
-}
-
-} /* namespace statemachine */
-
-PLUGINLIB_EXPORT_CLASS(statemachine::StatemachineControlPanel,
-	rqt_gui_cpp::Plugin)
-
+PLUGINLIB_EXPORT_CLASS(rsm::RSMControlPanel, rviz::Panel)

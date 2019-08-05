@@ -1,6 +1,6 @@
-#include <statemachine_additions/AdditionsServiceProvider.h>
+#include <rsm_additions/AdditionsServiceProvider.h>
 
-namespace statemachine {
+namespace rsm {
 
 AdditionsServiceProvider::AdditionsServiceProvider() :
 		as(NULL) {
@@ -9,13 +9,13 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 			_autonomy_cmd_vel_topic, "/autonomy/cmd_vel");
 	std::string navigation_plugin;
 	private_nh.param<std::string>("navigation_plugin", navigation_plugin, "");
-	if (navigation_plugin.compare("statemachine::NavigationState") == 0) {
+	if (navigation_plugin.compare("rsm::NavigationState") == 0) {
 		_navigation_plugin_used = true;
 	} else {
 		_navigation_plugin_used = false;
 	}
 
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 
 	if (_navigation_plugin_used) {
 		_set_navigation_to_reverse_service = nh.advertiseService(
@@ -32,7 +32,7 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 
 	std::string mapping_plugin;
 	private_nh.param<std::string>("mapping_plugin", mapping_plugin, "");
-	if (mapping_plugin.compare("statemachine::KinectMappingState") == 0) {
+	if (mapping_plugin.compare("rsm::KinectMappingState") == 0) {
 		_reset_kinect_position_serivce = nh.advertiseService(
 				"resetKinectPosition",
 				&AdditionsServiceProvider::resetKinectPosition, this);

@@ -1,6 +1,6 @@
-#include <statemachine_additions/NavigationState.h>
+#include <rsm_additions/NavigationState.h>
 
-namespace statemachine {
+namespace rsm {
 
 NavigationState::NavigationState() {
 }
@@ -10,18 +10,18 @@ NavigationState::~NavigationState() {
 
 void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	_get_navigation_goal_service = nh.serviceClient<
-			statemachine_msgs::GetNavigationGoal>("getNavigationGoal");
+			rsm_msgs::GetNavigationGoal>("getNavigationGoal");
 	_add_failed_goal_service =
-			nh.serviceClient<statemachine_msgs::AddFailedGoal>("addFailedGoal");
+			nh.serviceClient<rsm_msgs::AddFailedGoal>("addFailedGoal");
 	_reset_failed_goals_service = nh.serviceClient<std_srvs::Trigger>(
 			"resetFailedGoals");
 	_waypoint_visited_service = nh.serviceClient<
-			statemachine_msgs::WaypointVisited>("waypointVisited");
+			rsm_msgs::WaypointVisited>("waypointVisited");
 	_waypoint_unreachable_service = nh.serviceClient<
-			statemachine_msgs::WaypointUnreachable>("waypointUnreachable");
-	_get_robot_pose_service = nh.serviceClient<statemachine_msgs::GetRobotPose>(
+			rsm_msgs::WaypointUnreachable>("waypointUnreachable");
+	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
 	_get_reverse_mode_service = nh.serviceClient<std_srvs::Trigger>(
 			"getReverseMode");
@@ -36,12 +36,12 @@ void NavigationState::onSetup() {
 	_navigation_mode = -1;
 	_goal_active = false;
 	_exploration_mode = -1;
-	_operation_mode = statemachine_msgs::OperationMode::STOPPED;
+	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 }
 
 void NavigationState::onEntry() {
 	//Request navigation goal from Service Provider
-	statemachine_msgs::GetNavigationGoal srv;
+	rsm_msgs::GetNavigationGoal srv;
 	if (_get_navigation_goal_service.call(srv)) {
 		_nav_goal = srv.response.goal;
 		_failed_goals = srv.response.failedGoals.poses;
@@ -86,7 +86,7 @@ void NavigationState::onEntry() {
 		if (_get_exploration_mode_service.call(srv2)) {
 			_exploration_mode = srv2.response.success;
 			if (_exploration_mode) {
-				_get_goal_obsolete = _nh.subscribe("statemachine/goalObsolete",
+				_get_goal_obsolete = _nh.subscribe("rsm/goalObsolete",
 						1, &NavigationState::goalObsoleteCallback, this);
 			}
 		} else {
@@ -118,7 +118,7 @@ void NavigationState::onActive() {
 							break;
 						}
 						case WAYPOINT_FOLLOWING: {
-							statemachine_msgs::WaypointVisited srv;
+							rsm_msgs::WaypointVisited srv;
 							srv.request.position = _waypoint_position;
 							if (!_waypoint_visited_service.call(srv)) {
 								ROS_ERROR(
@@ -149,7 +149,7 @@ void NavigationState::onActive() {
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
-							statemachine_msgs::AddFailedGoal srv;
+							rsm_msgs::AddFailedGoal srv;
 							srv.request.failedGoal = _nav_goal;
 							if (!_add_failed_goal_service.call(srv)) {
 								ROS_ERROR(
@@ -161,7 +161,7 @@ void NavigationState::onActive() {
 							break;
 						}
 						case WAYPOINT_FOLLOWING: {
-							statemachine_msgs::WaypointUnreachable srv;
+							rsm_msgs::WaypointUnreachable srv;
 							srv.request.position = _waypoint_position;
 							if (!_waypoint_unreachable_service.call(srv)) {
 								ROS_ERROR(
@@ -320,10 +320,10 @@ void NavigationState::timerCallback(const ros::TimerEvent& event) {
 }
 
 void NavigationState::comparePose() {
-	if (_operation_mode == statemachine_msgs::OperationMode::AUTONOMOUS) {
+	if (_operation_mode == rsm_msgs::OperationMode::AUTONOMOUS) {
 		if (_comparison_counter++ >= 5) { //only compare poses every 5th call to reduce load
 			tf::Pose current_pose;
-			statemachine_msgs::GetRobotPose srv;
+			rsm_msgs::GetRobotPose srv;
 			if (_get_robot_pose_service.call(srv)) {
 				tf::poseMsgToTF(srv.response.pose, current_pose);
 				tf::Pose pose_difference = current_pose.inverseTimes(
@@ -377,7 +377,7 @@ void NavigationState::reverseModeCallback(
 }
 
 void NavigationState::operationModeCallback(
-		const statemachine_msgs::OperationMode::ConstPtr& operation_mode) {
+		const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
 	_operation_mode = operation_mode->mode;
 }
 
@@ -390,4 +390,4 @@ void NavigationState::abortNavigation() {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::NavigationState, statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::NavigationState, rsm::BaseState)

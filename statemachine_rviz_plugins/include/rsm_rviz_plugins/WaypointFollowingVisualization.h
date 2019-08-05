@@ -1,15 +1,15 @@
 #include <ros/ros.h>
 #include <interactive_markers/interactive_marker_server.h>
 #include <interactive_markers/menu_handler.h>
-#include <statemachine_msgs/WaypointArray.h>
-#include <statemachine_msgs/Waypoint.h>
-#include <statemachine_msgs/MoveWaypoint.h>
-#include <statemachine_msgs/RemoveWaypoint.h>
-#include <statemachine_msgs/SetWaypointRoutine.h>
-#include <statemachine_msgs/GetWaypointRoutines.h>
+#include <rsm_msgs/WaypointArray.h>
+#include <rsm_msgs/Waypoint.h>
+#include <rsm_msgs/MoveWaypoint.h>
+#include <rsm_msgs/RemoveWaypoint.h>
+#include <rsm_msgs/SetWaypointRoutine.h>
+#include <rsm_msgs/GetWaypointRoutines.h>
 #include <tf/tf.h>
 
-namespace statemachine {
+namespace rsm {
 
 /**
  * @class WaypointFollowingVisualization
@@ -56,7 +56,7 @@ private:
 	 * @param waypoint_array
 	 */
 	void waypointCallback(
-			const statemachine_msgs::WaypointArray::ConstPtr& waypoint_array);
+			const rsm_msgs::WaypointArray::ConstPtr& waypoint_array);
 	/**
 	 * Draws the interactive marker for the waypoints with position waypoint_pos in the waypoint array
 	 * @param waypoint_pos Position in the waypoint array of the waypoint to visualize
@@ -75,7 +75,7 @@ private:
 	 * @return True if the waypoint array has changed, false otherwise
 	 */
 	bool waypointArrayChanged(
-			const statemachine_msgs::WaypointArray::ConstPtr& waypoint_array);
+			const rsm_msgs::WaypointArray::ConstPtr& waypoint_array);
 	/**
 	 * Timer callback for periodically refreshing the displayed markers
 	 * @param event Timer event
@@ -95,7 +95,7 @@ private:
 	/**
 	 * Waypoint array
 	 */
-	statemachine_msgs::WaypointArray _waypoints;
+	rsm_msgs::WaypointArray _waypoints;
 	/**
 	 * List of all available waypoint routines
 	 */

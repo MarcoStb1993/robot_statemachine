@@ -1,15 +1,15 @@
-#  Statemachine
+#  RMS Core
 
-The statemachine's core components will be explained first and it's usage afterwards, including examples and tutorials for writing plugins, including them into the statemachine and setting up a robot. Also, handling the GUI and starting a simulation with the statemachine is explained.
+The Robot Statemachine's core components will be explained first and it's usage afterwards, including examples and tutorials for writing plugins, including them into the RSM and setting up a robot. Also, handling the GUI and starting a simulation with the RSM is explained.
 
 ## Documentation
 
-The statemachine consists of various non-customizable and custom states that are based on the [Base State](#base-state). The former [non-customizable states](#non-customizable-states) and the [Base State](#base-state) are a part of this package containing the statemachine's basics.  
-To handle state transitions the [State Interface](#state-interface) is used. [Robot Control Mux](#robot-control-mux) coordinates the actual control of the robot's movement while the [Service Provider](#service-provider) contains services, publishers and subscribers for communication between states and updating the GUI. To be able to handle arbitrary robots, the statemachine relies on [Plugins](#plugins) that can be implemented depending on the robot.
+The RSM consists of various non-customizable and custom states that are based on the [Base State](#base-state). The former [non-customizable states](#non-customizable-states) and the [Base State](#base-state) are a part of this package containing the RSM's basics.  
+To handle state transitions the [State Interface](#state-interface) is used. [Robot Control Mux](#robot-control-mux) coordinates the actual control of the robot's movement while the [Service Provider](#service-provider) contains services, publishers and subscribers for communication between states and updating the GUI. To be able to handle arbitrary robots, the RSM relies on [Plugins](#plugins) that can be implemented depending on the robot.
 
 ### Base State
 
-The base state for all states of the statemachine features the following four main functions:
+The base state for all states of the RSM features the following four main functions:
 * onSetup
 * onEntry
 * onActive
@@ -17,7 +17,7 @@ The base state for all states of the statemachine features the following four ma
 
 The function `onSetup` is called immediately after it was constructed and should be used to initialize the state. The function `onEntry` is run before the state's `onActive` method is executed for the first time and should be used to start up the processing in the state. The latter is the state's primary method that is executed periodically and contains it's main logic. `onExit` is called before the state will be destroyed and should take care of leaving the state cleanly.
 
-To realize interrupts in the statemachine, the following five functions need to be implemented:
+To realize interrupts in the RSM, the following five functions need to be implemented:
 * onExplorationStart
 * onExplorationStop
 * onWaypointFollowingStart
@@ -69,7 +69,7 @@ If the software emergency stop is activated in the GUI, the operation mode is ha
 
 ### Service Provider
 
-The Service Provider handles the communication between the different states and saves data throughout state transitions. Therefore it offers a lot of services to save and retrieve variables for the core functionality of the statemachine.
+The Service Provider handles the communication between the different states and saves data throughout state transitions. Therefore it offers a lot of services to save and retrieve variables for the core functionality of the RSM.
 
 It offers all services to control waypoint following which includes adding, moving and removing single waypoints, setting their `visited` and `unreachable` variables and the routine to be executed upon reaching the waypoint. Furthermore, all waypoints can be retrieved and reset which effectively sets `visited` and `unreachable` to false. The waypoint following mode can be set and the list of all available routines retrieved. The latter is given as a parameter to the Service Provider. The list of waypoints is also published.
 
@@ -83,7 +83,7 @@ Furthermore, it advertises services for setting and retrieving the reverse mode,
 
 ### Non-customizable states
 
-The core statemachine already features the following states for direct usage:
+The core state machine already features the following states for direct usage:
 * **Boot State:** Is the first state to be called and subscribes to a service which tells it when all necessary systems are available and ready to use. Then it initiates a transition to the **Idle State**. Can only be interrupted by the software emergency stop. 
 * **Emergency Stop State:** State being called when the software emergency stop was pushed. Only allows transition to **Idle State** when button is released.
 * **Idle State:** Standard state when no commands were issued. Allows transitions to all other states through interrupts.
@@ -92,21 +92,21 @@ The core statemachine already features the following states for direct usage:
 
 ### Plugins
 
-The statemachine package requires three different plugin states, one for exploration to calculate the next goal, one for navigation and one for mapping. The first is called when exploration is started or a previous exploration target was mapped successfully and  should interface an exploration package like [explore lite](http://wiki.ros.org/explore_lite) which finds unexplored regions in the map and extract a next goal from it. The second should interface a package for navigation like the [ROS navigation stack](http://wiki.ros.org/navigation) and update the statemachine according to the navigation's progress. The last is called when an exploration goal is reached and can include movements for better map acquisition or similar behaviors.
+The RSM package requires three different plugin states, one for exploration to calculate the next goal, one for navigation and one for mapping. The first is called when exploration is started or a previous exploration target was mapped successfully and  should interface an exploration package like [explore lite](http://wiki.ros.org/explore_lite) which finds unexplored regions in the map and extract a next goal from it. The second should interface a package for navigation like the [ROS navigation stack](http://wiki.ros.org/navigation) and update the RSM according to the navigation's progress. The last is called when an exploration goal is reached and can include movements for better map acquisition or similar behaviors.
 
-Also, up to ten plugins states can be included for the waypoint following routines that are executed upon reaching a waypoint. They are not necessary for the statemachine like the plugins mentioned above. These routines can be implemented to enable arbitrary behavior when reaching a certain waypoint, for example inspecting gauge valves with a camera.
+Also, up to ten plugins states can be included for the waypoint following routines that are executed upon reaching a waypoint. They are not necessary for the RSM like the plugins mentioned above. These routines can be implemented to enable arbitrary behavior when reaching a certain waypoint, for example inspecting gauge valves with a camera.
 
-More plugins can be added if additional states during exploration or waypoint following are desired. These can only be called from other implemented plugin states as the basic statemachine only includes transitions to the plugins described above. For example, if you have a robot able to climb stairs and you detect stairs during navigation, you can then call another plugin for stair-climbing and afterwards transition back to normal navigation.
+More plugins can be added if additional states during exploration or waypoint following are desired. These can only be called from other implemented plugin states as the basic RSM only includes transitions to the plugins described above. For example, if you have a robot able to climb stairs and you detect stairs during navigation, you can then call another plugin for stair-climbing and afterwards transition back to normal navigation.
 
 ## Tutorials
 
-The following section displays some examples and tutorials on how to use the statemachine, starting with the required setup to use the statemachine. Afterwards, running and launching the statemachine on its own and in a simulation environment is presented. The provided GUI and it's controls are shown and a tutorial on writing and including your own plugin state is presented last.
+The following section displays some examples and tutorials on how to use the RSM, starting with the required setup to use the RSM. Afterwards, running and launching the RSM on its own and in a simulation environment is presented. The provided GUI and it's controls are shown and a tutorial on writing and including your own plugin state is presented last.
 
-### Set up a robot for use with statemachine
+### Set up a robot for use with RSM
 
-Setting up a robot for the basic statemachine usage is fairly straightforward since it only requires setting up a robot motor controller interface that subscribes to command velocity messages of type [geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html) and generates actual motor commands from them.
+Setting up a robot for the basic RSM usage is fairly straightforward since it only requires setting up a robot motor controller interface that subscribes to command velocity messages of type [geometry_msgs/Twist](http://docs.ros.org/api/geometry_msgs/html/msg/Twist.html) and generates actual motor commands from them.
 
-A service provider to tell the **Boot State** that the boot is finished is also required. This should ideally check if all necessary systems on your robot are up and running. The service provider needs to offer a service of type [std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html) under the name "statemachine/bootUpFinished". The following code snippet shows a rudimentary sample implementation in a node:
+A service provider to tell the **Boot State** that the boot is finished is also required. This should ideally check if all necessary systems on your robot are up and running. The service provider needs to offer a service of type [std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html) under the name "rsm/bootUpFinished". The following code snippet shows a rudimentary sample implementation in a node:
 
 ```cpp
 #include "ros/ros.h"
@@ -128,7 +128,7 @@ bool bootUpService(std_srvs::SetBool::Request &req,
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "bootUpNode");
-	ros::NodeHandle nh("statemachine");
+	ros::NodeHandle nh("rsm");
 	ros::ServiceServer bootup_service = nh.advertiseService("bootUpFinished",
 			bootUpService);
 	//checking boot process and setting boot_finished to true if finished
@@ -137,22 +137,22 @@ int main(int argc, char **argv) {
 }
 ```
 
-If this is not possible or necessary for your configuration, you can just launch the `bootUpNode` from the [statemachine additions package](../statemachine_additions#statemachine-additions) that sets up the service provider and returns a successful boot message after default 1 second. The delay can be set using the parameter `wait_time`. 
+If this is not possible or necessary for your configuration, you can just launch the `bootUpNode` from the [RSM additions package](../rsm_additions#rsm-additions) that sets up the service provider and returns a successful boot message after default 1 second. The delay can be set using the parameter `wait_time`. 
 
 The setup for navigating to set goals and executing mapping behaviors or routines depends on the defined plugins and can therefore not generally be declared.
 
-*Note*: If you plan on using the plugins for [ROS navigation](http://wiki.ros.org/navigation) provided in the [statemachine additions package](../statemachine_additions#statemachine-additions), you need to follow the [navigation stack robot setup tutorial](http://wiki.ros.org/navigation/Tutorials/RobotSetup).
+*Note*: If you plan on using the plugins for [ROS navigation](http://wiki.ros.org/navigation) provided in the [RSM additions package](../rsm_additions#rsm-additions), you need to follow the [navigation stack robot setup tutorial](http://wiki.ros.org/navigation/Tutorials/RobotSetup).
 
-In general, a tool for navigation, a tool for mapping and a tool for exploration are necessary to fully exploit the robot statemachine. This includes at least one sensor for sensing the environment, creating a 2D or 3D map and running SLAM. When provided with the particular exploration and navigation plugins, the statemachine will work for 3D maps.
+In general, a tool for navigation, a tool for mapping and a tool for exploration are necessary to fully exploit the robot RSM. This includes at least one sensor for sensing the environment, creating a 2D or 3D map and running SLAM. When provided with the particular exploration and navigation plugins, the RSM will work for 3D maps.
 
-### Run statemachine
+### Run RSM
 
-The statemachine's core functionality is distributed over several nodes that can simply be started with the launchfile `statemachine.launch` which requires the following arguments:
-* `update_frequency`: The update rate in Hz of the statemachine (default: 20)
+The RSM's core functionality is distributed over several nodes that can simply be started with the launchfile `rsm.launch` which requires the following arguments:
+* `update_frequency`: The update rate in Hz of the RSM (default: 20)
 * `robot_frame`: The robot base frame (default: "base_footprint")
-* `mapping_plugin`: The plugin used for mapping (default: ["statemachine::MappingDummyState"](../statemachine_additions#mapping-dummy-state))
-* `calculate_goal_plugin`: The plugin used to calculate the next goal for exploration	 (default: ["statemachine::CalculateGoalState"](../statemachine_additions#calculate-goal-state))
-* `navigation_plugin`: The plugin used for navigation (default: ["statemachine::NavigationState"](../statemachine_additions#navigation-state))
+* `mapping_plugin`: The plugin used for mapping (default: ["rsm::MappingDummyState"](../rsm_additions#mapping-dummy-state))
+* `calculate_goal_plugin`: The plugin used to calculate the next goal for exploration	 (default: ["rsm::CalculateGoalState"](../rsm_additions#calculate-goal-state))
+* `navigation_plugin`: The plugin used for navigation (default: ["rsm::NavigationState"](../rsm_additions#navigation-state))
 * `autonomy_cmd_vel_topic`: The name of the command velocity topic for messages from exploration, waypoint following or simple goals (default: "/autonomy/cmd_vel")
 * `teleoperation_cmd_vel_topic`:	The name of the command velocity topic for messages from teleoperation (default: "/teleoperation/cmd_vel")
 * `cmd_vel_topic`: The name of the command velocity topic that the motor controller interface subscribes to (default: "/cmd_vel)
@@ -160,42 +160,42 @@ The statemachine's core functionality is distributed over several nodes that can
 * `waypoint_routines`: List of all plugins to be used as routines for waypoints (default: [])
 * `exploration_goal_tolerance`: Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached (default: 0.05)
 
-*Note*: The default plugins mentioned above all exist in the [statemachine additions package](../statemachine_additions#statemachine-additions).
+*Note*: The default plugins mentioned above all exist in the [RSM additions package](../rsm_additions#rsm-additions).
 
 The nodes can of course be started separately though it is easier to use the launch file. 
 
 ### Launch simulation
 
-To demonstrate the statemachine and get used to it's controls, the [statemachine additions package](../statemachine_additions#statemachine-additions) offers two launch files that start a simulation including a complete robot and environment to start right away.
+To demonstrate the RSM and get used to it's controls, the [RSM additions package](../rsm_additions#rsm-additions) offers two launch files that start a simulation including a complete robot and environment to start right away.
 
-The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the statemachine has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
+The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the RSM has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
 
 ![Simulations](../images/simulations.png)
 
-Both simulations use the plugins implemented in [statemachine additions](../statemachine_additions#statemachine-additions) which need the following packages to be installed:
+Both simulations use the plugins implemented in [RSM additions](../rsm_additions#rsm-additions) which need the following packages to be installed:
 * [gmapping](http://wiki.ros.org/gmapping) for SLAM
-* [ROS navigation stack](http://wiki.ros.org/navigation) for the [Navigation State](../statemachine_additions#navigation-state)
-* [explore lite](http://wiki.ros.org/explore_lite) for the [Calculate Goal State](../statemachine_additions#calculate-goal-state)
+* [ROS navigation stack](http://wiki.ros.org/navigation) for the [Navigation State](../rsm_additions#navigation-state)
+* [explore lite](http://wiki.ros.org/explore_lite) for the [Calculate Goal State](../rsm_additions#calculate-goal-state)
 
 When the above prerequisites are met, the simulations can be launched with the following commands including a pre-configured RViz display. If you do not want to start RViz, just leave out the `rviz:=true`. 
 
 For gazebo:
   
 ```
-roslaunch statemachine_additions simulation_gazebo.launch rviz:=true
+roslaunch rsm_additions simulation_gazebo.launch rviz:=true
 ```
 
 For the stdr simulator:
   
 ```
-roslaunch statemachine_additions simulation_stdr.launch rviz:=true
+roslaunch rsm_additions simulation_stdr.launch rviz:=true
 ```
 
 ### GUI introduction
 
-The statemachine can be operated through a GUI that enables the use of all it's core functionalities. The GUI panel is depicted below and can be integrated into [RViz](http://wiki.ros.org/rviz) or [rqt](http://wiki.ros.org/rqt). To the former by adding a new panel through *Panels->Add New Panel* and then choose *StatemachineControlPanel* under *statemachine_rviz_plugins*. To the latter by adding a new plugin through *Plugins->Statemachine Control*. The GUI always shows which state is currently active and provides the options explained below.
+The RSM can be operated through a GUI that enables the use of all it's core functionalities. The GUI panel is depicted below and can be integrated into [RViz](http://wiki.ros.org/rviz) or [rqt](http://wiki.ros.org/rqt). To the former by adding a new panel through *Panels->Add New Panel* and then choose *RSMControlPanel* under *rsm_rviz_plugins*. To the latter by adding a new plugin through *Plugins->RSM Control*. The GUI always shows which state is currently active and provides the options explained below.
 
-![Statemachine Control Panel](../images/statemachine_control_panel.png)
+![RSM Control Panel](../images/rsm_control_panel.png)
 
 The GUI offers control over the class handling the command velocities forwarded to the motor controller interface. This includes the software emergency stop as well as choosing autonomy, teleoperation or stopped. When the software emergency stop is active, the other choices are disabled and the command velocity is set to stopped until the software emergency stop is released again.
 
@@ -213,7 +213,7 @@ The GUI also offers the possibility to set a waypoint at the robot's current loc
 
 Furthermore, a checkbox enables setting the reverse mode manually. When the box is checked the robot moves in reverse. A button next to the checkbox enables stopping the navigation when a simple navigation goal was set through RViz.
 
-When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool** (Hotkey: "w"). It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *statemachine_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flagpole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
+When using [RViz](http://wiki.ros.org/rviz), waypoints can be set by utilizing the **Plant Waypoint Tool** (Hotkey: "w"). It can be added through the plus button (Add a new tool) in the toolbar and then choosing *PlantWaypointTool* under *rsm_rviz_plugins*. This enables putting waypoints on the ground plane, determining their x- and y-coordinates, and orientate them  in yaw by dragging the mouse in the desired direction. They are depicted as [interactive markers](http://wiki.ros.org/interactive_markers) with a flagpole mesh and the number of the waypoint above. Accordingly, an interactive marker display needs to be added with the topic name *waypoint_markers/update* to show them. The color of the marker corresponds to the waypoint's status: blue is the default color, green means the waypoint has been visited and red that it is unreachable.
 
 The displayed markers are interactive and can be seen below. Using the circle around them, they can be dragged in the desired direction, changing their x-y-position and yaw-orientation. The arrows above and below can be used to drag them in the respective direction, altering it's z-coordinate. Clicking on the waypoint marker opens a menu that offers the options to set the routine to be executed when reaching the waypoint and to delete the waypoint. The routine can also be set to none.
 
@@ -221,9 +221,9 @@ The displayed markers are interactive and can be seen below. Using the circle ar
 
 *Note*: When the robot is moving towards a waypoint, the specific waypoint can be manipulated but these changes will not be forwarded to the current navigation. So, changes made after the robot started to move towards the waypoint, will not be regarded until the waypoint and it's possible routine was finished.
 
-The [statemachine additions package](../statemachine_additions#statemachine-additions) features some exemplary [RViz configuration](http://wiki.ros.org/rviz/UserGuide#Configurations) files for the respective launch files that automatically include the GUI and **Plant Waypoint Tool** as well as adding the waypoint [interactive marker](http://wiki.ros.org/interactive_markers) topic to the display.
+The [RSM additions package](../rsm_additions#rsm-additions) features some exemplary [RViz configuration](http://wiki.ros.org/rviz/UserGuide#Configurations) files for the respective launch files that automatically include the GUI and **Plant Waypoint Tool** as well as adding the waypoint [interactive marker](http://wiki.ros.org/interactive_markers) topic to the display.
 
-*Note:* When saving the RViz configuration, the **Plant Waypoint Tool** sometimes does not get included in the configuration and has to be added each time RViz is started manually. To fix this, you need to add `- Class: statemachine::PlantWaypointTool` to your RViz configuration file by hand. It has to be appended under *Visualization Manager: Tools* as can be seen in the snippet below.
+*Note:* When saving the RViz configuration, the **Plant Waypoint Tool** sometimes does not get included in the configuration and has to be added each time RViz is started manually. To fix this, you need to add `- Class: rsm::PlantWaypointTool` to your RViz configuration file by hand. It has to be appended under *Visualization Manager: Tools* as can be seen in the snippet below.
 
 ```
 ...
@@ -234,16 +234,16 @@ Visualization Manager:
   Name: root
   Tools:
     ...
-    - Class: statemachine::PlantWaypointTool 
+    - Class: rsm::PlantWaypointTool 
   Value: true
   ...
 ```
 
-If the **2D Nav Goal Tool** (Hotkey: "g") from RViz should be used, the respective topic from RViz needs to be remapped, so that it works with the statemachine. The following remap needs to be added to the RViz launch, otherwise the **2D Nav Goal Tool** cannot be used:  
+If the **2D Nav Goal Tool** (Hotkey: "g") from RViz should be used, the respective topic from RViz needs to be remapped, so that it works with the RSM. The following remap needs to be added to the RViz launch, otherwise the **2D Nav Goal Tool** cannot be used:  
 
 ```
 <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" args="-d ...">
-	<remap from="/move_base_simple/goal" to="/statemachine/simpleGoal" />
+	<remap from="/move_base_simple/goal" to="/rsm/simpleGoal" />
 </node>
 ```
 
@@ -251,7 +251,7 @@ If the **2D Nav Goal Tool** (Hotkey: "g") from RViz should be used, the respecti
 
 ### Writing a plugin state
 
-To create a plugin state to be used with the robot statemachine follow the upcoming steps. This is very similar to the ROS tutorial [Writing and Using a Simple Plugin](http://wiki.ros.org/pluginlib/Tutorials/Writing%20and%20Using%20a%20Simple%20Plugin) but also includes some specific details for the statemachine.
+To create a plugin state to be used with the robot RSM follow the upcoming steps. This is very similar to the ROS tutorial [Writing and Using a Simple Plugin](http://wiki.ros.org/pluginlib/Tutorials/Writing%20and%20Using%20a%20Simple%20Plugin) but also includes some specific details for the RSM.
 
 In your package, add the following code to the respective files:   
 
@@ -261,8 +261,8 @@ In your package, add the following code to the respective files:
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   pluginlib
-  statemachine
-  statemachine_msgs
+  rsm_core
+  rsm_msgs
   ...
 )
 ```
@@ -274,12 +274,12 @@ find_package(catkin REQUIRED COMPONENTS
 <build_depend>pluginlib</build_depend>
 <build_export_depend>pluginlib</build_export_depend>
 <exec_depend>pluginlib</exec_depend>
-<exec_depend>statemachine</exec_depend>
-<build_depend>statemachine</build_depend>
-<build_export_depend>statemachine</build_export_depend>
-<build_depend>statemachine_msgs</build_depend>
-<build_export_depend>statemachine_msgs</build_export_depend>
-<exec_depend>statemachine_msgs</exec_depend>
+<exec_depend>rsm_core</exec_depend>
+<build_depend>rsm_core</build_depend>
+<build_export_depend>rsm_core</build_export_depend>
+<build_depend>rsm_msgs</build_depend>
+<build_export_depend>rsm_msgs</build_export_depend>
+<exec_depend>rsm_msgs</exec_depend>
 ...
 ```
 
@@ -290,10 +290,10 @@ Next, create a class consisting of a header and source file in the respective di
 
 ```cpp
 #include <pluginlib/class_list_macros.h>
-#include <statemachine/BaseState.h>
-#include <statemachine/StateInterface.h>
+#include <rsm_core/BaseState.h>
+#include <rsm_core/StateInterface.h>
 
-namespace statemachine {
+namespace rsm {
 
 class ExampleState: public BaseState {
 
@@ -319,7 +319,7 @@ public:
 ```cpp
 #include "ExampleState.h"
 
-namespace statemachine {
+namespace rsm {
 
 ExampleState::ExampleState() {
 	//...
@@ -371,20 +371,20 @@ void ExampleState::onInterrupt(int interrupt) {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(statemachine::ExampleState,
-		statemachine::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::ExampleState,
+		rsm::BaseState)
 
 ```
 
 The state plugin needs to implement all methods declared in the [Base State](#base-state) as `virtual` and enables to add arbitrary functionality to them. The `PLUGINLIB_EXPORT_CLASS` macro registers the class as a plugin to the pluginlib.
 
 To make the plugin available to ROS, an XML file needs to be added in the package that declares them as a library. The file should look like this:  
-*statemachine_example_plugins.xml*:
+*rsm_example_plugins.xml*:
 
 ```xml
-<library path="lib/libstatemachine_example_plugins">
-	<class type="statemachine::ExampleState"
-		base_class_type="statemachine::BaseState">
+<library path="lib/librsm_example_plugins">
+	<class type="rsm::ExampleState"
+		base_class_type="rsm::BaseState">
 		<description>This is the example state.</description>
 	</class>
 	...
@@ -396,7 +396,7 @@ The plugin library needs to be exported as well. Therefore the following lines n
 
 ```xml
 <export>
-	<statemachine plugin="${prefix}/statemachine_example_plugins.xml" />
+	<rsm plugin="${prefix}/rsm_example_plugins.xml" />
 </export>
 ```
 
@@ -404,38 +404,38 @@ The plugin library needs to be exported as well. Therefore the following lines n
 
 With the following statement you can check in the terminal if the plugin was registered correctly:
 
-    rospack plugins --attrib=plugin statemachine
+    rospack plugins --attrib=plugin rsm
     
 It should show:
 
 ```
-"your_package_name" /"your_workspace_path"/src/"your_package_name"/statemachine_example_plugins.xml
-statemachine_additions /home/marco/catkin_ws/src/robot_statemachine/statemachine_additions/statemachine_plugins.xml
+"your_package_name" /"your_workspace_path"/src/"your_package_name"/rsm_example_plugins.xml
+rsm_additions /home/marco/catkin_ws/src/robot_rsm/rsm_additions/rsm_plugins.xml
 ```
-You can now use the plugin state in the robot statemachine.
+You can now use the plugin state in the RSM.
 
-### Use plugin state in the statemachine
+### Use plugin state in the RSM
 
-To use the created plugin from above in the statemachine, it has to be made known to the [State Interface](#state-interface). This needs to be done by setting the respective parameters, either through the launch file or manually when starting the nodes from console. The [State Interface](#state-interface) expects the names for the **Calculate Goal State**, the **Mapping State** and the **Navigation State** plugins. The waypoint **Routine State** plugins need to be given to the [Service Provider](#service-provider). A sample launch with set parameters can be seen in the snippet below, where the plugins defined in [statemachine additions](../statemachine_additions#statemachine-additions) are used. A detailed example can be seen in the [statemachine additions launch files](../statemachine_additions/launch). 
+To use the created plugin from above in the RSM, it has to be made known to the [State Interface](#state-interface). This needs to be done by setting the respective parameters, either through the launch file or manually when starting the nodes from console. The [State Interface](#state-interface) expects the names for the **Calculate Goal State**, the **Mapping State** and the **Navigation State** plugins. The waypoint **Routine State** plugins need to be given to the [Service Provider](#service-provider). A sample launch with set parameters can be seen in the snippet below, where the plugins defined in [RSM additions](../rsm_additions#rsm-additions) are used. A detailed example can be seen in the [RSM additions launch files](../rsm_additions/launch). 
 
 ```
-<include file="$(find statemachine)/launch/statemachine.launch">
-	<arg name="calculate_goal_plugin" value="statemachine::CalculateGoalState" />
-	<arg name="navigation_plugin" value="statemachine::NavigationState" />
-	<arg name="mapping_plugin" value="statemachine::MappingState" />
+<include file="$(find rsm_core)/launch/rsm.launch">
+	<arg name="calculate_goal_plugin" value="rsm::CalculateGoalState" />
+	<arg name="navigation_plugin" value="rsm::NavigationState" />
+	<arg name="mapping_plugin" value="rsm::MappingState" />
 	<arg name="waypoint_routines" value="['Reversing']" />
 	...
 </include>
 ```
 
-The provided plugins can have arbitrary names, though it is recommended to use the *statemachine* namespace to avoid collisions with other packages since the plugin names need to be unique. 
+The provided plugins can have arbitrary names, though it is recommended to use the *rsm* namespace to avoid collisions with other packages since the plugin names need to be unique. 
 
-For waypoint routines up to ten routines can be provided as an array. Each routine plugin must be named like this <pre>statemachine::<i>Name</i>RoutineState</pre>
-*Name* has to be replaced by a uniquely identifying name for the particular routine. For the routines parameter provided only the *Name* needs to be set. So in the above example the plugin corresponding to the `Reversing` routine is called `statemachine::ReversingRoutineState`.
+For waypoint routines up to ten routines can be provided as an array. Each routine plugin must be named like this <pre>rsm::<i>Name</i>RoutineState</pre>
+*Name* has to be replaced by a uniquely identifying name for the particular routine. For the routines parameter provided only the *Name* needs to be set. So in the above example the plugin corresponding to the `Reversing` routine is called `rsm::ReversingRoutineState`.
 
-If additional plugins should be used, their names do not need to be made known to the statemachine up front. How to include them will be explained below.
+If additional plugins should be used, their names do not need to be made known to the RSM up front. How to include them will be explained below.
 
-For a transition to another state, in your implementation of a state the `transitionToVolatileState` method from [State Interface](#state-interface) needs to be called. If a transition to one of the included states is desired, it needs to be included in the header file and and then initialized and handed over as a parameter to the previously mentioned method. This is the first of the below examples. The second is a transition to a plugin state, which is made by providing one of the predefined types from [State Interface](#state-interface) to the method. If it is a routine plugin that should be called, the routine plugin's name needs to be provided as well, see the third example. The last example shows a transition to an additional plugin, where a 0 for the plugin type needs to be given and the name of the plugin without a leading `statemachine::` prefix.
+For a transition to another state, in your implementation of a state the `transitionToVolatileState` method from [State Interface](#state-interface) needs to be called. If a transition to one of the included states is desired, it needs to be included in the header file and and then initialized and handed over as a parameter to the previously mentioned method. This is the first of the below examples. The second is a transition to a plugin state, which is made by providing one of the predefined types from [State Interface](#state-interface) to the method. If it is a routine plugin that should be called, the routine plugin's name needs to be provided as well, see the third example. The last example shows a transition to an additional plugin, where a 0 for the plugin type needs to be given and the name of the plugin without a leading `rsm::` prefix.
 
 1. Transition to already included state:  
 `_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());`
@@ -446,15 +446,15 @@ For a transition to another state, in your implementation of a state the `transi
 4. Transition to additional plugin state:  
 `_stateinterface->transitionToVolatileState(_stateinterface->getPluginState(0, "ClimbStairsState"));`
 
-For a reference implementation of the [Calculate Goal State](../statemachine_additions#calculate-goal-state), the [Navigation State](../statemachine_additions#navigation-state), the [Mapping State](../statemachine_additions#mapping-state) and a routine plugin called [Reversing Routine State](../statemachine_additions#reversing-routine-state), see the [statemachine additions package](../statemachine_additions#statemachine-additions).
+For a reference implementation of the [Calculate Goal State](../rsm_additions#calculate-goal-state), the [Navigation State](../rsm_additions#navigation-state), the [Mapping State](../rsm_additions#mapping-state) and a routine plugin called [Reversing Routine State](../rsm_additions#reversing-routine-state), see the [rsm additions package](../rsm_additions#rsm-additions).
 
-If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the [Additions Service Provider](../statemachine_additions#additions-service-provider) in the package [statemachine addtions](../statemachine_additions#statemachine-additions) for an example.
+If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the [Additions Service Provider](../rsm_additions#additions-service-provider) in the package [RSM addtions](../rsm_additions#rsm-additions) for an example.
 
-*Note*: If the robot should be able to move in reverse mode, a service needs to be implemented called `setNavigationToReverse` which changes the navigation's mode interface in the [Navigation State](../statemachine_additions#navigation-state) plugin and switches between forward and reverse movement. A sample to include into the additional data handler can be seen below. If it is missing, activating reverse mode will only output a matching error.
+*Note*: If the robot should be able to move in reverse mode, a service needs to be implemented called `setNavigationToReverse` which changes the navigation's mode interface in the [Navigation State](../rsm_additions#navigation-state) plugin and switches between forward and reverse movement. A sample to include into the additional data handler can be seen below. If it is missing, activating reverse mode will only output a matching error.
 
 ```cpp
 ...
-ros::NodeHandle nh("statemachine");
+ros::NodeHandle nh("rsm");
 ros::ServiceServer set_navigation_to_reverse_service = nh.advertiseService("setNavigationToReverse", setNavigationToReverse);
 ...
 
@@ -472,15 +472,15 @@ bool setNavigationToReverse(std_srvs::SetBool::Request &req, std_srvs::SetBool::
 
 ## Nodes
 
-### statemachineNode 
+### rsmNode 
 
 This node realizes transitions between the different states.
 
-*Note:* All topics and services are in the **statemachine** namespace.
+*Note:* All topics and services are in the **rsm** namespace.
 
 #### Subscribed Topics
 
-**operationMode** ([statemachine_msgs/OperationMode](../statemachine_msgs/msg/OperationMode.msg))  
+**operationMode** ([rsm_msgs/OperationMode](../rsm_msgs/msg/OperationMode.msg))  
 The current operation mode as set by the GUI or interrupts
 
 **simpleGoal** ([geometry_msgs/PoseStamped](http://docs.ros.org/api/geometry_msgs/html/msg/PoseStamped.html))  
@@ -510,20 +510,20 @@ Call to stop navigation started through RViz tool **2D Nav Goal**
 **~update_frequency** (float, default: 20)  
 Update rate in Hz
 
-**~calculate_goal_plugin** (string, default: "statemachine::CalculateGoalPlugin")  
+**~calculate_goal_plugin** (string, default: "rsm::CalculateGoalPlugin")  
 Sets the plugin's name for the state calculating the next goal.
 
-**~navigation_plugin** (string, default: "statemachine::NavigationPlugin")  
+**~navigation_plugin** (string, default: "rsm::NavigationPlugin")  
 Sets the plugin's name for the navigation state.
 
-**~mapping_plugin** (string, default: "statemachine::MappingPlugin")  
+**~mapping_plugin** (string, default: "rsm::MappingPlugin")  
 Sets the plugin's name for the mapping state.
 
 ### robotControlMuxNode
 
 This node is for controlling if the robot is running autonomous, by teleoperation or is stopped.
 
-*Note:* All topics and services are in the **statemachine** namespace.
+*Note:* All topics and services are in the **rsm** namespace.
 
 #### Subscribed Topics
 
@@ -538,12 +538,12 @@ Publishes autonomy command velocities
 **<cmd_vel_topic>** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
 Command velocity that the robot should follow.
 
-**operationMode** ([statemachine_msgs/OperationMode](../statemachine_msgs/msg/OperationMode.msg))  
+**operationMode** ([rsm_msgs/OperationMode](../rsm_msgs/msg/OperationMode.msg))  
 The current operation mode as set by the GUI or interrupts
 
 #### Services
 
-**setOperationMode** ([statemachine_msgs/SetOperationMode](../statemachine_msgs/msg/OperationMode.msg))  
+**setOperationMode** ([rsm_msgs/SetOperationMode](../rsm_msgs/msg/OperationMode.msg))  
 Sets the operation mode to the given parameter
 
 #### Parameters
@@ -567,7 +567,7 @@ Time until teleoperation is stopped when no new command is received
 
 This node provides services for saving and receiving data needed by the volatile states.
 
-*Note:* All topics and services are in the **statemachine** namespace.
+*Note:* All topics and services are in the **rsm** namespace.
 
 #### Subscribed Topics
 
@@ -576,7 +576,7 @@ List of all currently available exploration goals (only active is exploration mo
 
 #### Published Topics
 
-**waypoints** ([statemachine_msgs/WaypointArray](../statemachine_msgs/msg/WaypointArray.msg))  
+**waypoints** ([rsm_msgs/WaypointArray](../rsm_msgs/msg/WaypointArray.msg))  
 List of all waypoints and their information
 
 **explorationMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
@@ -590,52 +590,52 @@ Information if the robot is currently moving in reverse (true: reverse, false: f
 
 #### Services
 
-**addWaypoint** ([statemachine_msgs/AddWaypoint](../statemachine_msgs/srv/AddWaypoint.srv))  
+**addWaypoint** ([rsm_msgs/AddWaypoint](../rsm_msgs/srv/AddWaypoint.srv))  
 Add a waypoint to the list of waypoints
 
-**getWaypoints** ([statemachine_msgs/GetWaypoints](../statemachine_msgs/srv/GetWaypoints.srv))  
+**getWaypoints** ([rsm_msgs/GetWaypoints](../rsm_msgs/srv/GetWaypoints.srv))  
 Get list of waypoints
 
-**moveWaypoint** ([statemachine_msgs/MoveWaypoint](../statemachine_msgs/srv/MoveWaypoint.srv))  
+**moveWaypoint** ([rsm_msgs/MoveWaypoint](../rsm_msgs/srv/MoveWaypoint.srv))  
 Move the waypoint at the given position in the waypoint list
 
-**removeWaypoint** ([statemachine_msgs/RemoveWaypoint](../statemachine_msgs/srv/RemoveWaypoint.srv))  
+**removeWaypoint** ([rsm_msgs/RemoveWaypoint](../rsm_msgs/srv/RemoveWaypoint.srv))  
 Remove the waypoint at the given position in the waypoint list
 
-**waypointVisited** ([statemachine_msgs/WaypointVisited](../statemachine_msgs/srv/WaypointVisited.srv))  
+**waypointVisited** ([rsm_msgs/WaypointVisited](../rsm_msgs/srv/WaypointVisited.srv))  
 Set the waypoint at the given position in the waypoint list to visited
 
-**waypointUnreachable** ([statemachine_msgs/WaypointUnreachable](../statemachine_msgs/srv/WaypointUnreachable.srv))  
+**waypointUnreachable** ([rsm_msgs/WaypointUnreachable](../rsm_msgs/srv/WaypointUnreachable.srv))  
 Set the waypoint at the given position in the waypoint list to unreachable
 
 **resetWaypoints** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
 Reset all waypoint's status to default
 
-**setWaypointFollowingMode** ([statemachine_msgs/SetWaypointFollowingMode](../statemachine_msgs/srv/SetWaypointFollowingMode.srv))  
+**setWaypointFollowingMode** ([rsm_msgs/SetWaypointFollowingMode](../rsm_msgs/srv/SetWaypointFollowingMode.srv))  
 Sets the waypoint following mode (0: single, 1: roundtrip, 2: patrol)
 
-**setWaypointRoutine** ([statemachine_msgs/SetWaypointRoutine](../statemachine_msgs/srv/SetWaypointRoutine.srv))  
+**setWaypointRoutine** ([rsm_msgs/SetWaypointRoutine](../rsm_msgs/srv/SetWaypointRoutine.srv))  
 Sets the routine of the waypoint at the given position in the waypoint list
 
-**getWaypointRoutines** ([statemachine_msgs/GetWaypointRoutines](../statemachine_msgs/srv/GetWaypointRoutines.srv))  
+**getWaypointRoutines** ([rsm_msgs/GetWaypointRoutines](../rsm_msgs/srv/GetWaypointRoutines.srv))  
 Return the list of all waypoint routines available
 
-**setNavigationGoal** ([statemachine_msgs/SetNavigationGoal](../statemachine_msgs/srv/SetNavigationGoal.srv))  
+**setNavigationGoal** ([rsm_msgs/SetNavigationGoal](../rsm_msgs/srv/SetNavigationGoal.srv))  
 Sets the current navigation goal
 
-**getNavigationGoal** ([statemachine_msgs/GetNavigationGoal](../statemachine_msgs/srv/GetNavigationGoal.srv))  
+**getNavigationGoal** ([rsm_msgs/GetNavigationGoal](../rsm_msgs/srv/GetNavigationGoal.srv))  
 Gets the current navigation goal
 
-**addFailedGoal** ([statemachine_msgs/AddFailedGoal](../statemachine_msgs/srv/AddFailedGoal.srv))  
+**addFailedGoal** ([rsm_msgs/AddFailedGoal](../rsm_msgs/srv/AddFailedGoal.srv))  
 Add an unreachable goal to the list of all failed goals
 
-**getFailedGoals** ([statemachine_msgs/GetFailedGoals](../statemachine_msgs/srv/GetFailedGoals.srv))  
+**getFailedGoals** ([rsm_msgs/GetFailedGoals](../rsm_msgs/srv/GetFailedGoals.srv))  
 Return list of all previously failed goals  
 
 **resetFailedGoals** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
 Deletes the list of previously failed goals
 
-**getRobotPose** ([statemachine_msgs/GetRobotPose](../statemachine_msgs/srv/GetRobotPose.srv))   
+**getRobotPose** ([rsm_msgs/GetRobotPose](../rsm_msgs/srv/GetRobotPose.srv))   
 Return the current robot pose in relation to the map frame
 
 **setExplorationMode** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
