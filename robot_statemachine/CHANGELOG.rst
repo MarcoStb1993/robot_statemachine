@@ -2,8 +2,13 @@
 Changelog for package robot_statemachine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.1.0 (2019-08-05)
+Forthcoming
 -----------
+
+1.1.1 (2019-08-05)
+------------------
+* Formatting for prerelease
+* added changelogs
 * renamed statemachine into rsm and statemachine package into rsm_core
 * Delete .project
 * Delete .cproject
