@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
 	<name>rsm_core</name>
-	<version>1.1.1</version>
+	<version>1.1.2</version>
 	<description>The statemachine package includes the Robot Statemachine's main functionality</description>
 	<maintainer email="marco.stb1993@gmail.com">marco</maintainer>
 	<license>BSD</license>

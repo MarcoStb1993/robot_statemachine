@@ -2,8 +2,8 @@
 Changelog for package rsm_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2019-08-28)
+------------------
 * Added necessary dependency on geometry_msgs to package.xml
 * Contributors: MarcoStb1993
 
