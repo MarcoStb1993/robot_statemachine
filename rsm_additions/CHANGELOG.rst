@@ -2,6 +2,11 @@
 Changelog for package rsm_additions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added all dependencies to CMakeLists and package.xml, that were missing previously
+* Contributors: MarcoStb1993
+
 1.1.2 (2019-08-28)
 ------------------
 
