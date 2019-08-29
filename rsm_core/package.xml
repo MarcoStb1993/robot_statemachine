@@ -2,13 +2,15 @@
 <package format="2">
 	<name>rsm_core</name>
 	<version>1.1.2</version>
-	<description>The statemachine package includes the Robot Statemachine's main functionality</description>
-	<maintainer email="marco.stb1993@gmail.com">marco</maintainer>
+	<description>The statemachine package includes the Robot Statemachine's
+		main functionality</description>
+	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
 	<license>BSD</license>
 	<url type="repository">https://github.com/MarcoStb1993/robot_statemachine</url>
-	<url type="bugtracker">https://github.com/MarcoStb1993/robot_statemachine/issues</url>
+	<url type="bugtracker">https://github.com/MarcoStb1993/robot_statemachine/issues
+	</url>
 	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
-	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author> 
+	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author>
 
 	<buildtool_depend>catkin</buildtool_depend>
 	<build_depend>roscpp</build_depend>
@@ -18,13 +20,24 @@
 	<build_export_depend>tf</build_export_depend>
 	<exec_depend>tf</exec_depend>
 	<build_depend>actionlib</build_depend>
-	<build_depend>actionlib_msgs</build_depend>
 	<build_export_depend>actionlib</build_export_depend>
 	<exec_depend>actionlib</exec_depend>
+	<build_depend>actionlib_msgs</build_depend>
+	<build_export_depend>actionlib_msgs</build_export_depend>
+	<exec_depend>actionlib_msgs</exec_depend>
 	<build_depend>pluginlib</build_depend>
 	<build_export_depend>pluginlib</build_export_depend>
 	<exec_depend>pluginlib</exec_depend>
 	<build_depend>rsm_msgs</build_depend>
 	<build_export_depend>rsm_msgs</build_export_depend>
 	<exec_depend>rsm_msgs</exec_depend>
+	<build_depend>std_msgs</build_depend>
+	<build_export_depend>std_msgs</build_export_depend>
+	<exec_depend>std_msgs</exec_depend>
+	<build_depend>std_srvs</build_depend>
+	<build_export_depend>std_srvs</build_export_depend>
+	<exec_depend>std_srvs</exec_depend>
+	<build_depend>geometry_msgs</build_depend>
+	<build_export_depend>geometry_msgs</build_export_depend>
+	<exec_depend>geometry_msgs</exec_depend>
 </package>

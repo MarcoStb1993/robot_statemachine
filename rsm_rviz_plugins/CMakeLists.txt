@@ -9,6 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
   rsm_msgs
   visualization_msgs
   interactive_markers
+  std_msgs
+  std_srvs
+  pluginlib
+  tf
 )
 
 #link_directories(${catkin_LIBRARY_DIRS})

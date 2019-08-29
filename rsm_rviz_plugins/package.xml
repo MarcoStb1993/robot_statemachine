@@ -2,23 +2,28 @@
 <package format="2">
 	<name>rsm_rviz_plugins</name>
 	<version>1.1.2</version>
-	<description>The rsm_rviz_plugins package includes the Robot Statemachine GUI plugin for RViz and the waypoint visualization</description>
-	<maintainer email="marco.stb1993@gmail.com">marco</maintainer>
+	<description>The rsm_rviz_plugins package includes the Robot
+		Statemachine GUI plugin for RViz and the waypoint visualization
+	</description>
+	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
 	<license>BSD</license>
 	<url type="repository">https://github.com/MarcoStb1993/robot_rsm</url>
 	<url type="bugtracker">https://github.com/MarcoStb1993/robot_rsm/issues</url>
 	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
-	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author> 
+	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author>
 
 	<buildtool_depend>catkin</buildtool_depend>
-
-	<exec_depend>roscpp</exec_depend>
 	<build_depend>roscpp</build_depend>
-	<exec_depend>rviz</exec_depend>
+	<build_export_depend>roscpp</build_export_depend>
+	<exec_depend>roscpp</exec_depend>
 	<build_depend>rviz</build_depend>
+	<build_export_depend>rviz</build_export_depend>
+	<exec_depend>rviz</exec_depend>
 	<build_depend>interactive_markers</build_depend>
+	<build_export_depend>interactive_markers</build_export_depend>
 	<exec_depend>interactive_markers</exec_depend>
 	<build_depend>visualization_msgs</build_depend>
+	<build_export_depend>visualization_msgs</build_export_depend>
 	<exec_depend>visualization_msgs</exec_depend>
 	<build_depend>rsm_msgs</build_depend>
 	<build_export_depend>rsm_msgs</build_export_depend>
@@ -26,6 +31,18 @@
 	<build_depend>cmake_modules</build_depend>
 	<build_export_depend>cmake_modules</build_export_depend>
 	<exec_depend>cmake_modules</exec_depend>
+	<build_depend>std_msgs</build_depend>
+	<build_export_depend>std_msgs</build_export_depend>
+	<exec_depend>std_msgs</exec_depend>
+	<build_depend>std_srvs</build_depend>
+	<build_export_depend>std_srvs</build_export_depend>
+	<exec_depend>std_srvs</exec_depend>
+	<build_depend>pluginlib</build_depend>
+	<build_export_depend>pluginlib</build_export_depend>
+	<exec_depend>pluginlib</exec_depend>
+	<build_depend>tf</build_depend>
+	<build_export_depend>tf</build_export_depend>
+	<exec_depend>tf</exec_depend>
 
 	<export>
 		<rviz plugin="${prefix}/rsm_rviz_plugins.xml" />

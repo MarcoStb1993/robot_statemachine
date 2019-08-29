@@ -2,13 +2,14 @@
 <package format="2">
 	<name>rsm_rqt_plugins</name>
 	<version>1.1.2</version>
-	<description>The rsm_rqt_plugins package includes the Robot Statemachine GUI plugin for rqt</description>
-	<maintainer email="marco.stb1993@gmail.com">marco</maintainer>
+	<description>The rsm_rqt_plugins package includes the Robot
+		Statemachine GUI plugin for rqt</description>
+	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
 	<license>BSD</license>
 	<url type="repository">https://github.com/MarcoStb1993/robot_rsm</url>
 	<url type="bugtracker">https://github.com/MarcoStb1993/robot_rsm/issues</url>
 	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
-	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author> 
+	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author>
 
 
 	<buildtool_depend>catkin</buildtool_depend>
@@ -27,6 +28,12 @@
 	<build_depend>cmake_modules</build_depend>
 	<build_export_depend>cmake_modules</build_export_depend>
 	<exec_depend>cmake_modules</exec_depend>
+	<build_depend>std_msgs</build_depend>
+	<build_export_depend>std_msgs</build_export_depend>
+	<exec_depend>std_msgs</exec_depend>
+	<build_depend>std_srvs</build_depend>
+	<build_export_depend>std_srvs</build_export_depend>
+	<exec_depend>std_srvs</exec_depend>
 
 	<export>
 		<rqt_gui plugin="${prefix}/rsm_rqt_plugins.xml" />

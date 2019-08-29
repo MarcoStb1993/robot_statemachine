@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
   rqt_gui
   rqt_gui_cpp
   rsm_msgs
+  std_msgs
+  std_srvs
 )
 
 set(CMAKE_AUTORCC ON)

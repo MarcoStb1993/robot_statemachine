@@ -10,6 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   rsm_msgs
+  std_srvs
+  std_msgs
+  geometry_msgs
 )
 
 catkin_package(

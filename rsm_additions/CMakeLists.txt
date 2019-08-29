@@ -12,6 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   rsm_msgs
   visualization_msgs
   move_base_msgs
+  std_msgs
+  std_srvs
+  geometry_msgs
+  sensor_msgs
+  tf
 )
 
 catkin_package(

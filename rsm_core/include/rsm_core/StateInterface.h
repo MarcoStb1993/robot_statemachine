@@ -10,7 +10,6 @@
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Trigger.h>
 #include <pluginlib/class_loader.h>
-#include <map>
 #include <rsm_core/BaseState.h>
 #include <rsm_core/IdleState.h>
 
