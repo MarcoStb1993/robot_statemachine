@@ -15,5 +15,6 @@ int main(int argc, char **argv) {
 			loopCallback);
 	service_provider.reset(new rsm::ServiceProvider());
 	ros::spin();
+	service_provider.reset();
 	return 0;
 }

@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
 	stateInterface->awake();
 	loop_timer.start();
 	ros::spin();
+	stateInterface.reset();
 	return 0;
 }
 

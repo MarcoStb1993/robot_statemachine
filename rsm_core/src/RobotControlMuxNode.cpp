@@ -16,5 +16,6 @@ int main(int argc, char **argv) {
 			loopCallback);
 	robot_control_mux.reset(new rsm::RobotControlMux());
 	ros::spin();
+	robot_control_mux.reset();
 	return 0;
 }

@@ -17,5 +17,6 @@ int main(int argc, char **argv) {
 	service_provider.reset(
 			new rsm::AdditionsServiceProvider());
 	ros::spin();
+	service_provider.reset();
 	return 0;
 }
