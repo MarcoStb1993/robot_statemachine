@@ -7,6 +7,7 @@ RSMControlPanel::RSMControlPanel(QWidget* parent) :
 	_gui->setupUi(this);
 	initCommunications();
 	connectSlots();
+	_operation_mode_button_pushed = false;
 	_exploration_running = false;
 	_waypoint_following_running = false;
 	_emergency_stop_active = false;
@@ -27,17 +28,15 @@ void RSMControlPanel::initCommunications() {
 	_waypoint_reset_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetWaypoints");
 	_set_waypoint_following_mode_client = nh.serviceClient<
-			rsm_msgs::SetWaypointFollowingMode>(
-			"setWaypointFollowingMode");
+			rsm_msgs::SetWaypointFollowingMode>("setWaypointFollowingMode");
 
 	_state_info_subscriber = nh.subscribe("stateInfo", 10,
 			&RSMControlPanel::stateInfoCallback, this);
 	_state_info_client = nh.serviceClient<std_srvs::Trigger>("stateInfo");
-	_set_operation_mode_client = nh.serviceClient<
-			rsm_msgs::SetOperationMode>("setOperationMode");
+	_set_operation_mode_client = nh.serviceClient<rsm_msgs::SetOperationMode>(
+			"setOperationMode");
 	_operation_mode_subcriber = nh.subscribe<rsm_msgs::OperationMode>(
-			"operationMode", 1,
-			&RSMControlPanel::operationModeCallback, this);
+			"operationMode", 1, &RSMControlPanel::operationModeCallback, this);
 
 	_set_reverse_mode_client = nh.serviceClient<std_srvs::SetBool>(
 			"setReverseMode");
@@ -246,6 +245,7 @@ srv.request.operationMode.emergencyStop = _emergency_stop_active;
 srv.request.operationMode.mode = _operation_mode;
 if (_set_operation_mode_client.call(srv)) {
 	updateOperationModeGUI();
+	_operation_mode_button_pushed = true;
 } else {
 	ROS_ERROR("Failed to call service Set Operation Mode");
 	_gui->control_label->setText(
@@ -327,9 +327,13 @@ _gui->reverse_checkbox->setChecked(_reverse_mode);
 
 void RSMControlPanel::operationModeCallback(
 	const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
-_emergency_stop_active = operation_mode->emergencyStop;
-_operation_mode = operation_mode->mode;
-updateOperationModeGUI();
+if (_operation_mode_button_pushed) {
+	_operation_mode_button_pushed = false;
+} else {
+	_emergency_stop_active = operation_mode->emergencyStop;
+	_operation_mode = operation_mode->mode;
+	updateOperationModeGUI();
+}
 }
 
 void RSMControlPanel::initRoutineComboBox() {
@@ -383,6 +387,6 @@ void RSMControlPanel::load(const rviz::Config& config) {
 rviz::Panel::load(config);
 }
 
-}  // end namespace moveit_dashboard
+}  // end namespace rsm
 
 PLUGINLIB_EXPORT_CLASS(rsm::RSMControlPanel, rviz::Panel)

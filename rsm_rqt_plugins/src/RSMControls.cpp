@@ -18,6 +18,7 @@ void RSMControlPanel::initPlugin(qt_gui_cpp::PluginContext& context) {
 	context.addWidget(_widget_main);
 	initCommunications();
 	connectSlots();
+	_operation_mode_button_pushed = false;
 	_exploration_running = false;
 	_waypoint_following_running = false;
 	_emergency_stop_active = false;
@@ -257,6 +258,7 @@ srv.request.operationMode.emergencyStop = _emergency_stop_active;
 srv.request.operationMode.mode = _operation_mode;
 if (_set_operation_mode_client.call(srv)) {
 	updateOperationModeGUI();
+	_operation_mode_button_pushed = true;
 } else {
 	ROS_ERROR("Failed to call service Set Operation Mode");
 	_gui->control_label->setText(
@@ -338,9 +340,13 @@ _gui->reverse_checkbox->setChecked(_reverse_mode);
 
 void RSMControlPanel::operationModeCallback(
 	const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
-_emergency_stop_active = operation_mode->emergencyStop;
-_operation_mode = operation_mode->mode;
-updateOperationModeGUI();
+	if (_operation_mode_button_pushed) {
+		_operation_mode_button_pushed = false;
+	} else {
+		_emergency_stop_active = operation_mode->emergencyStop;
+		_operation_mode = operation_mode->mode;
+		updateOperationModeGUI();
+	}
 }
 
 void RSMControlPanel::initRoutineComboBox() {

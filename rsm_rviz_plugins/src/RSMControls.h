@@ -83,6 +83,10 @@ private:
 	ros::Subscriber _exploration_mode_subscriber;
 
 	/**
+	 * @brief Was an operation mode button just pushed
+	 */
+	bool _operation_mode_button_pushed;
+	/**
 	 * @brief Is the exploration currently running
 	 */
 	bool _exploration_running;
