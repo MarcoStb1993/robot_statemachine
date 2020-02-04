@@ -3,8 +3,14 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Joy.h>
 #include <rsm_msgs/OperationMode.h>
 #include <rsm_msgs/SetOperationMode.h>
+
+/**
+ * Threshold for minimal movement of joysticks to be recognized as and intended command
+ */
+#define MOVE_THRESH 0.05
 
 namespace rsm {
 
@@ -34,6 +40,7 @@ private:
 	ros::ServiceServer _set_operation_mode_service;
 	ros::Subscriber _teleoperation_cmd_vel_sub;
 	ros::Subscriber _autonomy_cmd_vel_sub;
+	ros::Subscriber _joystick_sub;
 	ros::Publisher _cmd_vel_pub;
 	ros::Publisher _operation_mode_pub;
 	ros::Timer _teleoperation_idle_timer;
@@ -41,9 +48,10 @@ private:
 	std::string _teleoperation_cmd_vel_topic;
 	std::string _autonomy_operation_cmd_vel_topic;
 	std::string _cmd_vel_topic;
+	std::string _joystick_topic;
 
 	/**
-	 * Time until teleoperation mode will stopped when no new message is received
+	 * Time until teleoperation mode will be stopped when no new message is received
 	 */
 	double _teleoperation_idle_timer_duration;
 	/**
@@ -55,6 +63,10 @@ private:
 	 */
 	bool _emergency_stop_active;
 	/**
+	 * Is a joystick in use for controlling the robot
+	 */
+	bool _joystick_used;
+	/**
 	 * Last received command velocity from autonomy
 	 */
 	geometry_msgs::Twist _autonomy_cmd_vel;
@@ -62,6 +74,10 @@ private:
 	 * Last received command velocity from teleoperation
 	 */
 	geometry_msgs::Twist _teleoperation_cmd_vel;
+	/**
+	 * Last received joystick command
+	 */
+	sensor_msgs::Joy _joystick_cmd;
 
 	/**
 	 * Publish the cmd vel controlling the robot depending on the current operation mode
@@ -83,10 +99,21 @@ private:
 	void teleoperationCmdVelCallback(
 			const geometry_msgs::Twist::ConstPtr& cmd_vel);
 	/**
+	 * Callback for receiving the commands issued from a connected joystick and checks if a new command was sent
+	 * @param joy Joystick commands
+	 */
+	void joystickCallback(const sensor_msgs::Joy::ConstPtr& joy);
+	/**
 	 * Timer callback for checking if teleoperation was stopped and robot is idle again
 	 * @param event
 	 */
 	void teleoperationIdleTimerCallback(const ros::TimerEvent& event);
+	/**
+	 * Checks if the given joystick command will make the robot move and is different to the previous one
+	 * @param joy Joystick commands
+	 * @return If the new command will lead to a robot action
+	 */
+	bool checkJoystickCommand(const sensor_msgs::Joy::ConstPtr& joy);
 	bool setOperationMode(rsm_msgs::SetOperationMode::Request &req,
 			rsm_msgs::SetOperationMode::Response &res);
 

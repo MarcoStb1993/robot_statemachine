@@ -3,20 +3,20 @@
 	<arg name="update_frequency" default="20" />
 	<arg name="robot_frame" default="/base_footprint" />
 	<arg name="mapping_plugin" default="rsm::MappingDummyState" />
-	<arg name="calculate_goal_plugin"
-		default="rsm::CalculateGoalState" />
-	<arg name="navigation_plugin"
-		default="rsm::NavigationState" />
+	<arg name="calculate_goal_plugin" default="rsm::CalculateGoalState" />
+	<arg name="navigation_plugin" default="rsm::NavigationState" />
 	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
 	<arg name="teleoperation_cmd_vel_topic"
 		default="/teleoperation/cmd_vel" />
 	<arg name="cmd_vel_topic" default="/cmd_vel" />
-	<arg name="teleoperation_idle_timer" default="0.5" />"
+	<arg name="joystick_used" default="false" />
+	<arg name="joystick_topic" default="joy" />
+	<arg name="teleoperation_idle_timer" default="0.5" />
+	"
 	<arg name="waypoint_routines" default="[]" />
 	<arg name="exploration_goal_tolerance" default="0.05" />
 
-	<node pkg="rsm_core" type="rsmNode"
-		name="rsmNode" output="screen">
+	<node pkg="rsm_core" type="rsmNode" name="rsmNode" output="screen">
 		<param name="update_frequency" type="double"
 			value="$(arg update_frequency)" />
 		<param name="calculate_goal_plugin" type="string"
@@ -34,7 +34,8 @@
 		<param name="robot_frame" type="string"
 			value="$(arg robot_frame)" />
 		<rosparam param="waypoint_routines" subst_value="True">$(arg waypoint_routines)</rosparam>
-		<param name="exploration_goal_tolerance" type="double" value="$(arg exploration_goal_tolerance)" />
+		<param name="exploration_goal_tolerance" type="double"
+			value="$(arg exploration_goal_tolerance)" />
 	</node>
 
 	<node pkg="rsm_core" type="robotControlMuxNode"
@@ -47,6 +48,10 @@
 			value="$(arg teleoperation_cmd_vel_topic)" />
 		<param name="cmd_vel_topic" type="string"
 			value="$(arg cmd_vel_topic)" />
+		<param name="joystick_used" type="bool"
+			value="$(arg joystick_used)" />
+		<param name="joystick_topic" type="string"
+			value="$(arg joystick_topic)" />
 		<param name="teleoperation_idle_timer" type="double"
 			value="$(arg teleoperation_idle_timer)" />
 	</node>
