@@ -1,0 +1,12 @@
+<!-- Launches RViz to control Schrödi with the Robot Statemachine -->
+
+<launch>
+	<node pkg="rviz" type="rviz" name="rviz"
+		args="-d $(find rsm_additions)/config/schroedi/schroedi.rviz">
+		<remap from="/move_base_simple/goal" to="/rsm/simpleGoal" />
+	</node>
+	<include
+		file="$(find rsm_rviz_plugins)/launch/rsm_rviz_plugins.launch">
+		<arg name="update_frequency" value="20" />
+	</include>
+</launch>

@@ -8,11 +8,9 @@
 	<arg name="joystick_used" default="true" />
 	<arg name="joystick_topic" default="/joy" />
 	<arg name="goal_plugin" default="rsm::CalculateGoalState" />
-	<arg name="navigation_plugin"
-		default="rsm::NavigationState" />
+	<arg name="navigation_plugin" default="rsm::NavigationState" />
 	<arg name="mapping_plugin" default="rsm::MappingDummyState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
-	<arg name="rviz" default="true" />
 
 	<include file="$(find rsm_core)/launch/rsm.launch">
 		<arg name="update_frequency" value="20" />
@@ -31,13 +29,12 @@
 		<arg name="exploration_goal_tolerance" value="0.05" />
 	</include>
 
-	<node pkg="rsm_additions" type="bootUpNode"
-		name="bootUpNode" output="screen">
+	<node pkg="rsm_additions" type="bootUpNode" name="bootUpNode"
+		output="screen">
 		<param name="wait_time" value="2" />
 	</node>
 
-	<node pkg="rsm_additions"
-		type="additionsServiceProviderNode"
+	<node pkg="rsm_additions" type="additionsServiceProviderNode"
 		name="additionsServiceProviderNode">
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
@@ -123,14 +120,4 @@
 		<param name="min_frontier_size" value="0.75" />
 		<remap from="/move_base" to="/frontier_move_base" />
 	</node>
-	
-	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
-		args="-d $(find rsm_additions)/config/schroedi/schroedi.rviz">
-		<remap from="/move_base_simple/goal"
-			to="/rsm/simpleGoal" />
-	</node>
-	<include if="$(arg rviz)"
-		file="$(find rsm_rviz_plugins)/launch/rsm_rviz_plugins.launch">
-		<arg name="update_frequency" value="20" />
-	</include>
 </launch>
