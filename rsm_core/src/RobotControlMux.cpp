@@ -29,6 +29,9 @@ RobotControlMux::RobotControlMux() {
 	_operation_mode_pub = nh.advertise<rsm_msgs::OperationMode>("operationMode",
 			1);
 
+	_pub_pan_des = _nh.advertise<std_msgs::Float32>("/pan/pos/des", 1);
+	_pub_tilt_des = _nh.advertise<std_msgs::Float32>("/tilt/pos/des", 1);
+
 	_teleoperation_idle_timer = _nh.createTimer(
 			ros::Duration(_teleoperation_idle_timer_duration),
 			&RobotControlMux::teleoperationIdleTimerCallback, this, false,
@@ -45,6 +48,7 @@ RobotControlMux::~RobotControlMux() {
 void RobotControlMux::publishTopics() {
 	publishCmdVel();
 	publishOperationMode();
+	publishScannerStabilizer();
 }
 
 void RobotControlMux::publishCmdVel() {
@@ -64,6 +68,15 @@ void RobotControlMux::publishOperationMode() {
 	msg.emergencyStop = _emergency_stop_active;
 	msg.mode = _operation_mode;
 	_operation_mode_pub.publish(msg);
+}
+
+void RobotControlMux::publishScannerStabilizer() {
+	if (_operation_mode == rsm_msgs::OperationMode::AUTONOMOUS) {
+		std_msgs::Float32 msg;
+		msg.data = 0.0;
+		_pub_pan_des.publish(msg);
+		_pub_tilt_des.publish(msg);
+	}
 }
 
 bool RobotControlMux::setOperationMode(rsm_msgs::SetOperationMode::Request &req,

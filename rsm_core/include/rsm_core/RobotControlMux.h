@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Joy.h>
+#include <std_msgs/Float32.h>
 #include <rsm_msgs/OperationMode.h>
 #include <rsm_msgs/SetOperationMode.h>
 
@@ -43,6 +44,8 @@ private:
 	ros::Subscriber _joystick_sub;
 	ros::Publisher _cmd_vel_pub;
 	ros::Publisher _operation_mode_pub;
+	ros::Publisher _pub_pan_des;
+	ros::Publisher _pub_tilt_des;
 	ros::Timer _teleoperation_idle_timer;
 
 	std::string _teleoperation_cmd_vel_topic;
@@ -87,6 +90,10 @@ private:
 	 * Publish current operation mode
 	 */
 	void publishOperationMode();
+	/**
+	 * Publish commands to keep the scanner stable
+	 */
+	void publishScannerStabilizer();
 	/**
 	 * Callback for receiving the cmd vel produced by autonomous operation
 	 * @param cmd_vel Cmd vel from autonomous operation
