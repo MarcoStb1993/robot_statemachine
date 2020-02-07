@@ -36,8 +36,12 @@ RobotControlMux::RobotControlMux() {
 			ros::Duration(_teleoperation_idle_timer_duration),
 			&RobotControlMux::teleoperationIdleTimerCallback, this, false,
 			false);
+	_joystick_connected_timer = _nh.createTimer(
+				ros::Duration(_teleoperation_idle_timer_duration),
+				&RobotControlMux::joystickConnectedTimerCallback, this, false,
+				false);
 
-	_emergency_stop_active = 0;
+	_emergency_stop_active = false;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 }
 
@@ -114,6 +118,7 @@ void RobotControlMux::teleoperationCmdVelCallback(
 
 void RobotControlMux::joystickCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 	if (!_emergency_stop_active) {
+		_joystick_connected_timer.stop();
 		if (checkJoystickCommand(joy)) {
 			_operation_mode = rsm_msgs::OperationMode::TELEOPERATION;
 			_teleoperation_idle_timer.stop();
@@ -121,6 +126,7 @@ void RobotControlMux::joystickCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 		if (_operation_mode == rsm_msgs::OperationMode::TELEOPERATION) {
 			_teleoperation_idle_timer.start();
 		}
+		_joystick_connected_timer.start();
 	}
 }
 
@@ -130,6 +136,11 @@ void RobotControlMux::teleoperationIdleTimerCallback(
 	geometry_msgs::Twist empty_cmd_vel;
 	_teleoperation_cmd_vel = empty_cmd_vel;
 	_teleoperation_idle_timer.stop();
+}
+
+void RobotControlMux::joystickConnectedTimerCallback(const ros::TimerEvent& event) {
+	_emergency_stop_active = true;
+	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 }
 
 bool RobotControlMux::checkJoystickCommand(

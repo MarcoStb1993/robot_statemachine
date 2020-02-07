@@ -47,6 +47,7 @@ private:
 	ros::Publisher _pub_pan_des;
 	ros::Publisher _pub_tilt_des;
 	ros::Timer _teleoperation_idle_timer;
+	ros::Timer _joystick_connected_timer;
 
 	std::string _teleoperation_cmd_vel_topic;
 	std::string _autonomy_operation_cmd_vel_topic;
@@ -115,6 +116,11 @@ private:
 	 * @param event
 	 */
 	void teleoperationIdleTimerCallback(const ros::TimerEvent& event);
+	/**
+	 * Timer callback for checking if joystick commands are still received or if it disconnected
+	 * @param event
+	 */
+	void joystickConnectedTimerCallback(const ros::TimerEvent& event);
 	/**
 	 * Checks if the given joystick command will make the robot move and is different to the previous one
 	 * @param joy Joystick commands
