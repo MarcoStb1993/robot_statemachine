@@ -5,10 +5,9 @@
 	<description>The rsm_rviz_plugins package includes the Robot
 		Statemachine GUI plugin for RViz and the waypoint visualization
 	</description>
-	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
 	<license>BSD</license>
-	<url type="repository">https://github.com/MarcoStb1993/robot_rsm</url>
-	<url type="bugtracker">https://github.com/MarcoStb1993/robot_rsm/issues</url>
+	<url type="repository">https://github.com/MarcoStb1993/robot_statemachine</url>
+	<url type="bugtracker">https://github.com/MarcoStb1993/robot_statemachine/issues</url>
 	<maintainer email="marco.stb1993@gmail.com">Marco Steinbrink</maintainer>
 	<author email="marco.stb1993@gmail.com">Marco Steinbrink</author>
 
