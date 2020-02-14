@@ -1,0 +1,5 @@
+geometry_msgs/Pose goal			 	# Exploration goal that has been completed
+bool goal_reached					# If the goal was reached or aborted
+---
+bool success                        # Indicate successful run of triggered service
+string message                      # Informational, e.g. for error messages

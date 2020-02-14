@@ -78,6 +78,8 @@ as obsolete is called. A tolerance for comparing these positions can be set with
 
 Furthermore, goals that could not be reached during exploration, here named as
 failed goals, can be set, retrieved or reset. These serve as a way of blacklisting goals.
+This normally happens, when the navigation finishes. Then a service in the Additions Service
+Provider is called, that handles the outcome for the exploration.
 
 For driving in reverse mode, the velocity commands issued by the reverse navigation 
 stack are also subscribed to and republished with negated linear velocities. It also 
@@ -166,6 +168,9 @@ Return list of all previously failed goals
 
 **resetFailedGoals** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
 Deletes the list of previously failed goals
+
+**explorationGoalCompleted** ([rsm_msgs/ExplorationGoalCompleted](../rsm_msgs/srv/ExplorationGoalCompleted.srv))  
+Depending on the success of reaching the goal, clears the failed goals if it was reached or adds a new one if it was not
 
 #### Parameters
 

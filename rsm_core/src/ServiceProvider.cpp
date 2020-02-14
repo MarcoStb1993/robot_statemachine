@@ -37,6 +37,9 @@ ServiceProvider::ServiceProvider() {
 			&ServiceProvider::setNavigationGoal, this);
 	_get_navigation_goal_service = nh.advertiseService("getNavigationGoal",
 			&ServiceProvider::getNavigationGoal, this);
+	_navigation_goal_completed_service = nh.advertiseService(
+			"navigationGoalCompleted", &ServiceProvider::NavigationGoalCompleted,
+			this);
 
 	_set_goal_obsolete_service = nh.advertiseService("setGoalObsolete",
 			&ServiceProvider::setGoalObsolete, this);
@@ -52,6 +55,8 @@ ServiceProvider::ServiceProvider() {
 			&ServiceProvider::getExplorationMode, this);
 	_exploration_mode_publisher = nh.advertise<std_msgs::Bool>(
 			"explorationMode", 1);
+	_exploration_goal_completed_service = nh.serviceClient<
+			rsm_msgs::ExplorationGoalCompleted>("explorationGoalCompleted");
 
 	_set_reverse_mode_service = nh.advertiseService("setReverseMode",
 			&ServiceProvider::setReverseMode, this);
@@ -233,6 +238,50 @@ bool ServiceProvider::getNavigationGoal(
 	res.navigationMode = _navigation_mode;
 	res.waypointPosition = _waypoint_position;
 	res.routine = _routine;
+	return true;
+}
+
+bool ServiceProvider::NavigationGoalCompleted(std_srvs::SetBool::Request &req,
+		std_srvs::SetBool::Response &res) {
+	switch (_navigation_mode) {
+	case 0: { //Exploration
+		rsm_msgs::ExplorationGoalCompleted srv;
+		if (req.data) {
+			srv.request.goal_reached = true;
+			res.message = "Exploration goal reached";
+		} else {
+			srv.request.goal_reached = false;
+			srv.request.goal = _navigation_goal;
+			res.message = "Exploration goal aborted";
+		}
+		if (!_exploration_goal_completed_service.call(srv)) {
+			ROS_ERROR("Failed to call Exploration Goal Completed service");
+		}
+		break;
+	}
+	case 1: { //Waypoint following
+		if (req.data) {
+			if (_waypoint_position >= 0
+					&& _waypoint_position < _waypoint_array.waypoints_size) {
+				_waypoint_array.waypoints[_waypoint_position].visited = true;
+			}
+			res.message = "Waypoint reached";
+		} else {
+			if (_waypoint_position >= 0
+					&& _waypoint_position < _waypoint_array.waypoints_size) {
+				_waypoint_array.waypoints[_waypoint_position].unreachable =
+						true;
+			}
+			res.message = "Waypoint aborted";
+		}
+		break;
+	}
+	default: {
+		res.message = "Navigation goal completed";
+		break;
+	}
+	}
+	res.success = 1;
 	return true;
 }
 

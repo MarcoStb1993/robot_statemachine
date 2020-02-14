@@ -1,6 +1,5 @@
 ---
 geometry_msgs/Pose goal 			# Goal for navigation
-geometry_msgs/PoseArray failedGoals # List of previously failed goals
 int8 navigationMode					# Mode of navigation (Exploration=0, Waypoint following=1 and Simple Goal=2)
 int64 waypointPosition				# Position of waypoint in array
 string routine						# Routine plugin name to be executed at waypoint

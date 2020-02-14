@@ -53,13 +53,17 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 			"explorationGoals", 1);
 	_exploration_mode_subscriber = nh.subscribe("explorationMode", 1,
 			&AdditionsServiceProvider::explorationModeCallback, this);
-	_set_goal_obsolete_service = nh.serviceClient<std_srvs::Trigger>("setGoalObsolete");
+	_set_goal_obsolete_service = nh.serviceClient<std_srvs::Trigger>(
+			"setGoalObsolete");
 	_add_failed_goal_service = nh.advertiseService("addFailedGoal",
 			&AdditionsServiceProvider::addFailedGoal, this);
 	_get_failed_goals_service = nh.advertiseService("getFailedGoals",
 			&AdditionsServiceProvider::getFailedGoals, this);
 	_reset_failed_goals_service = nh.advertiseService("resetFailedGoals",
 			&AdditionsServiceProvider::resetFailedGoals, this);
+	_exploration_goal_completed_service = nh.advertiseService(
+			"explorationGoalCompleted",
+			&AdditionsServiceProvider::explorationGoalCompleted, this);
 	_get_navigation_goal_service =
 			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
 
@@ -128,6 +132,20 @@ bool AdditionsServiceProvider::resetFailedGoals(std_srvs::Trigger::Request &req,
 	return true;
 }
 
+bool AdditionsServiceProvider::explorationGoalCompleted(
+		rsm_msgs::ExplorationGoalCompleted::Request &req,
+		rsm_msgs::ExplorationGoalCompleted::Response &res) {
+	if (req.goal_reached) {
+		_failed_goals.poses.clear();
+		res.message = "Failed goals cleared";
+	} else {
+		_failed_goals.poses.push_back(req.goal);
+		res.message = "Failed goal added";
+	}
+	res.success = 1;
+	return true;
+}
+
 void AdditionsServiceProvider::frontierCallback(
 		const visualization_msgs::MarkerArray::ConstPtr& frontiers) {
 	_exploration_goals.poses.clear();
@@ -144,10 +162,9 @@ void AdditionsServiceProvider::frontierCallback(
 			}
 		}
 	}
-	if(_exploration_mode && !navGoalIncludedInFrontiers()){
+	if (_exploration_mode && !navGoalIncludedInFrontiers()) {
 		std_srvs::Trigger srv;
-		if(!_set_goal_obsolete_service.call(srv))
-		{
+		if (!_set_goal_obsolete_service.call(srv)) {
 			ROS_ERROR("Failed to call Set Goal Obsolete service");
 		}
 	}

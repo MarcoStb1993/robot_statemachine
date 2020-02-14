@@ -17,6 +17,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <rsm_msgs/SetNavigationGoal.h>
 #include <rsm_msgs/GetNavigationGoal.h>
+#include <rsm_msgs/ExplorationGoalCompleted.h>
 
 #include <rsm_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
@@ -66,6 +67,7 @@ private:
 
 	ros::ServiceServer _set_navigation_goal_service;
 	ros::ServiceServer _get_navigation_goal_service;
+	ros::ServiceServer _navigation_goal_completed_service;
 
 	ros::ServiceServer _get_robot_pose_service;
 	tf::TransformListener _transform_listener;
@@ -76,6 +78,7 @@ private:
 	ros::ServiceServer _set_goal_obsolete_service;
 	ros::ServiceServer _get_goal_obsolete_service;
 	ros::Publisher _goal_obsolete_publisher;
+	ros::ServiceClient _exploration_goal_completed_service;
 
 	ros::ServiceServer _set_reverse_mode_service;
 	ros::ServiceServer _get_reverse_mode_service;
@@ -157,6 +160,8 @@ private:
 			rsm_msgs::SetNavigationGoal::Response &res);
 	bool getNavigationGoal(rsm_msgs::GetNavigationGoal::Request &req,
 			rsm_msgs::GetNavigationGoal::Response &res);
+	bool NavigationGoalCompleted(std_srvs::SetBool::Request &req,
+			std_srvs::SetBool::Response &res);
 
 	bool getRobotPose(rsm_msgs::GetRobotPose::Request &req,
 			rsm_msgs::GetRobotPose::Response &res);

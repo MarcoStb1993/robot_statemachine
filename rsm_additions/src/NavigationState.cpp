@@ -11,16 +11,10 @@ NavigationState::~NavigationState() {
 void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("rsm");
-	_get_navigation_goal_service = nh.serviceClient<
-			rsm_msgs::GetNavigationGoal>("getNavigationGoal");
-	_add_failed_goal_service =
-			nh.serviceClient<rsm_msgs::AddFailedGoal>("addFailedGoal");
-	_reset_failed_goals_service = nh.serviceClient<std_srvs::Trigger>(
-			"resetFailedGoals");
-	_waypoint_visited_service = nh.serviceClient<
-			rsm_msgs::WaypointVisited>("waypointVisited");
-	_waypoint_unreachable_service = nh.serviceClient<
-			rsm_msgs::WaypointUnreachable>("waypointUnreachable");
+	_get_navigation_goal_service =
+			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
+	_navigation_goal_completed_service = nh.serviceClient<
+			std_srvs::SetBool>("navigationGoalCompleted");
 	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
 	_get_reverse_mode_service = nh.serviceClient<std_srvs::Trigger>(
@@ -35,6 +29,7 @@ void NavigationState::onSetup() {
 	_name = "Navigation";
 	_navigation_mode = -1;
 	_goal_active = false;
+	_reverse_mode = false;
 	_exploration_mode = -1;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 }
@@ -44,9 +39,7 @@ void NavigationState::onEntry() {
 	rsm_msgs::GetNavigationGoal srv;
 	if (_get_navigation_goal_service.call(srv)) {
 		_nav_goal = srv.response.goal;
-		_failed_goals = srv.response.failedGoals.poses;
 		_navigation_mode = srv.response.navigationMode;
-		_waypoint_position = srv.response.waypointPosition;
 		_routine = srv.response.routine;
 		switch (_navigation_mode) {
 		case EXPLORATION:
@@ -86,8 +79,8 @@ void NavigationState::onEntry() {
 		if (_get_exploration_mode_service.call(srv2)) {
 			_exploration_mode = srv2.response.success;
 			if (_exploration_mode) {
-				_get_goal_obsolete = _nh.subscribe("rsm/goalObsolete",
-						1, &NavigationState::goalObsoleteCallback, this);
+				_get_goal_obsolete = _nh.subscribe("rsm/goalObsolete", 1,
+						&NavigationState::goalObsoleteCallback, this);
 			}
 		} else {
 			ROS_ERROR("Failed to call Get Exploration Mode service");
@@ -102,28 +95,19 @@ void NavigationState::onActive() {
 	if (_move_base_client->isServerConnected()) {
 		if (_goal_active) {
 			if (_move_base_client->getState().isDone()) {
+				std_srvs::SetBool srv;
 				if (_move_base_client->getState().state_
 						== actionlib::SimpleClientGoalState::SUCCEEDED) {
+					srv.request.data = true;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
-							std_srvs::Trigger srv;
-							if (!_reset_failed_goals_service.call(srv)) {
-								ROS_ERROR(
-										"Failed to call Reset Failed Goals service");
-							}
 							_stateinterface->transitionToVolatileState(
 									_stateinterface->getPluginState(
 									MAPPING_STATE));
 							break;
 						}
 						case WAYPOINT_FOLLOWING: {
-							rsm_msgs::WaypointVisited srv;
-							srv.request.position = _waypoint_position;
-							if (!_waypoint_visited_service.call(srv)) {
-								ROS_ERROR(
-										"Failed to call Waypoint Visited service");
-							}
 							if (_routine.empty()) {
 								_stateinterface->transitionToVolatileState(
 										boost::make_shared<
@@ -135,10 +119,6 @@ void NavigationState::onActive() {
 							}
 							break;
 						}
-						case SIMPLE_GOAL: {
-							abortNavigation();
-							break;
-						}
 						default: {
 							abortNavigation();
 							break;
@@ -146,33 +126,18 @@ void NavigationState::onActive() {
 						}
 					}
 				} else {
+					srv.request.data = false;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
-							rsm_msgs::AddFailedGoal srv;
-							srv.request.failedGoal = _nav_goal;
-							if (!_add_failed_goal_service.call(srv)) {
-								ROS_ERROR(
-										"Failed to call Add Failed Goal service");
-							}
 							_stateinterface->transitionToVolatileState(
 									_stateinterface->getPluginState(
 									CALCULATEGOAL_STATE));
 							break;
 						}
 						case WAYPOINT_FOLLOWING: {
-							rsm_msgs::WaypointUnreachable srv;
-							srv.request.position = _waypoint_position;
-							if (!_waypoint_unreachable_service.call(srv)) {
-								ROS_ERROR(
-										"Failed to call Waypoint Visited service");
-							}
 							_stateinterface->transitionToVolatileState(
 									boost::make_shared<WaypointFollowingState>());
-							break;
-						}
-						case SIMPLE_GOAL: {
-							abortNavigation();
 							break;
 						}
 						default: {
@@ -181,6 +146,10 @@ void NavigationState::onActive() {
 						}
 						}
 					}
+				}
+				if (!_navigation_goal_completed_service.call(srv)) {
+					ROS_ERROR(
+							"Failed to call Complete Navigation Goal service");
 				}
 			} else {
 				//Check if robot moved for navigation failure check
@@ -307,8 +276,9 @@ void NavigationState::onInterrupt(int interrupt) {
 		_interrupt_occured = true;
 		break;
 	case SIMPLE_GOAL_STOP_INTERRUPT:
-		if(_navigation_mode==SIMPLE_GOAL){
-			_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());
+		if (_navigation_mode == SIMPLE_GOAL) {
+			_stateinterface->transitionToVolatileState(
+					boost::make_shared<IdleState>());
 		}
 		break;
 	}

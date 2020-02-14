@@ -18,6 +18,7 @@
 #include <rsm_msgs/GetNavigationGoal.h>
 #include <rsm_msgs/AddFailedGoal.h>
 #include <rsm_msgs/GetFailedGoals.h>
+#include <rsm_msgs/ExplorationGoalCompleted.h>
 
 typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseActionServer;
 
@@ -51,6 +52,7 @@ private:
 	ros::Publisher exploration_goals_publisher;
 	ros::ServiceClient _get_navigation_goal_service;
 	ros::ServiceClient _set_goal_obsolete_service;
+	ros::ServiceServer _exploration_goal_completed_service;
 	ros::Subscriber _exploration_mode_subscriber;
 
 	ros::ServiceServer _reset_kinect_position_serivce;
@@ -125,6 +127,8 @@ private:
 			rsm_msgs::GetFailedGoals::Response &res);
 	bool resetFailedGoals(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
+	bool explorationGoalCompleted(rsm_msgs::ExplorationGoalCompleted::Request &req,
+			rsm_msgs::ExplorationGoalCompleted::Response &res);
 	/**
 	 * Callback for exploration mode
 	 * @param exploration_mode Exploration mode (0=complete goal, 1=interrupt goal when exploration goals vanished)

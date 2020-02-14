@@ -73,7 +73,8 @@ The Service Provider handles the communication between the different states and 
 
 It offers all services to control waypoint following which includes adding, moving and removing single waypoints, setting their `visited` and `unreachable` variables and the routine to be executed upon reaching the waypoint. Furthermore, all waypoints can be retrieved and reset which effectively sets `visited` and `unreachable` to false. The waypoint following mode can be set and the list of all available routines retrieved. The latter is given as a parameter to the Service Provider. The list of waypoints is also published.
 
-For setting and retrieving the current navigation goal the Service Provider is offering services. In addition, the current robot pose can be retrieved and is calculated from the transform of the map to the robot's base footprint.
+For setting and retrieving the current navigation goal the Service Provider is offering services. In addition, the current robot pose can be retrieved and is calculated from the transform of the map to the robot's base footprint. Furthermore, when a navigation goal is completed, a respective service must be called
+that handles waypoint following and exploration for a successful or unsuccessful completion.
 
 The Service Provider hosts services for exploration that enable setting and getting the exploration mode. It is also published. When the mode is set to *Interrupt*, goals can become obsolete. This means the exploration algorithm has found more rewarding goals to go to. A service is provided with which a goal can be made obsolete. This information is published by the Service Provider and also retrievable via service.
 
@@ -630,6 +631,9 @@ Sets the current navigation goal
 
 **getNavigationGoal** ([rsm_msgs/GetNavigationGoal](../rsm_msgs/srv/GetNavigationGoal.srv))  
 Gets the current navigation goal
+
+**NavigationGoalCompleted** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Handles exploration and waypoint following when a goal was completed
 
 **getRobotPose** ([rsm_msgs/GetRobotPose](../rsm_msgs/srv/GetRobotPose.srv))   
 Return the current robot pose in relation to the map frame

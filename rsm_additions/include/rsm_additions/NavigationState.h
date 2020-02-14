@@ -10,9 +10,6 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <rsm_msgs/GetNavigationGoal.h>
-#include <rsm_msgs/AddFailedGoal.h>
-#include <rsm_msgs/WaypointVisited.h>
-#include <rsm_msgs/WaypointUnreachable.h>
 #include <rsm_msgs/GetRobotPose.h>
 #include <rsm_msgs/OperationMode.h>
 #include <std_srvs/Trigger.h>
@@ -100,17 +97,9 @@ private:
 	 */
 	bool _goal_active;
 	/**
-	 * List of previously failed goals
-	 */
-	std::vector<geometry_msgs::Pose> _failed_goals;
-	/**
 	 * Mode of navigation (Exploration=0, Waypoint following=1 and Simple Goal=2)
 	 */
 	int _navigation_mode;
-	/**
-	 * Position of waypoint in waypoint array
-	 */
-	int _waypoint_position;
 	/**
 	 * Routine to be executed when reaching waypoint
 	 */
@@ -141,10 +130,7 @@ private:
 
 	ros::NodeHandle _nh;
 	ros::ServiceClient _get_navigation_goal_service;
-	ros::ServiceClient _add_failed_goal_service;
-	ros::ServiceClient _reset_failed_goals_service;
-	ros::ServiceClient _waypoint_visited_service;
-	ros::ServiceClient _waypoint_unreachable_service;
+	ros::ServiceClient _navigation_goal_completed_service;
 	ros::ServiceClient _get_robot_pose_service;
 	ros::ServiceClient _get_exploration_mode_service;
 	ros::ServiceClient _get_reverse_mode_service;

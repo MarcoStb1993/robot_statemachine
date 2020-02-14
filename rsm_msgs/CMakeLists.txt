@@ -30,6 +30,7 @@ add_service_files(
   GetWaypointRoutines.srv
   SetNavigationGoal.srv
   GetNavigationGoal.srv
+  ExplorationGoalCompleted.srv
   AddFailedGoal.srv
   GetFailedGoals.srv
   GetRobotPose.srv
