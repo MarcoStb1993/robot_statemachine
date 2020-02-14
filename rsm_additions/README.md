@@ -18,7 +18,7 @@ subscribes to it's visualization topic that shows frontiers on a 2D map and extr
 point to the robot as navigation goal. Therefore, it retrieves the robot's pose and 
 calculates it's distance to each of the frontier's center points. Also, previously 
 failed goals are disregarded as potential navigation goals. If it fails to find a suitable goal 
-for exploration, it returns an error message and transitions back to the [Idle State](../rsm-core#non-customizable-states)
+for exploration, it returns an error message and transitions back to the [Idle State](../rsm_core#non-customizable-states)
 
 To have [explore lite](http://wiki.ros.org/explore_lite) running without directly sending 
 commands to the [navigation stack](http://wiki.ros.org/navigation), a mock action server 
@@ -35,11 +35,11 @@ It forwards received goals to the navigation stack and also gets feedback from i
 If it fails, the goal is added to the failed goals list. If it succeeds, the failed 
 goal list will be reset.
 
-When standing still for too long, it transitions to the [Idle State](../rsm-core#non-customizable-states).
+When standing still for too long, it transitions to the [Idle State](../rsm_core#non-customizable-states).
 Reaching the goal will initiate a transition to the [Mapping State](#mapping-state) 
-or the particular routine state if there is one available. If not, [Waypoint Following State](../rsm-core#non-customizable-states)
+or the particular routine state if there is one available. If not, [Waypoint Following State](../rsm_core#non-customizable-states)
 is called. After reaching a navigation goal provided by RViz and if waypoint following has ended,
-it transitions to [Idle State](../rsm-core#non-customizable-states).
+it transitions to [Idle State](../rsm_core#non-customizable-states).
 
 Reverse driving is realised by running two navigation stacks, one for forward driving 
 and one for reverse driving. This is explained in more detail [later](#reverse-robot-movement-with-navigation-stack).
@@ -73,7 +73,7 @@ This data handler class retrieved the frontiers published by [explore lite](http
 for visualization, extracts each frontier's center and republishes them as possible 
 exploration goals. In case, the exploration mode is set to *Interrupt*, it is also
 checked if the current navigation goal is still in the list of exploration goals.
-If not, the [Service Provider](../rsm-core#service-provider)'s service to mark the goal
+If not, the [Service Provider](../rsm_core#service-provider)'s service to mark the goal
 as obsolete is called. A tolerance for comparing these positions can be set with a parameter.
 
 Furthermore, goals that could not be reached during exploration, here named as
