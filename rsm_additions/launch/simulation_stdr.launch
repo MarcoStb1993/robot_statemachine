@@ -48,7 +48,6 @@
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
-		<arg name="exploration_goal_tolerance" value="0.05" />
 	</include>
 
 	<node pkg="rsm_additions" type="bootUpNode"
@@ -62,8 +61,9 @@
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
-		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
-
+		<param name="navigation_plugin" value="$(arg navigation_plugin)" />		
+		<param name="exploration_goal_tolerance" type="double"
+			value="0.05" />
 	</node>
 
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">

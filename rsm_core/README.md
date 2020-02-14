@@ -73,11 +73,9 @@ The Service Provider handles the communication between the different states and 
 
 It offers all services to control waypoint following which includes adding, moving and removing single waypoints, setting their `visited` and `unreachable` variables and the routine to be executed upon reaching the waypoint. Furthermore, all waypoints can be retrieved and reset which effectively sets `visited` and `unreachable` to false. The waypoint following mode can be set and the list of all available routines retrieved. The latter is given as a parameter to the Service Provider. The list of waypoints is also published.
 
-For setting and retrieving the current navigation goal the Service Provider is offering services. In addition, previously failed goals can be set, retrieved or reset. These serve as a way of blacklisting goals.
+For setting and retrieving the current navigation goal the Service Provider is offering services. In addition, the current robot pose can be retrieved and is calculated from the transform of the map to the robot's base footprint.
 
-The current robot pose can be retrieved and is calculated from the transform of the map to the robot's base footprint.
-
-The Service Provider hosts services for exploration that enable setting and getting the exploration mode. It is also published. If the exploration mode is set to *Interrupt*, the Service Provider subscribes to the list of available exploration goals and checks if the current navigation goal is still in this list. A tolerance for comparing these positions can be set with a parameter. If the navigation goal is not an exploration goal anymore, it becomes obsolete. This info is published when the mode is set to *Interrupt* as well.
+The Service Provider hosts services for exploration that enable setting and getting the exploration mode. It is also published. When the mode is set to *Interrupt*, goals can become obsolete. This means the exploration algorithm has found more rewarding goals to go to. A service is provided with which a goal can be made obsolete. This information is published by the Service Provider and also retrievable via service.
 
 Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published.  
 
@@ -160,7 +158,6 @@ The RSM's core functionality is distributed over several nodes that can simply b
 * `joystick_topic`: The name of the joystick topic for messages from handling the joystick (default: "/joy")
 * `teleoperation_idle_timer`: Time in seconds without input from teleoperation that leads to a transition to **Idle State** (default: 0.5)
 * `waypoint_routines`: List of all plugins to be used as routines for waypoints (default: [])
-* `exploration_goal_tolerance`: Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached (default: 0.05)
 
 *Note*: The default plugins mentioned above all exist in the [RSM additions package](../rsm_additions#rsm-additions).
 
@@ -416,6 +413,8 @@ rsm_additions /home/marco/catkin_ws/src/robot_rsm/rsm_additions/rsm_plugins.xml
 ```
 You can now use the plugin state in the RSM.
 
+
+
 ### Use plugin state in the RSM
 
 To use the created plugin from above in the RSM, it has to be made known to the [State Interface](#state-interface). This needs to be done by setting the respective parameters, either through the launch file or manually when starting the nodes from console. The [State Interface](#state-interface) expects the names for the **Calculate Goal State**, the **Mapping State** and the **Navigation State** plugins. The waypoint **Routine State** plugins need to be given to the [Service Provider](#service-provider). A sample launch with set parameters can be seen in the snippet below, where the plugins defined in [RSM additions](../rsm_additions#rsm-additions) are used. A detailed example can be seen in the [RSM additions launch files](../rsm_additions/launch). 
@@ -580,11 +579,6 @@ This node provides services for saving and receiving data needed by the volatile
 
 *Note:* All topics and services are in the **rsm** namespace.
 
-#### Subscribed Topics
-
-**exploration_goals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
-List of all currently available exploration goals (only active is exploration mode is set to "interrupt")
-
 #### Published Topics
 
 **waypoints** ([rsm_msgs/WaypointArray](../rsm_msgs/msg/WaypointArray.msg))  
@@ -637,15 +631,6 @@ Sets the current navigation goal
 **getNavigationGoal** ([rsm_msgs/GetNavigationGoal](../rsm_msgs/srv/GetNavigationGoal.srv))  
 Gets the current navigation goal
 
-**addFailedGoal** ([rsm_msgs/AddFailedGoal](../rsm_msgs/srv/AddFailedGoal.srv))  
-Add an unreachable goal to the list of all failed goals
-
-**getFailedGoals** ([rsm_msgs/GetFailedGoals](../rsm_msgs/srv/GetFailedGoals.srv))  
-Return list of all previously failed goals  
-
-**resetFailedGoals** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
-Deletes the list of previously failed goals
-
 **getRobotPose** ([rsm_msgs/GetRobotPose](../rsm_msgs/srv/GetRobotPose.srv))   
 Return the current robot pose in relation to the map frame
 
@@ -654,6 +639,12 @@ Set the exploration mode (true: interrupt, false: finish)
 
 **getExplorationMode** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
 Get the exploration mode
+
+**SetGoalObsolete** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
+Set the current exploration goal to obsolete
+
+**GetGoalObsolete** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Returns if the current exploration goal is obsolete
 
 **SetReverseMode** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
 Set the robot to reverse mode (true: reverse, false: forward)
@@ -671,9 +662,6 @@ Transform frame for the robot
 
 **~waypoint_routines** (std::vector<string>, default: [])  
 Vector with waypoint routines available as state plugins
-
-**~exploration_goal_tolerance** (double, default: 0.05)  
-Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached
 
 #### Required tf Transforms
 

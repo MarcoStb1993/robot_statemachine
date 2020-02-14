@@ -7,8 +7,6 @@ ServiceProvider::ServiceProvider() {
 	private_nh.param<std::string>("robot_frame", _robot_frame, "/base_link");
 	private_nh.param<std::vector<std::string>>("waypoint_routines",
 			_waypoint_routines, std::vector<std::string>());
-	private_nh.param<double>("exploration_goal_tolerance",
-			_exploration_goal_tolerance, 0.05);
 
 	ros::NodeHandle nh("rsm");
 	_add_waypoint_service = nh.advertiseService("addWaypoint",
@@ -32,19 +30,18 @@ ServiceProvider::ServiceProvider() {
 			&ServiceProvider::setWaypointRoutine, this);
 	_get_waypoint_routines_service = nh.advertiseService("getWaypointRoutines",
 			&ServiceProvider::getWaypointRoutines, this);
-	_waypoints_publisher = nh.advertise<rsm_msgs::WaypointArray>(
-			"waypoints", 10);
+	_waypoints_publisher = nh.advertise<rsm_msgs::WaypointArray>("waypoints",
+			10);
 
 	_set_navigation_goal_service = nh.advertiseService("setNavigationGoal",
 			&ServiceProvider::setNavigationGoal, this);
 	_get_navigation_goal_service = nh.advertiseService("getNavigationGoal",
 			&ServiceProvider::getNavigationGoal, this);
-	_add_failed_goal_service = nh.advertiseService("addFailedGoal",
-			&ServiceProvider::addFailedGoal, this);
-	_get_failed_goals_service = nh.advertiseService("getFailedGoals",
-			&ServiceProvider::getFailedGoals, this);
-	_reset_failed_goals_service = nh.advertiseService("resetFailedGoals",
-			&ServiceProvider::resetFailedGoals, this);
+
+	_set_goal_obsolete_service = nh.advertiseService("setGoalObsolete",
+			&ServiceProvider::setGoalObsolete, this);
+	_get_goal_obsolete_service = nh.advertiseService("getGoalObsolete",
+			&ServiceProvider::getGoalObsolete, this);
 
 	_get_robot_pose_service = nh.advertiseService("getRobotPose",
 			&ServiceProvider::getRobotPose, this);
@@ -109,15 +106,13 @@ bool ServiceProvider::addWaypoint(rsm_msgs::AddWaypoint::Request &req,
 	return true;
 }
 
-bool ServiceProvider::getWaypoints(
-		rsm_msgs::GetWaypoints::Request &req,
+bool ServiceProvider::getWaypoints(rsm_msgs::GetWaypoints::Request &req,
 		rsm_msgs::GetWaypoints::Response &res) {
 	res.waypointArray = _waypoint_array;
 	return true;
 }
 
-bool ServiceProvider::moveWaypoint(
-		rsm_msgs::MoveWaypoint::Request &req,
+bool ServiceProvider::moveWaypoint(rsm_msgs::MoveWaypoint::Request &req,
 		rsm_msgs::MoveWaypoint::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints[req.position].pose = req.pose;
@@ -130,8 +125,7 @@ bool ServiceProvider::moveWaypoint(
 	return true;
 }
 
-bool ServiceProvider::removeWaypoint(
-		rsm_msgs::RemoveWaypoint::Request &req,
+bool ServiceProvider::removeWaypoint(rsm_msgs::RemoveWaypoint::Request &req,
 		rsm_msgs::RemoveWaypoint::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints.erase(
@@ -146,8 +140,7 @@ bool ServiceProvider::removeWaypoint(
 	return true;
 }
 
-bool ServiceProvider::waypointVisited(
-		rsm_msgs::WaypointVisited::Request &req,
+bool ServiceProvider::waypointVisited(rsm_msgs::WaypointVisited::Request &req,
 		rsm_msgs::WaypointVisited::Response &res) {
 	if (req.position >= 0 && req.position < _waypoint_array.waypoints_size) {
 		_waypoint_array.waypoints[req.position].visited = true;
@@ -227,6 +220,7 @@ bool ServiceProvider::setNavigationGoal(
 	_navigation_mode = req.navigationMode;
 	_waypoint_position = req.waypointPosition;
 	_routine = req.routine;
+	_goal_obsolete = false;
 	res.success = 1;
 	res.message = "Navigation goal set";
 	return true;
@@ -236,38 +230,13 @@ bool ServiceProvider::getNavigationGoal(
 		rsm_msgs::GetNavigationGoal::Request &req,
 		rsm_msgs::GetNavigationGoal::Response &res) {
 	res.goal = _navigation_goal;
-	res.failedGoals = _failed_goals;
 	res.navigationMode = _navigation_mode;
 	res.waypointPosition = _waypoint_position;
 	res.routine = _routine;
 	return true;
 }
 
-bool ServiceProvider::addFailedGoal(
-		rsm_msgs::AddFailedGoal::Request &req,
-		rsm_msgs::AddFailedGoal::Response &res) {
-	_failed_goals.poses.push_back(req.failedGoal);
-	res.success = 1;
-	res.message = "Failed goal added";
-	return true;
-}
-
-bool ServiceProvider::getFailedGoals(
-		rsm_msgs::GetFailedGoals::Request &req,
-		rsm_msgs::GetFailedGoals::Response &res) {
-	res.failedGoals = _failed_goals;
-	return true;
-}
-
-bool ServiceProvider::resetFailedGoals(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	_failed_goals.poses.clear();
-	res.success = 1;
-	res.message = "Failed goals reset";
-	return true;
-}
-bool ServiceProvider::getRobotPose(
-		rsm_msgs::GetRobotPose::Request &req,
+bool ServiceProvider::getRobotPose(rsm_msgs::GetRobotPose::Request &req,
 		rsm_msgs::GetRobotPose::Response &res) {
 	_transform_listener.lookupTransform("/map", _robot_frame, ros::Time(0),
 			_transform);
@@ -297,42 +266,35 @@ bool ServiceProvider::setExplorationMode(std_srvs::SetBool::Request &req,
 		ros::NodeHandle nh("rsm");
 		_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete",
 				1);
-		_exploration_goals_subscriber = nh.subscribe("explorationGoals", 1,
-				&ServiceProvider::explorationGoalCallback, this);
 	} else {
 		_goal_obsolete_publisher.shutdown();
-		_exploration_goals_subscriber.shutdown();
 	}
 	res.success = 1;
 	res.message = "Exploration mode set";
 	return true;
 }
 
-void ServiceProvider::explorationGoalCallback(
-		const geometry_msgs::PoseArray::ConstPtr& exploration_goals) {
-	_exploration_goals = *exploration_goals;
+bool ServiceProvider::setGoalObsolete(std_srvs::Trigger::Request &req,
+		std_srvs::Trigger::Response &res) {
+	if (_goal_obsolete) {
+		res.success = false;
+		res.message = "Goal already obsolete";
+	} else {
+		_goal_obsolete = true;
+		res.success = true;
+		res.message = "Goal set to obsolete";
+	}
+	return true;
 }
 
-bool ServiceProvider::navGoalIncludedInFrontiers() {
-	for (auto iterator : _exploration_goals.poses) {
-		double x_dif = abs(_navigation_goal.position.x - iterator.position.x);
-		double y_dif = abs(_navigation_goal.position.y - iterator.position.y);
-		double z_dif = abs(_navigation_goal.position.z - iterator.position.z);
-		if (x_dif <= _exploration_goal_tolerance
-				&& y_dif <= _exploration_goal_tolerance
-				&& z_dif <= _exploration_goal_tolerance) {
-			return true;
-		}
-	}
-	return false;
+bool ServiceProvider::getGoalObsolete(std_srvs::Trigger::Request &req,
+		std_srvs::Trigger::Response &res) {
+	res.success = _goal_obsolete;
+	res.message = "Goal obsolete returned";
+	return true;
 }
 
 void ServiceProvider::publishGoalObsolete() {
-	if (_exploration_mode == 1 && !navGoalIncludedInFrontiers()) {
-		_goal_obsolete = true;
-	} else {
-		_goal_obsolete = false;
-	}
 	std_msgs::Bool msg;
 	msg.data = _goal_obsolete;
 	_goal_obsolete_publisher.publish(msg);

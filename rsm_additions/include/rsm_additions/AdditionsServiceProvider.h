@@ -14,6 +14,11 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/server/simple_action_server.h>
 
+#include <std_msgs/Bool.h>
+#include <rsm_msgs/GetNavigationGoal.h>
+#include <rsm_msgs/AddFailedGoal.h>
+#include <rsm_msgs/GetFailedGoals.h>
+
 typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseActionServer;
 
 namespace rsm {
@@ -38,8 +43,15 @@ private:
 	ros::Subscriber _reverse_mode_cmd_vel_subscriber;
 	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
+	ros::ServiceServer _add_failed_goal_service;
+	ros::ServiceServer _get_failed_goals_service;
+	ros::ServiceServer _reset_failed_goals_service;
+
 	ros::Subscriber frontiers_marker_array_subscriber;
 	ros::Publisher exploration_goals_publisher;
+	ros::ServiceClient _get_navigation_goal_service;
+	ros::ServiceClient _set_goal_obsolete_service;
+	ros::Subscriber _exploration_mode_subscriber;
 
 	ros::ServiceServer _reset_kinect_position_serivce;
 	ros::Publisher _kinetic_joint_controller;
@@ -52,11 +64,22 @@ private:
 	 *Topic name for the autonomy cmd vel topic to be recorded
 	 */
 	std::string _autonomy_cmd_vel_topic;
-
 	/**
 	 * List of all extracted frontier centers
 	 */
 	geometry_msgs::PoseArray _exploration_goals;
+	/**
+	 * List of previously failed goals
+	 */
+	geometry_msgs::PoseArray _failed_goals;
+	/**
+	 * Tolerance for comparing if the current goal is still in the list of exploration goals
+	 */
+	double _exploration_goal_tolerance;
+	/**
+	 * Mode of exploration (0=complete goal, 1=interrupt goal when exploration goals vanished)
+	 */
+	bool _exploration_mode;
 	/**
 	 * Is the Navigation stack used as Plugin for navigation
 	 */
@@ -95,6 +118,24 @@ private:
 	 * Publish list of extracted frontier centers for further calculation
 	 */
 	void publishExplorationGoals();
+
+	bool addFailedGoal(rsm_msgs::AddFailedGoal::Request &req,
+			rsm_msgs::AddFailedGoal::Response &res);
+	bool getFailedGoals(rsm_msgs::GetFailedGoals::Request &req,
+			rsm_msgs::GetFailedGoals::Response &res);
+	bool resetFailedGoals(std_srvs::Trigger::Request &req,
+			std_srvs::Trigger::Response &res);
+	/**
+	 * Callback for exploration mode
+	 * @param exploration_mode Exploration mode (0=complete goal, 1=interrupt goal when exploration goals vanished)
+	 */
+	void explorationModeCallback(
+			const std_msgs::Bool::ConstPtr& exploration_mode);
+	/**
+	 * Checks if the current navigation goal is still present as an exploration goal
+	 * @return Returns true if the current navigation goal is still an exploration goal to be explored
+	 */
+	bool navGoalIncludedInFrontiers();
 
 	bool resetKinectPosition(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);

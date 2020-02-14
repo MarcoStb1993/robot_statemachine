@@ -14,7 +14,6 @@
 	<arg name="teleoperation_idle_timer" default="0.5" />
 	"
 	<arg name="waypoint_routines" default="[]" />
-	<arg name="exploration_goal_tolerance" default="0.05" />
 
 	<node pkg="rsm_core" type="rsmNode" name="rsmNode" output="screen">
 		<param name="update_frequency" type="double"
@@ -34,8 +33,6 @@
 		<param name="robot_frame" type="string"
 			value="$(arg robot_frame)" />
 		<rosparam param="waypoint_routines" subst_value="True">$(arg waypoint_routines)</rosparam>
-		<param name="exploration_goal_tolerance" type="double"
-			value="$(arg exploration_goal_tolerance)" />
 	</node>
 
 	<node pkg="rsm_core" type="robotControlMuxNode"

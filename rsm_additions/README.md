@@ -37,9 +37,9 @@ goal list will be reset.
 
 When standing still for too long, it transitions to the [Idle State](../rsm-core#non-customizable-states).
 Reaching the goal will initiate a transition to the [Mapping State](#mapping-state) 
-or the particular routine state if there is one available. If not, [Waypoint Following 
-State](../rsm-core#non-customizable-states) is called. After reaching a navigation 
-goal provided by RViz and if waypoint following has ended, it transitions to [Idle State](../rsm-core#non-customizable-states).
+or the particular routine state if there is one available. If not, [Waypoint Following State](../rsm-core#non-customizable-states)
+is called. After reaching a navigation goal provided by RViz and if waypoint following has ended,
+it transitions to [Idle State](../rsm-core#non-customizable-states).
 
 Reverse driving is realised by running two navigation stacks, one for forward driving 
 and one for reverse driving. This is explained in more detail [later](#reverse-robot-movement-with-navigation-stack).
@@ -71,7 +71,13 @@ before and vice versa.
 
 This data handler class retrieved the frontiers published by [explore lite](http://wiki.ros.org/explore_lite) 
 for visualization, extracts each frontier's center and republishes them as possible 
-exploration goals.
+exploration goals. In case, the exploration mode is set to *Interrupt*, it is also
+checked if the current navigation goal is still in the list of exploration goals.
+If not, the [Service Provider](../rsm-core#service-provider)'s service to mark the goal
+as obsolete is called. A tolerance for comparing these positions can be set with a parameter.
+
+Furthermore, goals that could not be reached during exploration, here named as
+failed goals, can be set, retrieved or reset. These serve as a way of blacklisting goals.
 
 For driving in reverse mode, the velocity commands issued by the reverse navigation 
 stack are also subscribed to and republished with negated linear velocities. It also 
@@ -144,10 +150,22 @@ Topic name for the autonomy command velocity in reverse mode
 **explore/frontiers** ([visualization_msgs/MarkerArray](http://docs.ros.org/api/visualization_msgs/html/msg/MarkerArray.html))  
 All frontier grid cells as points and closest frontier points as spheres
 
+**explorationMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
+The current exploration mode (true: interrupt, false: finish)
+
 #### Services
 
 **setNavigationToReverse** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
 Needs to be implemented for reverse mode, just returns success
+
+**addFailedGoal** ([rsm_msgs/AddFailedGoal](../rsm_msgs/srv/AddFailedGoal.srv))  
+Add an unreachable goal to the list of all failed goals
+
+**getFailedGoals** ([rsm_msgs/GetFailedGoals](../rsm_msgs/srv/GetFailedGoals.srv))  
+Return list of all previously failed goals  
+
+**resetFailedGoals** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Deletes the list of previously failed goals
 
 #### Parameters
 
@@ -162,3 +180,6 @@ Sets the plugin's name for the navigation state.
 
 **~mapping_plugin** (string, default: "rsm::MappingDummyPlugin")  
 Sets the plugin's name for the mapping state.
+
+**~exploration_goal_tolerance** (double, default: 0.05)  
+Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached
