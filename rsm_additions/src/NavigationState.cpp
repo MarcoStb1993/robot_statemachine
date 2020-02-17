@@ -13,8 +13,8 @@ void NavigationState::onSetup() {
 	ros::NodeHandle nh("rsm");
 	_get_navigation_goal_service =
 			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
-	_navigation_goal_completed_service = nh.serviceClient<
-			std_srvs::SetBool>("navigationGoalCompleted");
+	_navigation_goal_completed_service = nh.serviceClient<std_srvs::SetBool>(
+			"navigationGoalCompleted");
 	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
 	_get_reverse_mode_service = nh.serviceClient<std_srvs::Trigger>(
@@ -324,6 +324,11 @@ void NavigationState::comparePose() {
 void NavigationState::goalObsoleteCallback(
 		const std_msgs::Bool::ConstPtr& msg) {
 	if (msg->data && !_interrupt_occured) {
+		std_srvs::SetBool srv;
+		srv.request.data = false;
+		if (!_navigation_goal_completed_service.call(srv)) {
+			ROS_ERROR("Failed to call Complete Navigation Goal service");
+		}
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(
 				MAPPING_STATE));
