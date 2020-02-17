@@ -7,8 +7,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	ros::NodeHandle private_nh("~");
 	private_nh.param<std::string>("autonomy_cmd_vel_topic",
 			_autonomy_cmd_vel_topic, "/autonomy/cmd_vel");
-	private_nh.param<double>("exploration_goal_tolerance",
-			_exploration_goal_tolerance, 0.05);
 
 	ros::NodeHandle nh("rsm");
 
@@ -31,6 +29,9 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	private_nh.param<std::string>("calculate_goal_plugin",
 			calculate_goal_plugin, "");
 	if (calculate_goal_plugin.compare("rsm::CalculateGoalState") == 0) {
+		_calculate_goal_plugin_used = true;
+		private_nh.param<double>("exploration_goal_tolerance",
+				_exploration_goal_tolerance, 0.05);
 		as = new MoveBaseActionServer(_nh, "frontier_move_base",
 				boost::bind(&AdditionsServiceProvider::navigationGoalCallback,
 						this, _1), false);
@@ -54,6 +55,8 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 				&AdditionsServiceProvider::explorationGoalCompleted, this);
 		_get_navigation_goal_service = nh.serviceClient<
 				rsm_msgs::GetNavigationGoal>("getNavigationGoal");
+	} else {
+		_calculate_goal_plugin_used = false;
 	}
 
 	std::string mapping_plugin;
@@ -74,7 +77,9 @@ AdditionsServiceProvider::~AdditionsServiceProvider() {
 }
 
 void AdditionsServiceProvider::publishTopics() {
-	publishExplorationGoals();
+	if (_calculate_goal_plugin_used) {
+		publishExplorationGoals();
+	}
 }
 
 bool AdditionsServiceProvider::setNavigationToReverse(

@@ -82,6 +82,10 @@ private:
 	 * Mode of exploration (0=complete goal, 1=interrupt goal when exploration goals vanished)
 	 */
 	bool _exploration_mode;
+	/**
+	 * Is the Calculate Goal plugin used
+	 */
+	bool _calculate_goal_plugin_used;
 
 	/**
 	 * Callback for receiving autonomy cmd vel messages and save the ones not equals zero in the cirular buffer
