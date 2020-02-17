@@ -412,9 +412,7 @@ It should show:
 "your_package_name" /"your_workspace_path"/src/"your_package_name"/rsm_example_plugins.xml
 rsm_additions /home/marco/catkin_ws/src/robot_rsm/rsm_additions/rsm_plugins.xml
 ```
-You can now use the plugin state in the RSM.
-
-
+You are now able to use the plugin state in the RSM.
 
 ### Use plugin state in the RSM
 
@@ -452,7 +450,69 @@ For a reference implementation of the [Calculate Goal State](../rsm_additions#ca
 
 If additional data has to be passed between plugin states, that is not already covered by the [Service Provider](#service-provider), it is recommended to implement an additional data handler for this. See the [Additions Service Provider](../rsm_additions#additions-service-provider) in the package [RSM addtions](../rsm_additions#rsm-additions) for an example.
 
-*Note*: If the robot should be able to move in reverse mode, a service needs to be implemented called `setNavigationToReverse` which changes the navigation's mode interface in the [Navigation State](../rsm_additions#navigation-state) plugin and switches between forward and reverse movement. A sample to include into the additional data handler can be seen below. If it is missing, activating reverse mode will only output a matching error.
+If you want to create your own plugin for calculating an exploration goal
+or navigation, you should meet the following requirements to enable all of the RSM's functionalities.
+
+#### Calculate Goal Plugin
+
+The calculate goal plugin is required to set a new navigation goal before transitioning to the navigation state.
+Therefore, it has to call the respective service as shown in the exemplary code below.
+
+```cpp
+...
+ros::NodeHandle nh("rsm");
+ros::ServiceServer set_navigation_goal_service = nh.serviceClient<rsm_msgs::SetNavigationGoal>("setNavigationGoal");
+...
+rsm_msgs::SetNavigationGoal srv;
+geometry_msgs::Pose goal;
+// set goal to the new exploration target calculated by your algorithm
+srv.request.goal = goal;
+srv.request.navigationMode = EXPLORATION;
+if (!set_navigation_goal_service.call(srv)) {
+	ROS_ERROR("Failed to call Set Navigation Goal service");
+}
+...
+```
+
+In addition, a service provider for this plugin must offer the `explorationGoalCompleted` service which handles the navigation's
+result when trying to reach an exploration goal previously calculated. The service server is being told if the goal was successfully
+reached or aborted. Handling this event is shown in the code sample below.
+
+```cpp
+...
+ros::NodeHandle nh("rsm");
+ros::ServiceServer exploration_goal_completed_service = nh.advertiseService("explorationGoalCompleted",explorationGoalCompleted);
+...
+bool explorationGoalCompleted(
+		rsm_msgs::ExplorationGoalCompleted::Request &req,
+		rsm_msgs::ExplorationGoalCompleted::Response &res) {
+	if (req.goal_reached) {
+		// Handle successful exploration goal
+		res.message = "Exploration goal success handled";
+	} else {
+		// Handle failed exploration goal
+		res.message = "Exploration goal failure handled";
+	}
+	res.success = 1;
+	return true;
+}
+```
+
+#### Navigation Plugin
+
+The navigation plugin requires a larger number of services and topics that need to be processed to fully interface all
+of the RSM's abilities.
+
+First, to retrieve the navigation goal, the `getNavigationGoal` service has to be called. Furthermore, the `getReverseMode`
+service needs to be called as well. And in case the reverse mode changes, a callback for the `reverseMode` topic is also
+necessary. To properly interact with exploration, the `getExplorationMode` service must be called and if the mode is set
+to *Interrupt*, the `goalObsolete` topic must be subscribed to. In case the goal becomes obsolete, the navigation finishes.
+
+When a goal is reached or cannot be reached, the navigation ends and the `navigationGoalCompleted` service must be called, providing
+information about the success of the navigation to it. Have a look at the **Navigation** plugin state in the [rsm_additions package](../rsm_additions)
+for details regarding the implementation.
+
+If the robot should be able to move in reverse mode, a service needs to be implemented called `setNavigationToReverse` which changes the navigation's mode interface in the [Navigation State](../rsm_additions#navigation-state) plugin and switches between forward and reverse movement. A sample to include into the additional data handler can be seen below. If it is missing, activating reverse mode will only output a matching error.
 
 ```cpp
 ...

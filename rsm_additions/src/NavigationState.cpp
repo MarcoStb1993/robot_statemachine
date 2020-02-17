@@ -79,7 +79,8 @@ void NavigationState::onEntry() {
 		if (_get_exploration_mode_service.call(srv2)) {
 			_exploration_mode = srv2.response.success;
 			if (_exploration_mode) {
-				_get_goal_obsolete = _nh.subscribe("rsm/goalObsolete", 1,
+				ros::NodeHandle nh("rsm");
+				_get_goal_obsolete_subscriber = nh.subscribe("goalObsolete", 1,
 						&NavigationState::goalObsoleteCallback, this);
 			}
 		} else {

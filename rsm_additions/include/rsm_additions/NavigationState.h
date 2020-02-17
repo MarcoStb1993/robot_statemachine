@@ -134,9 +134,8 @@ private:
 	ros::ServiceClient _get_robot_pose_service;
 	ros::ServiceClient _get_exploration_mode_service;
 	ros::ServiceClient _get_reverse_mode_service;
-	ros::Subscriber _get_goal_obsolete;
+	ros::Subscriber _get_goal_obsolete_subscriber;
 	ros::Subscriber _reverse_mode_subscriber;
-	ros::Subscriber _exploration_mode_subscriber;
 	ros::Timer _idle_timer;
 
 	/**

@@ -125,7 +125,7 @@ to allow the robot to navigate in forward and reverse depending on the set mode:
 Replace the dots with the usual parameters for the navigation stack. Both packages share the same parameters but for the robot base frame. To use a particular 
 navigation stack, initiate it like in this [tutorial](http://wiki.ros.org/navigation/Tutorials/SendingSimpleGoals) 
 and call the action for forward movement with "move_base" and for reverse movement 
-with "move_base_reverse".
+with "move\_base\_reverse".
 
 ## Nodes
 
