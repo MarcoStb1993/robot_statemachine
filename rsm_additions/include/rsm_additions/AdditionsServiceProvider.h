@@ -82,10 +82,6 @@ private:
 	 * Mode of exploration (0=complete goal, 1=interrupt goal when exploration goals vanished)
 	 */
 	bool _exploration_mode;
-	/**
-	 * Is the Navigation stack used as Plugin for navigation
-	 */
-	bool _navigation_plugin_used;
 
 	/**
 	 * Callback for receiving autonomy cmd vel messages and save the ones not equals zero in the cirular buffer
@@ -127,7 +123,8 @@ private:
 			rsm_msgs::GetFailedGoals::Response &res);
 	bool resetFailedGoals(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
-	bool explorationGoalCompleted(rsm_msgs::ExplorationGoalCompleted::Request &req,
+	bool explorationGoalCompleted(
+			rsm_msgs::ExplorationGoalCompleted::Request &req,
 			rsm_msgs::ExplorationGoalCompleted::Response &res);
 	/**
 	 * Callback for exploration mode

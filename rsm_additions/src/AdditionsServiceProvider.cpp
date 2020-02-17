@@ -9,17 +9,12 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 			_autonomy_cmd_vel_topic, "/autonomy/cmd_vel");
 	private_nh.param<double>("exploration_goal_tolerance",
 			_exploration_goal_tolerance, 0.05);
-	std::string navigation_plugin;
-	private_nh.param<std::string>("navigation_plugin", navigation_plugin, "");
-	if (navigation_plugin.compare("rsm::NavigationState") == 0) {
-		_navigation_plugin_used = true;
-	} else {
-		_navigation_plugin_used = false;
-	}
 
 	ros::NodeHandle nh("rsm");
 
-	if (_navigation_plugin_used) {
+	std::string navigation_plugin;
+	private_nh.param<std::string>("navigation_plugin", navigation_plugin, "");
+	if (navigation_plugin.compare("rsm::NavigationState") == 0) {
 		_set_navigation_to_reverse_service = nh.advertiseService(
 				"setNavigationToReverse",
 				&AdditionsServiceProvider::setNavigationToReverse, this);
@@ -32,6 +27,35 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 				_autonomy_cmd_vel_topic, 10);
 	}
 
+	std::string calculate_goal_plugin;
+	private_nh.param<std::string>("calculate_goal_plugin",
+			calculate_goal_plugin, "");
+	if (calculate_goal_plugin.compare("rsm::CalculateGoalState") == 0) {
+		as = new MoveBaseActionServer(_nh, "frontier_move_base",
+				boost::bind(&AdditionsServiceProvider::navigationGoalCallback,
+						this, _1), false);
+		as->start();
+		frontiers_marker_array_subscriber = _nh.subscribe("explore/frontiers",
+				1, &AdditionsServiceProvider::frontierCallback, this);
+		exploration_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
+				"explorationGoals", 1);
+		_exploration_mode_subscriber = nh.subscribe("explorationMode", 1,
+				&AdditionsServiceProvider::explorationModeCallback, this);
+		_set_goal_obsolete_service = nh.serviceClient<std_srvs::Trigger>(
+				"setGoalObsolete");
+		_add_failed_goal_service = nh.advertiseService("addFailedGoal",
+				&AdditionsServiceProvider::addFailedGoal, this);
+		_get_failed_goals_service = nh.advertiseService("getFailedGoals",
+				&AdditionsServiceProvider::getFailedGoals, this);
+		_reset_failed_goals_service = nh.advertiseService("resetFailedGoals",
+				&AdditionsServiceProvider::resetFailedGoals, this);
+		_exploration_goal_completed_service = nh.advertiseService(
+				"explorationGoalCompleted",
+				&AdditionsServiceProvider::explorationGoalCompleted, this);
+		_get_navigation_goal_service = nh.serviceClient<
+				rsm_msgs::GetNavigationGoal>("getNavigationGoal");
+	}
+
 	std::string mapping_plugin;
 	private_nh.param<std::string>("mapping_plugin", mapping_plugin, "");
 	if (mapping_plugin.compare("rsm::KinectMappingState") == 0) {
@@ -41,31 +65,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 		_kinetic_joint_controller = _nh.advertise<std_msgs::Float64>(
 				"kinetic_controller/command", 1, true);
 	}
-
-	as = new MoveBaseActionServer(_nh, "frontier_move_base",
-			boost::bind(&AdditionsServiceProvider::navigationGoalCallback, this,
-					_1), false);
-	as->start();
-
-	frontiers_marker_array_subscriber = _nh.subscribe("explore/frontiers", 1,
-			&AdditionsServiceProvider::frontierCallback, this);
-	exploration_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
-			"explorationGoals", 1);
-	_exploration_mode_subscriber = nh.subscribe("explorationMode", 1,
-			&AdditionsServiceProvider::explorationModeCallback, this);
-	_set_goal_obsolete_service = nh.serviceClient<std_srvs::Trigger>(
-			"setGoalObsolete");
-	_add_failed_goal_service = nh.advertiseService("addFailedGoal",
-			&AdditionsServiceProvider::addFailedGoal, this);
-	_get_failed_goals_service = nh.advertiseService("getFailedGoals",
-			&AdditionsServiceProvider::getFailedGoals, this);
-	_reset_failed_goals_service = nh.advertiseService("resetFailedGoals",
-			&AdditionsServiceProvider::resetFailedGoals, this);
-	_exploration_goal_completed_service = nh.advertiseService(
-			"explorationGoalCompleted",
-			&AdditionsServiceProvider::explorationGoalCompleted, this);
-	_get_navigation_goal_service =
-			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
 
 	_exploration_mode = 0;
 }

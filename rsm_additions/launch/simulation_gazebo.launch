@@ -1,4 +1,5 @@
-<!-- Simulation of Husky UGV in Gazebo running Robot Statemachine with GMapping and Explore Lite -->
+<!-- Simulation of Husky UGV in Gazebo running Robot Statemachine with GMapping 
+	and Explore Lite -->
 
 <launch>
 	<arg name="world"
@@ -10,15 +11,13 @@
 	<arg name="cmd_vel_topic" default="/cmd_vel" />
 	<arg name="joystick_used" default="true" />
 	<arg name="joystick_topic" default="/joy" />
-	<arg name="goal_plugin" default="rsm::CalculateGoalState" />
-	<arg name="navigation_plugin"
-		default="rsm::NavigationState" />
+	<arg name="calculate_goal_plugin" default="rsm::CalculateGoalState" />
+	<arg name="navigation_plugin" default="rsm::NavigationState" />
 	<arg name="mapping_plugin" default="rsm::KinectMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 
-	<include
-		file="$(find rsm_additions)/launch/gazebo.launch">
+	<include file="$(find rsm_additions)/launch/gazebo.launch">
 		<arg name="world_file" value="$(arg world)" />
 	</include>
 
@@ -32,25 +31,27 @@
 		<arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
 		<arg name="joystick_used" default="$(arg joystick_used)" />
 		<arg name="joystick_topic" default="$(arg joystick_topic)" />
-		<arg name="calculate_goal_plugin" value="$(arg goal_plugin)" />
+		<arg name="calculate_goal_plugin"
+			value="$(arg calculate_goal_plugin)" />
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
 	</include>
 
-	<node pkg="rsm_additions" type="bootUpNode"
-		name="bootUpNode" output="screen">
+	<node pkg="rsm_additions" type="bootUpNode" name="bootUpNode"
+		output="screen">
 		<param name="wait_time" value="2" />
 	</node>
 
-	<node pkg="rsm_additions"
-		type="additionsServiceProviderNode"
+	<node pkg="rsm_additions" type="additionsServiceProviderNode"
 		name="additionsServiceProviderNode">
 		<param name="update_frequency" value="20" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
-		<param name="mapping_plugin" value="$(arg mapping_plugin)" />		
+		<param name="mapping_plugin" value="$(arg mapping_plugin)" />
+		<param name="calculate_goal_plugin"
+			value="$(arg calculate_goal_plugin)" />
 		<param name="exploration_goal_tolerance" type="double"
 			value="0.05" />
 	</node>
@@ -140,8 +141,7 @@
 	<!-- RViz für Exploration -->
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
 		args="-d $(find rsm_additions)/config/gazebo_sim/gazebo_simulation.rviz">
-		<remap from="/move_base_simple/goal"
-			to="/rsm/simpleGoal" />
+		<remap from="/move_base_simple/goal" to="/rsm/simpleGoal" />
 	</node>
 	<include if="$(arg rviz)"
 		file="$(find rsm_rviz_plugins)/launch/rsm_rviz_plugins.launch">
