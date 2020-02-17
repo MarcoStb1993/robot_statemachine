@@ -169,7 +169,7 @@ void WaypointFollowingState::getWaypoints() {
 			abortWaypointFollowing();
 		}
 	} else {
-		ROS_ERROR("Failed to call Get Failed Goals service");
+		ROS_ERROR("Failed to call Get Waypoints  service");
 		abortWaypointFollowing();
 	}
 }
