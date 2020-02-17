@@ -5,7 +5,9 @@ The Robot Statemachine's core components will be explained first and it's usage 
 ## Documentation
 
 The RSM consists of various non-customizable and custom states that are based on the [Base State](#base-state). The former [non-customizable states](#non-customizable-states) and the [Base State](#base-state) are a part of this package containing the RSM's basics.  
-To handle state transitions the [State Interface](#state-interface) is used. [Robot Control Mux](#robot-control-mux) coordinates the actual control of the robot's movement while the [Service Provider](#service-provider) contains services, publishers and subscribers for communication between states and updating the GUI. To be able to handle arbitrary robots, the RSM relies on [Plugins](#plugins) that can be implemented depending on the robot.
+To handle state transitions the [State Interface](#state-interface) is used. [Robot Control Mux](#robot-control-mux) coordinates the actual control of the robot's movement while the [Service Provider](#service-provider) contains services, publishers and subscribers for communication between states and updating the GUI. To be able to handle arbitrary robots, the RSM relies on [Plugins](#plugins) that can be implemented depending on the robot. The implemented states can be seen in the biref class diagram below. It only shows the most important aspects and is not complete!
+
+![RSM Class Diagram](../images/class_diagram.png)
 
 ### Base State
 
@@ -96,6 +98,10 @@ The RSM package requires three different plugin states, one for exploration to c
 Also, up to ten plugins states can be included for the waypoint following routines that are executed upon reaching a waypoint. They are not necessary for the RSM like the plugins mentioned above. These routines can be implemented to enable arbitrary behavior when reaching a certain waypoint, for example inspecting gauge valves with a camera.
 
 More plugins can be added if additional states during exploration or waypoint following are desired. These can only be called from other implemented plugin states as the basic RSM only includes transitions to the plugins described above. For example, if you have a robot able to climb stairs and you detect stairs during navigation, you can then call another plugin for stair-climbing and afterwards transition back to normal navigation.
+
+An exemplary state diagram with plugin states being shown with a bold border can be seen below.
+
+![RSM State Diagram](../images/state_diagram.png)
 
 ## Tutorials
 
