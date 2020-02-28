@@ -73,8 +73,8 @@ This data handler class retrieved the frontiers published by [explore lite](http
 for visualization, extracts each frontier's center and republishes them as possible 
 exploration goals. In case, the exploration mode is set to *Interrupt*, it is also
 checked if the current navigation goal is still in the list of exploration goals.
-If not, the [Service Provider](../rsm_core#service-provider)'s service to mark the goal
-as obsolete is called. A tolerance for comparing these positions can be set with a parameter.
+If not, it is published that the goal is obsolete. A tolerance for comparing these
+positions can be set with a parameter.
 
 Furthermore, goals that could not be reached during exploration, here named as
 failed goals, can be set, retrieved or reset. These serve as a way of blacklisting goals.
@@ -144,6 +144,9 @@ List of all currently available exploration goals
 **kinect_controller/command** ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html))  
 Position the kinect revolute joint will move to
 
+**goalObsolete** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
+Information if the current goal is still viable (only active is exploration mode is set to *Interrupt*)
+
 #### Subscribed Topics
 
 **<autonomy_cmd_vel_top>_reverse** ([std_msgs/String](http://docs.ros.org/api/std_msgs/html/msg/String.html))  
@@ -179,6 +182,9 @@ Update rate in Hz
 
 **~autonomy_cmd_vel_topic** (string, default: "autonomy/cmd_vel")  
 Topic name for the autonomy command velocity
+
+**~calculate_goal_plugin** (string, default: "rsm::CalculateGoalPlugin")  
+Sets the plugin's name for the calculate goal state.
 
 **~navigation_plugin** (string, default: "rsm::NavigationPlugin")  
 Sets the plugin's name for the navigation state.

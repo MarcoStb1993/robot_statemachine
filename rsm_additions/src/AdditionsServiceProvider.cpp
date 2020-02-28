@@ -42,8 +42,6 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 				"explorationGoals", 1);
 		_exploration_mode_subscriber = nh.subscribe("explorationMode", 1,
 				&AdditionsServiceProvider::explorationModeCallback, this);
-		_set_goal_obsolete_service = nh.serviceClient<std_srvs::Trigger>(
-				"setGoalObsolete");
 		_add_failed_goal_service = nh.advertiseService("addFailedGoal",
 				&AdditionsServiceProvider::addFailedGoal, this);
 		_get_failed_goals_service = nh.advertiseService("getFailedGoals",
@@ -70,6 +68,7 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 	}
 
 	_exploration_mode = 0;
+	_goal_obsolete = false;
 }
 
 AdditionsServiceProvider::~AdditionsServiceProvider() {
@@ -79,6 +78,9 @@ AdditionsServiceProvider::~AdditionsServiceProvider() {
 void AdditionsServiceProvider::publishTopics() {
 	if (_calculate_goal_plugin_used) {
 		publishExplorationGoals();
+	}
+	if (_exploration_mode) {
+		publishGoalObsolete();
 	}
 }
 
@@ -110,6 +112,12 @@ void AdditionsServiceProvider::publishExplorationGoals() {
 	_exploration_goals.header.frame_id = "map";
 	_exploration_goals.header.stamp = ros::Time::now();
 	exploration_goals_publisher.publish(_exploration_goals);
+}
+
+void AdditionsServiceProvider::publishGoalObsolete() {
+	std_msgs::Bool msg;
+	msg.data = _goal_obsolete;
+	_goal_obsolete_publisher.publish(msg);
 }
 
 bool AdditionsServiceProvider::addFailedGoal(
@@ -167,16 +175,23 @@ void AdditionsServiceProvider::frontierCallback(
 		}
 	}
 	if (_exploration_mode && !navGoalIncludedInFrontiers()) {
-		std_srvs::Trigger srv;
-		if (!_set_goal_obsolete_service.call(srv)) {
-			ROS_ERROR("Failed to call Set Goal Obsolete service");
-		}
+		_goal_obsolete = true;
+	}
+	else {
+		_goal_obsolete = false;
 	}
 }
 
 void AdditionsServiceProvider::explorationModeCallback(
 		const std_msgs::Bool::ConstPtr& exploration_mode) {
 	_exploration_mode = exploration_mode->data;
+	if (_exploration_mode) {
+		ros::NodeHandle nh("rsm");
+		_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete",
+				1);
+	} else {
+		_goal_obsolete_publisher.shutdown();
+	}
 }
 
 bool AdditionsServiceProvider::navGoalIncludedInFrontiers() {

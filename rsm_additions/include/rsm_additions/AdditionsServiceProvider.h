@@ -51,7 +51,7 @@ private:
 	ros::Subscriber frontiers_marker_array_subscriber;
 	ros::Publisher exploration_goals_publisher;
 	ros::ServiceClient _get_navigation_goal_service;
-	ros::ServiceClient _set_goal_obsolete_service;
+	ros::Publisher _goal_obsolete_publisher;
 	ros::ServiceServer _exploration_goal_completed_service;
 	ros::Subscriber _exploration_mode_subscriber;
 
@@ -86,6 +86,10 @@ private:
 	 * Is the Calculate Goal plugin used
 	 */
 	bool _calculate_goal_plugin_used;
+	/**
+	 * Is navigation goal still an exploration goal
+	 */
+	bool _goal_obsolete;
 
 	/**
 	 * Callback for receiving autonomy cmd vel messages and save the ones not equals zero in the cirular buffer
@@ -120,6 +124,10 @@ private:
 	 * Publish list of extracted frontier centers for further calculation
 	 */
 	void publishExplorationGoals();
+	/**
+	 * Publish if current exploration goal is obsolete if exploration mode is set to interrupt
+	 */
+	void publishGoalObsolete();
 
 	bool addFailedGoal(rsm_msgs::AddFailedGoal::Request &req,
 			rsm_msgs::AddFailedGoal::Response &res);

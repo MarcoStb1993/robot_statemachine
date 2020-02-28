@@ -32,6 +32,7 @@ void NavigationState::onSetup() {
 	_reverse_mode = false;
 	_exploration_mode = -1;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
+	_navigation_complete_success = false;
 }
 
 void NavigationState::onEntry() {
@@ -96,10 +97,10 @@ void NavigationState::onActive() {
 	if (_move_base_client->isServerConnected()) {
 		if (_goal_active) {
 			if (_move_base_client->getState().isDone()) {
-				std_srvs::SetBool srv;
+
 				if (_move_base_client->getState().state_
 						== actionlib::SimpleClientGoalState::SUCCEEDED) {
-					srv.request.data = true;
+					_navigation_complete_success = true;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
@@ -127,7 +128,7 @@ void NavigationState::onActive() {
 						}
 					}
 				} else {
-					srv.request.data = false;
+					_navigation_complete_success = false;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
@@ -148,10 +149,6 @@ void NavigationState::onActive() {
 						}
 					}
 				}
-				if (!_navigation_goal_completed_service.call(srv)) {
-					ROS_ERROR(
-							"Failed to call Complete Navigation Goal service");
-				}
 			} else {
 				//Check if robot moved for navigation failure check
 				comparePose();
@@ -171,6 +168,11 @@ void NavigationState::onActive() {
 void NavigationState::onExit() {
 	if (_goal_active) {
 		_move_base_client->cancelGoal();
+	}
+	std_srvs::SetBool srv;
+	srv.request.data = _navigation_complete_success;
+	if (!_navigation_goal_completed_service.call(srv)) {
+		ROS_ERROR("Failed to call Complete Navigation Goal service");
 	}
 }
 
@@ -324,11 +326,7 @@ void NavigationState::comparePose() {
 void NavigationState::goalObsoleteCallback(
 		const std_msgs::Bool::ConstPtr& msg) {
 	if (msg->data && !_interrupt_occured) {
-		std_srvs::SetBool srv;
-		srv.request.data = false;
-		if (!_navigation_goal_completed_service.call(srv)) {
-			ROS_ERROR("Failed to call Complete Navigation Goal service");
-		}
+		_navigation_complete_success = false;
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(
 				MAPPING_STATE));

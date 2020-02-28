@@ -75,9 +75,6 @@ private:
 	ros::ServiceServer _set_exploration_mode_service;
 	ros::ServiceServer _get_exploration_mode_service;
 	ros::Publisher _exploration_mode_publisher;
-	ros::ServiceServer _set_goal_obsolete_service;
-	ros::ServiceServer _get_goal_obsolete_service;
-	ros::Publisher _goal_obsolete_publisher;
 	ros::ServiceClient _exploration_goal_completed_service;
 
 	ros::ServiceServer _set_reverse_mode_service;
@@ -121,10 +118,6 @@ private:
 	 */
 	std::string _robot_frame;
 	/**
-	 * Is navigation goal still an exploration goal
-	 */
-	bool _goal_obsolete;
-	/**
 	 * Mode of exploration (0=complete goal, 1=interrupt goal when exploration goals vanished)
 	 */
 	bool _exploration_mode;
@@ -132,6 +125,14 @@ private:
 	 * Is currently driving in reverse
 	 */
 	bool _reverse_mode_active;
+	/**
+	 * Was the current exploration goal completed
+	 */
+	bool _exploration_goal_completed;
+	/**
+	 * Service call for completed exploration goal
+	 */
+	rsm_msgs::ExplorationGoalCompleted _exploration_goal_completed_srv;
 
 	bool addWaypoint(rsm_msgs::AddWaypoint::Request &req,
 			rsm_msgs::AddWaypoint::Response &res);
@@ -171,11 +172,6 @@ private:
 	bool setExplorationMode(std_srvs::SetBool::Request &req,
 			std_srvs::SetBool::Response &res);
 
-	bool setGoalObsolete(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-	bool getGoalObsolete(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
-
 	void publishGoalObsolete();
 	void publishExplorationModes();
 
@@ -184,6 +180,7 @@ private:
 	bool getReverseMode(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 	void publishReverseMode();
+	void callExplorationGoalCompleted();
 };
 
 }

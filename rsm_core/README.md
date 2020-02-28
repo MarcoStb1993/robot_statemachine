@@ -78,7 +78,7 @@ It offers all services to control waypoint following which includes adding, movi
 For setting and retrieving the current navigation goal the Service Provider is offering services. In addition, the current robot pose can be retrieved and is calculated from the transform of the map to the robot's base footprint. Furthermore, when a navigation goal is completed, a respective service must be called
 that handles waypoint following and exploration for a successful or unsuccessful completion.
 
-The Service Provider hosts services for exploration that enable setting and getting the exploration mode. It is also published. When the mode is set to *Interrupt*, goals can become obsolete. This means the exploration algorithm has found more rewarding goals to go to. A service is provided with which a goal can be made obsolete. This information is published by the Service Provider and also retrievable via service.
+The Service Provider hosts services for exploration that enable setting and getting the exploration mode. It is also published. When the mode is set to *Interrupt*, goals can become obsolete. This means the exploration algorithm has found more rewarding goals to go to.
 
 Furthermore, it advertises services for setting and retrieving the reverse mode, which is also published.  
 
@@ -504,6 +504,10 @@ bool explorationGoalCompleted(
 }
 ```
 
+Furthermore, if the Exploration is run in *Interrupt* mode, the additional service provider is required to publish a `goalObsolete`
+topic of type [std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html), publishing the value "true" if the goal has become
+obsolete.
+
 #### Navigation Plugin
 
 The navigation plugin requires a larger number of services and topics that need to be processed to fully interface all
@@ -654,9 +658,6 @@ List of all waypoints and their information
 **explorationMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
 The current exploration mode (true: interrupt, false: finish)
 
-**goalObsolete** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
-Information if the current goal is still viable (only active is exploration mode is set to "interrupt")
-
 **reverseMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
 Information if the robot is currently moving in reverse (true: reverse, false: forward)
 
@@ -709,12 +710,6 @@ Set the exploration mode (true: interrupt, false: finish)
 
 **getExplorationMode** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
 Get the exploration mode
-
-**SetGoalObsolete** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
-Set the current exploration goal to obsolete
-
-**GetGoalObsolete** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
-Returns if the current exploration goal is obsolete
 
 **SetReverseMode** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
 Set the robot to reverse mode (true: reverse, false: forward)

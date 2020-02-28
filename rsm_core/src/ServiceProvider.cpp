@@ -38,13 +38,8 @@ ServiceProvider::ServiceProvider() {
 	_get_navigation_goal_service = nh.advertiseService("getNavigationGoal",
 			&ServiceProvider::getNavigationGoal, this);
 	_navigation_goal_completed_service = nh.advertiseService(
-			"navigationGoalCompleted", &ServiceProvider::NavigationGoalCompleted,
-			this);
-
-	_set_goal_obsolete_service = nh.advertiseService("setGoalObsolete",
-			&ServiceProvider::setGoalObsolete, this);
-	_get_goal_obsolete_service = nh.advertiseService("getGoalObsolete",
-			&ServiceProvider::getGoalObsolete, this);
+			"navigationGoalCompleted",
+			&ServiceProvider::NavigationGoalCompleted, this);
 
 	_get_robot_pose_service = nh.advertiseService("getRobotPose",
 			&ServiceProvider::getRobotPose, this);
@@ -76,8 +71,8 @@ ServiceProvider::ServiceProvider() {
 	_navigation_mode = -1;
 	_waypoint_position = -1;
 
-	_goal_obsolete = false;
 	_exploration_mode = 0;
+	_exploration_goal_completed = false;
 
 	_reverse_mode_active = false;
 }
@@ -86,13 +81,20 @@ ServiceProvider::~ServiceProvider() {
 
 }
 
+void ServiceProvider::callExplorationGoalCompleted() {
+	if (!_exploration_goal_completed_service.call(
+			_exploration_goal_completed_srv)) {
+		ROS_ERROR("Failed to call Exploration Goal Completed service");
+	}
+	_exploration_goal_completed = false;
+}
+
 void ServiceProvider::publishTopics() {
 	publishWaypoints();
 	publishExplorationModes();
 	publishReverseMode();
-	if (_exploration_mode) {
-		publishGoalObsolete();
-
+	if (_exploration_goal_completed) {
+		callExplorationGoalCompleted();
 	}
 }
 
@@ -225,7 +227,6 @@ bool ServiceProvider::setNavigationGoal(
 	_navigation_mode = req.navigationMode;
 	_waypoint_position = req.waypointPosition;
 	_routine = req.routine;
-	_goal_obsolete = false;
 	res.success = 1;
 	res.message = "Navigation goal set";
 	return true;
@@ -245,18 +246,15 @@ bool ServiceProvider::NavigationGoalCompleted(std_srvs::SetBool::Request &req,
 		std_srvs::SetBool::Response &res) {
 	switch (_navigation_mode) {
 	case 0: { //Exploration
-		rsm_msgs::ExplorationGoalCompleted srv;
 		if (req.data) {
-			srv.request.goal_reached = true;
+			_exploration_goal_completed_srv.request.goal_reached = true;
 			res.message = "Exploration goal reached";
 		} else {
-			srv.request.goal_reached = false;
-			srv.request.goal = _navigation_goal;
+			_exploration_goal_completed_srv.request.goal_reached = false;
+			_exploration_goal_completed_srv.request.goal = _navigation_goal;
 			res.message = "Exploration goal aborted";
 		}
-		if (!_exploration_goal_completed_service.call(srv)) {
-			ROS_ERROR("Failed to call Exploration Goal Completed service");
-		}
+		_exploration_goal_completed = true;
 		break;
 	}
 	case 1: { //Waypoint following
@@ -311,42 +309,9 @@ bool ServiceProvider::getExplorationMode(std_srvs::Trigger::Request &req,
 bool ServiceProvider::setExplorationMode(std_srvs::SetBool::Request &req,
 		std_srvs::SetBool::Response &res) {
 	_exploration_mode = req.data;
-	if (_exploration_mode) {
-		ros::NodeHandle nh("rsm");
-		_goal_obsolete_publisher = nh.advertise<std_msgs::Bool>("goalObsolete",
-				1);
-	} else {
-		_goal_obsolete_publisher.shutdown();
-	}
 	res.success = 1;
 	res.message = "Exploration mode set";
 	return true;
-}
-
-bool ServiceProvider::setGoalObsolete(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	if (_goal_obsolete) {
-		res.success = false;
-		res.message = "Goal already obsolete";
-	} else {
-		_goal_obsolete = true;
-		res.success = true;
-		res.message = "Goal set to obsolete";
-	}
-	return true;
-}
-
-bool ServiceProvider::getGoalObsolete(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	res.success = _goal_obsolete;
-	res.message = "Goal obsolete returned";
-	return true;
-}
-
-void ServiceProvider::publishGoalObsolete() {
-	std_msgs::Bool msg;
-	msg.data = _goal_obsolete;
-	_goal_obsolete_publisher.publish(msg);
 }
 
 void ServiceProvider::publishExplorationModes() {

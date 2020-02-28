@@ -124,6 +124,10 @@ private:
 	 * Currently active mode of operation (0=stopped, 1=autonomous, 2=teleoperation)
 	 */
 	int _operation_mode;
+	/**
+	 * Was the navigation goal successfully reached or aborted
+	 */
+	bool _navigation_complete_success;
 
 	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 	boost::shared_ptr<MoveBaseClient> _move_base_client;
