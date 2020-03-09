@@ -23,7 +23,7 @@ void WaypointFollowingState::onSetup() {
 	_set_navigation_goal_service = nh.serviceClient<
 			rsm_msgs::SetNavigationGoal>("setNavigationGoal");
 	//initialize variables
-	_name = "Waypoint Following";
+	_name = "W: Waypoint Following";
 	_next_waypoint_position = -1;
 }
 

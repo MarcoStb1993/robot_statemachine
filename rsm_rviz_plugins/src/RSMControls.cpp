@@ -286,10 +286,21 @@ void RSMControlPanel::stateInfoCallback(
 	const std_msgs::String::ConstPtr& state_info) {
 QString text = QString("Current state: %1").arg(state_info->data.c_str());
 _gui->current_state_text->setText(text);
-if (state_info->data.compare("Idle") == 0
-		|| state_info->data.compare("Teleoperation") == 0
-		|| state_info->data.compare("Emergency Stop") == 0
-		|| state_info->data.compare("Navigation: Simple Goal") == 0) {
+if (state_info->data.rfind("E:") == 0) {
+	if (!_exploration_running) {
+		_gui->start_exploration_button->setText("Stop");
+		_exploration_running = true;
+		_gui->exploration_info_text->setText("Exploration running");
+		_gui->exploration_mode_box->setEnabled(false);
+	}
+} else if (state_info->data.rfind("W:") == 0) {
+	if (!_waypoint_following_running) {
+		_gui->start_waypoint_following_button->setText("Stop");
+		_waypoint_following_running = false;
+		_gui->waypoint_following_info_text->setText(
+				"Waypoint Following running");
+	}
+} else {
 	_gui->start_exploration_button->setText("Start");
 	_exploration_running = false;
 	_gui->exploration_info_text->setText("");
@@ -299,23 +310,6 @@ if (state_info->data.compare("Idle") == 0
 	_gui->mode_box->setEnabled(true);
 	_waypoint_following_running = false;
 	_gui->waypoint_following_info_text->setText("");
-} else if (state_info->data.compare("Calculate Goal") == 0
-		|| state_info->data.compare("Navigation: Exploration") == 0
-		|| state_info->data.compare("Mapping") == 0) {
-	if (!_exploration_running) {
-		_gui->start_exploration_button->setText("Stop");
-		_exploration_running = true;
-		_gui->exploration_info_text->setText("Exploration running");
-		_gui->exploration_mode_box->setEnabled(false);
-	}
-} else if (state_info->data.compare("Waypoint Following") == 0
-		|| state_info->data.compare("Navigation: Waypoint Following") == 0) {
-	if (!_waypoint_following_running) {
-		_gui->start_waypoint_following_button->setText("Stop");
-		_waypoint_following_running = false;
-		_gui->waypoint_following_info_text->setText(
-				"Waypoint Following running");
-	}
 }
 }
 

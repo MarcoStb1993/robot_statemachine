@@ -39,17 +39,15 @@ void RSMControlPanel::initCommunications() {
 	_waypoint_reset_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetWaypoints");
 	_set_waypoint_following_mode_client = nh.serviceClient<
-			rsm_msgs::SetWaypointFollowingMode>(
-			"setWaypointFollowingMode");
+			rsm_msgs::SetWaypointFollowingMode>("setWaypointFollowingMode");
 
 	_state_info_subscriber = nh.subscribe("stateInfo", 10,
 			&RSMControlPanel::stateInfoCallback, this);
 	_state_info_client = nh.serviceClient<std_srvs::Trigger>("stateInfo");
-	_set_operation_mode_client = nh.serviceClient<
-			rsm_msgs::SetOperationMode>("setOperationMode");
+	_set_operation_mode_client = nh.serviceClient<rsm_msgs::SetOperationMode>(
+			"setOperationMode");
 	_operation_mode_subcriber = nh.subscribe<rsm_msgs::OperationMode>(
-			"operationMode", 1,
-			&RSMControlPanel::operationModeCallback, this);
+			"operationMode", 1, &RSMControlPanel::operationModeCallback, this);
 
 	_set_reverse_mode_client = nh.serviceClient<std_srvs::SetBool>(
 			"setReverseMode");
@@ -299,10 +297,21 @@ void RSMControlPanel::stateInfoCallback(
 	const std_msgs::String::ConstPtr& state_info) {
 QString text = QString("Current state: %1").arg(state_info->data.c_str());
 _gui->current_state_text->setText(text);
-if (state_info->data.compare("Idle") == 0
-		|| state_info->data.compare("Teleoperation") == 0
-		|| state_info->data.compare("Emergency Stop") == 0
-		|| state_info->data.compare("Navigation: Simple Goal") == 0) {
+if (state_info->data.rfind("E:") == 0) {
+	if (!_exploration_running) {
+		_gui->start_exploration_button->setText("Stop");
+		_exploration_running = true;
+		_gui->exploration_info_text->setText("Exploration running");
+		_gui->exploration_mode_box->setEnabled(false);
+	}
+} else if (state_info->data.rfind("W:") == 0) {
+	if (!_waypoint_following_running) {
+		_gui->start_waypoint_following_button->setText("Stop");
+		_waypoint_following_running = false;
+		_gui->waypoint_following_info_text->setText(
+				"Waypoint Following running");
+	}
+} else {
 	_gui->start_exploration_button->setText("Start");
 	_exploration_running = false;
 	_gui->exploration_info_text->setText("");
@@ -312,23 +321,6 @@ if (state_info->data.compare("Idle") == 0
 	_gui->mode_box->setEnabled(true);
 	_waypoint_following_running = false;
 	_gui->waypoint_following_info_text->setText("");
-} else if (state_info->data.compare("Calculate Goal") == 0
-		|| state_info->data.compare("Navigation: Exploration") == 0
-		|| state_info->data.compare("Mapping") == 0) {
-	if (!_exploration_running) {
-		_gui->start_exploration_button->setText("Stop");
-		_exploration_running = true;
-		_gui->exploration_info_text->setText("Exploration running");
-		_gui->exploration_mode_box->setEnabled(false);
-	}
-} else if (state_info->data.compare("Waypoint Following") == 0
-		|| state_info->data.compare("Navigation: Waypoint Following") == 0) {
-	if (!_waypoint_following_running) {
-		_gui->start_waypoint_following_button->setText("Stop");
-		_waypoint_following_running = false;
-		_gui->waypoint_following_info_text->setText(
-				"Waypoint Following running");
-	}
 }
 }
 
@@ -340,13 +332,13 @@ _gui->reverse_checkbox->setChecked(_reverse_mode);
 
 void RSMControlPanel::operationModeCallback(
 	const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
-	if (_operation_mode_button_pushed) {
-		_operation_mode_button_pushed = false;
-	} else {
-		_emergency_stop_active = operation_mode->emergencyStop;
-		_operation_mode = operation_mode->mode;
-		updateOperationModeGUI();
-	}
+if (_operation_mode_button_pushed) {
+	_operation_mode_button_pushed = false;
+} else {
+	_emergency_stop_active = operation_mode->emergencyStop;
+	_operation_mode = operation_mode->mode;
+	updateOperationModeGUI();
+}
 }
 
 void RSMControlPanel::initRoutineComboBox() {
@@ -365,14 +357,14 @@ _gui->routine_combo_box->addItems(list);
 }
 
 void RSMControlPanel::getStateInfo() {
-	std_srvs::Trigger srv;
-	if (_state_info_client.call(srv)) {
-		QString text = QString("Current state: %1").arg(
-				srv.response.message.c_str());
-		_gui->current_state_text->setText(text);
-	} else {
-		ROS_ERROR("Failed to call State Info service");
-	}
+std_srvs::Trigger srv;
+if (_state_info_client.call(srv)) {
+	QString text = QString("Current state: %1").arg(
+			srv.response.message.c_str());
+	_gui->current_state_text->setText(text);
+} else {
+	ROS_ERROR("Failed to call State Info service");
+}
 }
 
 void RSMControlPanel::updateOperationModeGUI() {
@@ -396,8 +388,7 @@ void RSMControlPanel::shutdownPlugin() {
 ros::shutdown();
 }
 
-void RSMControlPanel::saveSettings(
-	qt_gui_cpp::Settings& plugin_settings,
+void RSMControlPanel::saveSettings(qt_gui_cpp::Settings& plugin_settings,
 	qt_gui_cpp::Settings& instance_settings) const {
 
 }
@@ -410,6 +401,5 @@ void RSMControlPanel::restoreSettings(
 
 } /* namespace rsm */
 
-PLUGINLIB_EXPORT_CLASS(rsm::RSMControlPanel,
-	rqt_gui_cpp::Plugin)
+PLUGINLIB_EXPORT_CLASS(rsm::RSMControlPanel, rqt_gui_cpp::Plugin)
 

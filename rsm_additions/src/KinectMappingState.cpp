@@ -16,7 +16,7 @@ void KinectMappingState::onSetup() {
 	ros::NodeHandle nh("rsm");
 	_reset_kinect_position_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetKinectPosition");
-	_name = "Mapping";
+	_name = "E: Kinect Mapping";
 	_swivel_state = -1;
 	_position_reached = false;
 	_message_send = false;

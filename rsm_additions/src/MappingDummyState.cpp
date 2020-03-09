@@ -9,7 +9,7 @@ MappingDummyState::~MappingDummyState() {
 }
 
 void MappingDummyState::onSetup() {
-	_name = "Mapping";
+	_name = "E: Mapping Dummy";
 }
 
 void MappingDummyState::onEntry() {

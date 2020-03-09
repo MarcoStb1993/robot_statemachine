@@ -23,7 +23,7 @@ void CalculateGoalState::onSetup() {
 	_idle_timer = nh.createTimer(ros::Duration(5.0),
 			&CalculateGoalState::timerCallback, this, true);
 	//initialize variables
-	_name = "Calculate Goal";
+	_name = "E: Calculate Goal";
 	_frontiers_received = false;
 }
 

@@ -17,7 +17,7 @@ void ReversingRoutineState::onSetup() {
 	_get_reverse_moving_service = nh.serviceClient<std_srvs::Trigger>(
 			"getReverseMode");
 	//initialize variables
-	_name = "Mapping";
+	_name = "W: Reversing";
 	_reverse_mode_active = false;
 }
 

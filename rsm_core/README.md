@@ -35,7 +35,7 @@ These functions handle commands issued from the GUI or the use of teleoperation 
 
 The four other methods receive a reference to a bool and a string variable. The former informs if the request was successful and the desired action will be executed (true) or not (false) and the latter features a descriptive text.
 
-The Base State holds a reference to the [State Interface](#state-interface) which has to be used for state transitions. It also has a variable with it's name that is necessary to display the current state in the GUI and needs to be set in the `onSetup` or `onEntry` method.
+The Base State holds a reference to the [State Interface](#state-interface) which has to be used for state transitions. It also has a variable with it's name that is necessary to display the current state in the GUI and needs to be set in the `onSetup` or `onEntry` method. Furthermore, this name contains information if the state is part of an autonomous behavior. More details will follow [later](#writing-a-plugin-state)
 
 ### State Interface
 
@@ -290,7 +290,8 @@ find_package(catkin REQUIRED COMPONENTS
 ```
 
 This adds all dependencies needed to use the [pluginlib](http://wiki.ros.org/pluginlib) and include the [Base State](#base-state).  
-Next, create a class consisting of a header and source file in the respective directory in your package. The class needs to inherit from the [Base State](#base-state), interact with the [State Interface](#state-interface) and declare it is a plugin. The code for header and source are shown below.
+Next, create a class consisting of a header and source file in the respective directory in your package. The class needs to inherit from the [Base State](#base-state), interact with the [State Interface](#state-interface) and declare it is a plugin. If the plugin is part of exploration or waypoint following, its name
+must start with a leading `"E:"` or `"W:"` respectively. This is used to check, if the particular behavior is still active. The sample code for header and source are shown below.
 
 *ExampleState.h*:
 

@@ -44,13 +44,13 @@ void NavigationState::onEntry() {
 		_routine = srv.response.routine;
 		switch (_navigation_mode) {
 		case EXPLORATION:
-			_name = "Navigation: Exploration";
+			_name = "E: Navigation";
 			break;
 		case WAYPOINT_FOLLOWING:
-			_name = "Navigation: Waypoint Following";
+			_name = "W: Navigation";
 			break;
 		case SIMPLE_GOAL:
-			_name = "Navigation: Simple Goal";
+			_name = "G: Navigation";
 			break;
 		default:
 			_name = "Navigation";
