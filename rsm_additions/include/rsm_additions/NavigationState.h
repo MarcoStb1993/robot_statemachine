@@ -12,8 +12,8 @@
 #include <rsm_msgs/GetNavigationGoal.h>
 #include <rsm_msgs/GetRobotPose.h>
 #include <rsm_msgs/OperationMode.h>
+#include <rsm_msgs/GoalCompleted.h>
 #include <std_srvs/Trigger.h>
-#include <std_srvs/SetBool.h>
 #include <tf/transform_datatypes.h>
 #include <std_msgs/Bool.h>
 
@@ -125,9 +125,9 @@ private:
 	 */
 	int _operation_mode;
 	/**
-	 * Was the navigation goal successfully reached or aborted
+	 * Was the navigation goal successfully reached or not or aborted
 	 */
-	bool _navigation_complete_success;
+	int _navigation_completed_status;
 
 	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 	boost::shared_ptr<MoveBaseClient> _move_base_client;

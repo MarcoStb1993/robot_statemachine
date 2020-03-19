@@ -17,7 +17,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <rsm_msgs/SetNavigationGoal.h>
 #include <rsm_msgs/GetNavigationGoal.h>
-#include <rsm_msgs/ExplorationGoalCompleted.h>
+#include <rsm_msgs/GoalCompleted.h>
 
 #include <rsm_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
@@ -132,7 +132,7 @@ private:
 	/**
 	 * Service call for completed exploration goal
 	 */
-	rsm_msgs::ExplorationGoalCompleted _exploration_goal_completed_srv;
+	rsm_msgs::GoalCompleted _exploration_goal_completed_srv;
 
 	bool addWaypoint(rsm_msgs::AddWaypoint::Request &req,
 			rsm_msgs::AddWaypoint::Response &res);
@@ -161,8 +161,8 @@ private:
 			rsm_msgs::SetNavigationGoal::Response &res);
 	bool getNavigationGoal(rsm_msgs::GetNavigationGoal::Request &req,
 			rsm_msgs::GetNavigationGoal::Response &res);
-	bool NavigationGoalCompleted(std_srvs::SetBool::Request &req,
-			std_srvs::SetBool::Response &res);
+	bool NavigationGoalCompleted(rsm_msgs::GoalCompleted::Request &req,
+			rsm_msgs::GoalCompleted::Response &res);
 
 	bool getRobotPose(rsm_msgs::GetRobotPose::Request &req,
 			rsm_msgs::GetRobotPose::Response &res);

@@ -18,7 +18,7 @@
 #include <rsm_msgs/GetNavigationGoal.h>
 #include <rsm_msgs/AddFailedGoal.h>
 #include <rsm_msgs/GetFailedGoals.h>
-#include <rsm_msgs/ExplorationGoalCompleted.h>
+#include <rsm_msgs/GoalCompleted.h>
 
 typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseActionServer;
 
@@ -136,8 +136,8 @@ private:
 	bool resetFailedGoals(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 	bool explorationGoalCompleted(
-			rsm_msgs::ExplorationGoalCompleted::Request &req,
-			rsm_msgs::ExplorationGoalCompleted::Response &res);
+			rsm_msgs::GoalCompleted::Request &req,
+			rsm_msgs::GoalCompleted::Response &res);
 	/**
 	 * Callback for exploration mode
 	 * @param exploration_mode Exploration mode (0=complete goal, 1=interrupt goal when exploration goals vanished)

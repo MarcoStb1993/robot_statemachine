@@ -13,7 +13,7 @@ void NavigationState::onSetup() {
 	ros::NodeHandle nh("rsm");
 	_get_navigation_goal_service =
 			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
-	_navigation_goal_completed_service = nh.serviceClient<std_srvs::SetBool>(
+	_navigation_goal_completed_service = nh.serviceClient<rsm_msgs::GoalCompleted>(
 			"navigationGoalCompleted");
 	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
@@ -32,7 +32,7 @@ void NavigationState::onSetup() {
 	_reverse_mode = false;
 	_exploration_mode = -1;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
-	_navigation_complete_success = false;
+	_navigation_completed_status = rsm_msgs::GoalCompleted::Request::ABORTED;
 }
 
 void NavigationState::onEntry() {
@@ -97,10 +97,9 @@ void NavigationState::onActive() {
 	if (_move_base_client->isServerConnected()) {
 		if (_goal_active) {
 			if (_move_base_client->getState().isDone()) {
-
 				if (_move_base_client->getState().state_
 						== actionlib::SimpleClientGoalState::SUCCEEDED) {
-					_navigation_complete_success = true;
+					_navigation_completed_status = rsm_msgs::GoalCompleted::Request::REACHED;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
@@ -128,7 +127,7 @@ void NavigationState::onActive() {
 						}
 					}
 				} else {
-					_navigation_complete_success = false;
+					_navigation_completed_status = rsm_msgs::GoalCompleted::Request::FAILED;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
@@ -169,8 +168,8 @@ void NavigationState::onExit() {
 	if (_goal_active) {
 		_move_base_client->cancelGoal();
 	}
-	std_srvs::SetBool srv;
-	srv.request.data = _navigation_complete_success;
+	rsm_msgs::GoalCompleted srv;
+	srv.request.goal_state = _navigation_completed_status;
 	if (!_navigation_goal_completed_service.call(srv)) {
 		ROS_ERROR("Failed to call Complete Navigation Goal service");
 	}
@@ -326,7 +325,6 @@ void NavigationState::comparePose() {
 void NavigationState::goalObsoleteCallback(
 		const std_msgs::Bool::ConstPtr& msg) {
 	if (msg->data && !_interrupt_occured) {
-		_navigation_complete_success = false;
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(
 				MAPPING_STATE));

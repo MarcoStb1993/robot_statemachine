@@ -51,7 +51,7 @@ ServiceProvider::ServiceProvider() {
 	_exploration_mode_publisher = nh.advertise<std_msgs::Bool>(
 			"explorationMode", 1);
 	_exploration_goal_completed_service = nh.serviceClient<
-			rsm_msgs::ExplorationGoalCompleted>("explorationGoalCompleted");
+			rsm_msgs::GoalCompleted>("explorationGoalCompleted");
 
 	_set_reverse_mode_service = nh.advertiseService("setReverseMode",
 			&ServiceProvider::setReverseMode, this);
@@ -242,36 +242,31 @@ bool ServiceProvider::getNavigationGoal(
 	return true;
 }
 
-bool ServiceProvider::NavigationGoalCompleted(std_srvs::SetBool::Request &req,
-		std_srvs::SetBool::Response &res) {
+bool ServiceProvider::NavigationGoalCompleted(
+		rsm_msgs::GoalCompleted::Request &req,
+		rsm_msgs::GoalCompleted::Response &res) {
 	switch (_navigation_mode) {
 	case 0: { //Exploration
-		if (req.data) {
-			_exploration_goal_completed_srv.request.goal_reached = true;
-			res.message = "Exploration goal reached";
-		} else {
-			_exploration_goal_completed_srv.request.goal_reached = false;
-			_exploration_goal_completed_srv.request.goal = _navigation_goal;
-			res.message = "Exploration goal aborted";
-		}
+		_exploration_goal_completed_srv.request.goal_state = req.goal_state;
+		_exploration_goal_completed_srv.request.goal = _navigation_goal;
+		res.message = "Exploration goal completed";
 		_exploration_goal_completed = true;
 		break;
 	}
 	case 1: { //Waypoint following
-		if (req.data) {
+		if (req.goal_state == rsm_msgs::GoalCompleted::Request::REACHED) {
 			if (_waypoint_position >= 0
 					&& _waypoint_position < _waypoint_array.waypoints_size) {
 				_waypoint_array.waypoints[_waypoint_position].visited = true;
 			}
-			res.message = "Waypoint reached";
-		} else {
+		} else if (req.goal_state == rsm_msgs::GoalCompleted::Request::FAILED) {
 			if (_waypoint_position >= 0
 					&& _waypoint_position < _waypoint_array.waypoints_size) {
 				_waypoint_array.waypoints[_waypoint_position].unreachable =
 						true;
 			}
-			res.message = "Waypoint aborted";
 		}
+		res.message = "Waypoint completed";
 		break;
 	}
 	default: {

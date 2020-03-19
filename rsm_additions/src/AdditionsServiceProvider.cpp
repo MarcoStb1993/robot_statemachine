@@ -145,14 +145,16 @@ bool AdditionsServiceProvider::resetFailedGoals(std_srvs::Trigger::Request &req,
 }
 
 bool AdditionsServiceProvider::explorationGoalCompleted(
-		rsm_msgs::ExplorationGoalCompleted::Request &req,
-		rsm_msgs::ExplorationGoalCompleted::Response &res) {
-	if (req.goal_reached) {
+		rsm_msgs::GoalCompleted::Request &req,
+		rsm_msgs::GoalCompleted::Response &res) {
+	if (req.goal_state == rsm_msgs::GoalCompleted::Request::REACHED) {
 		_failed_goals.poses.clear();
 		res.message = "Failed goals cleared";
-	} else {
+	} else if (req.goal_state == rsm_msgs::GoalCompleted::Request::FAILED) {
 		_failed_goals.poses.push_back(req.goal);
 		res.message = "Failed goal added";
+	} else {
+		res.message = "Goal aborted";
 	}
 	res.success = 1;
 	return true;
@@ -176,8 +178,7 @@ void AdditionsServiceProvider::frontierCallback(
 	}
 	if (_exploration_mode && !navGoalIncludedInFrontiers()) {
 		_goal_obsolete = true;
-	}
-	else {
+	} else {
 		_goal_obsolete = false;
 	}
 }

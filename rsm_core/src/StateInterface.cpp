@@ -104,6 +104,7 @@ void StateInterface::awake() {
 	if (_next_state) // do transition
 	{
 		// do transition to next state
+		ROS_INFO_STREAM("Transition from " << _current_state->getName() << " to " << _next_state->getName());
 		_current_state = _next_state;
 		_next_state = NULL;
 

@@ -1,0 +1,9 @@
+geometry_msgs/Pose goal			 	# Exploration goal that has been completed
+uint8 goal_state					# If the goal was reached or not or aborted
+
+uint8 REACHED = 0       			# Goal was successfully reached
+uint8 FAILED = 1        			# Failed to reach goal
+uint8 ABORTED = 2        			# Aborted goal before completion
+---
+bool success                        # Indicate successful run of triggered service
+string message                      # Informational, e.g. for error messages
