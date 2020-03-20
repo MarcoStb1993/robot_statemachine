@@ -50,8 +50,8 @@ ServiceProvider::ServiceProvider() {
 			&ServiceProvider::getExplorationMode, this);
 	_exploration_mode_publisher = nh.advertise<std_msgs::Bool>(
 			"explorationMode", 1);
-	_exploration_goal_completed_service = nh.serviceClient<
-			rsm_msgs::GoalCompleted>("explorationGoalCompleted");
+	_exploration_goal_publisher = nh.advertise<rsm_msgs::GoalStatus>(
+			"explorationGoalStatus", 1);
 
 	_set_reverse_mode_service = nh.advertiseService("setReverseMode",
 			&ServiceProvider::setReverseMode, this);
@@ -72,7 +72,6 @@ ServiceProvider::ServiceProvider() {
 	_waypoint_position = -1;
 
 	_exploration_mode = 0;
-	_exploration_goal_completed = false;
 
 	_reverse_mode_active = false;
 }
@@ -81,21 +80,11 @@ ServiceProvider::~ServiceProvider() {
 
 }
 
-void ServiceProvider::callExplorationGoalCompleted() {
-	if (!_exploration_goal_completed_service.call(
-			_exploration_goal_completed_srv)) {
-		ROS_ERROR("Failed to call Exploration Goal Completed service");
-	}
-	_exploration_goal_completed = false;
-}
-
 void ServiceProvider::publishTopics() {
 	publishWaypoints();
 	publishExplorationModes();
 	publishReverseMode();
-	if (_exploration_goal_completed) {
-		callExplorationGoalCompleted();
-	}
+	publishExplorationGoalCompleted();
 }
 
 bool ServiceProvider::addWaypoint(rsm_msgs::AddWaypoint::Request &req,
@@ -227,6 +216,9 @@ bool ServiceProvider::setNavigationGoal(
 	_navigation_mode = req.navigationMode;
 	_waypoint_position = req.waypointPosition;
 	_routine = req.routine;
+
+	_exploration_goal_completed_msg.goal = _navigation_goal;
+	_exploration_goal_completed_msg.goal_status = rsm_msgs::GoalStatus::ACTIVE;
 	res.success = 1;
 	res.message = "Navigation goal set";
 	return true;
@@ -247,19 +239,17 @@ bool ServiceProvider::NavigationGoalCompleted(
 		rsm_msgs::GoalCompleted::Response &res) {
 	switch (_navigation_mode) {
 	case 0: { //Exploration
-		_exploration_goal_completed_srv.request.goal_state = req.goal_state;
-		_exploration_goal_completed_srv.request.goal = _navigation_goal;
+		_exploration_goal_completed_msg.goal_status = req.status.goal_status;
 		res.message = "Exploration goal completed";
-		_exploration_goal_completed = true;
 		break;
 	}
 	case 1: { //Waypoint following
-		if (req.goal_state == rsm_msgs::GoalCompleted::Request::REACHED) {
+		if (req.status.goal_status == rsm_msgs::GoalStatus::REACHED) {
 			if (_waypoint_position >= 0
 					&& _waypoint_position < _waypoint_array.waypoints_size) {
 				_waypoint_array.waypoints[_waypoint_position].visited = true;
 			}
-		} else if (req.goal_state == rsm_msgs::GoalCompleted::Request::FAILED) {
+		} else if (req.status.goal_status == rsm_msgs::GoalStatus::FAILED) {
 			if (_waypoint_position >= 0
 					&& _waypoint_position < _waypoint_array.waypoints_size) {
 				_waypoint_array.waypoints[_waypoint_position].unreachable =
@@ -313,6 +303,10 @@ void ServiceProvider::publishExplorationModes() {
 	std_msgs::Bool msg;
 	msg.data = _exploration_mode;
 	_exploration_mode_publisher.publish(msg);
+}
+
+void ServiceProvider::publishExplorationGoalCompleted() {
+	_exploration_goal_publisher.publish(_exploration_goal_completed_msg);
 }
 
 bool ServiceProvider::setReverseMode(std_srvs::SetBool::Request &req,

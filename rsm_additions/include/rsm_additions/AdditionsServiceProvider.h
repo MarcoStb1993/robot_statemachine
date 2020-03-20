@@ -48,7 +48,7 @@ private:
 	ros::Publisher _exploration_goals_publisher;
 	ros::ServiceClient _get_navigation_goal_service;
 	ros::Publisher _goal_obsolete_publisher;
-	ros::ServiceServer _exploration_goal_completed_service;
+	ros::Subscriber _exploration_goal_subscriber;
 	ros::Subscriber _exploration_mode_subscriber;
 
 	ros::ServiceServer _reset_kinect_position_serivce;
@@ -129,9 +129,12 @@ private:
 	 */
 	void publishGoalObsolete();
 
-	bool explorationGoalCompleted(
-			rsm_msgs::GoalCompleted::Request &req,
-			rsm_msgs::GoalCompleted::Response &res);
+	/**
+	 * Callback for exploration goal status
+	 * @param goal_status Current goal status and pose
+	 */
+	void explorationGoalCallback(
+			const rsm_msgs::GoalStatus::ConstPtr& goal_status);
 	/**
 	 * Callback for exploration mode
 	 * @param exploration_mode Exploration mode (0=complete goal, 1=interrupt goal when exploration goals vanished)

@@ -32,7 +32,7 @@ void NavigationState::onSetup() {
 	_reverse_mode = false;
 	_exploration_mode = -1;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
-	_navigation_completed_status = rsm_msgs::GoalCompleted::Request::ABORTED;
+	_navigation_completed_status = rsm_msgs::GoalStatus::ABORTED;
 }
 
 void NavigationState::onEntry() {
@@ -99,7 +99,7 @@ void NavigationState::onActive() {
 			if (_move_base_client->getState().isDone()) {
 				if (_move_base_client->getState().state_
 						== actionlib::SimpleClientGoalState::SUCCEEDED) {
-					_navigation_completed_status = rsm_msgs::GoalCompleted::Request::REACHED;
+					_navigation_completed_status = rsm_msgs::GoalStatus::REACHED;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
@@ -127,7 +127,7 @@ void NavigationState::onActive() {
 						}
 					}
 				} else {
-					_navigation_completed_status = rsm_msgs::GoalCompleted::Request::FAILED;
+					_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
 					if (!_interrupt_occured) {
 						switch (_navigation_mode) {
 						case EXPLORATION: {
@@ -169,7 +169,7 @@ void NavigationState::onExit() {
 		_move_base_client->cancelGoal();
 	}
 	rsm_msgs::GoalCompleted srv;
-	srv.request.goal_state = _navigation_completed_status;
+	srv.request.status.goal_status = _navigation_completed_status;
 	if (!_navigation_goal_completed_service.call(srv)) {
 		ROS_ERROR("Failed to call Complete Navigation Goal service");
 	}

@@ -44,9 +44,8 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 				&AdditionsServiceProvider::explorationModeCallback, this);
 		_failed_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
 				"failedGoals", 1);
-		_exploration_goal_completed_service = nh.advertiseService(
-				"explorationGoalCompleted",
-				&AdditionsServiceProvider::explorationGoalCompleted, this);
+		_exploration_goal_subscriber = nh.subscribe("explorationGoalStatus", 1,
+				&AdditionsServiceProvider::explorationGoalCallback, this);
 		_get_navigation_goal_service = nh.serviceClient<
 				rsm_msgs::GetNavigationGoal>("getNavigationGoal");
 	} else {
@@ -123,20 +122,13 @@ void AdditionsServiceProvider::publishGoalObsolete() {
 	_goal_obsolete_publisher.publish(msg);
 }
 
-bool AdditionsServiceProvider::explorationGoalCompleted(
-		rsm_msgs::GoalCompleted::Request &req,
-		rsm_msgs::GoalCompleted::Response &res) {
-	if (req.goal_state == rsm_msgs::GoalCompleted::Request::REACHED) {
+void AdditionsServiceProvider::explorationGoalCallback(
+		const rsm_msgs::GoalStatus::ConstPtr& goal_status) {
+	if (goal_status->goal_status == rsm_msgs::GoalStatus::REACHED) {
 		_failed_goals.poses.clear();
-		res.message = "Failed goals cleared";
-	} else if (req.goal_state == rsm_msgs::GoalCompleted::Request::FAILED) {
-		_failed_goals.poses.push_back(req.goal);
-		res.message = "Failed goal added";
-	} else {
-		res.message = "Goal aborted";
+	} else if (goal_status->goal_status == rsm_msgs::GoalStatus::FAILED) {
+		_failed_goals.poses.push_back(goal_status->goal);
 	}
-	res.success = 1;
-	return true;
 }
 
 void AdditionsServiceProvider::frontierCallback(

@@ -78,8 +78,7 @@ positions can be set with a parameter.
 
 Furthermore, goals that could not be reached during exploration, here named as
 failed goals, are saved and published. These serve as a way of blacklisting goals.
-This normally happens, when the navigation finishes. Then a service in the Additions Service
-Provider is called, that handles the outcome for the exploration.
+This normally happens, when the navigation finishes.
 
 For driving in reverse mode, the velocity commands issued by the reverse navigation 
 stack are also subscribed to and republished with negated linear velocities. It also 
@@ -161,13 +160,13 @@ All frontier grid cells as points and closest frontier points as spheres
 **explorationMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
 The current exploration mode (true: interrupt, false: finish)
 
+**explorationGoalStatus** ([rsm_msgs/GoalStatus](../rsm_msgs/msg/GoalStatus.msg))  
+The currently active goal's status and pose
+
 #### Services
 
 **setNavigationToReverse** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
 Needs to be implemented for reverse mode, just returns success
-
-**explorationGoalCompleted** ([rsm_msgs/ExplorationGoalCompleted](../rsm_msgs/srv/ExplorationGoalCompleted.srv))  
-Depending on the success of reaching the goal, clears the failed goals if it was reached or adds a new one if it was not
 
 #### Parameters
 

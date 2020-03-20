@@ -18,6 +18,7 @@
 #include <rsm_msgs/SetNavigationGoal.h>
 #include <rsm_msgs/GetNavigationGoal.h>
 #include <rsm_msgs/GoalCompleted.h>
+#include <rsm_msgs/GoalStatus.h>
 
 #include <rsm_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
@@ -75,7 +76,7 @@ private:
 	ros::ServiceServer _set_exploration_mode_service;
 	ros::ServiceServer _get_exploration_mode_service;
 	ros::Publisher _exploration_mode_publisher;
-	ros::ServiceClient _exploration_goal_completed_service;
+	ros::Publisher _exploration_goal_publisher;
 
 	ros::ServiceServer _set_reverse_mode_service;
 	ros::ServiceServer _get_reverse_mode_service;
@@ -126,13 +127,9 @@ private:
 	 */
 	bool _reverse_mode_active;
 	/**
-	 * Was the current exploration goal completed
+	 * Message for completed exploration goal
 	 */
-	bool _exploration_goal_completed;
-	/**
-	 * Service call for completed exploration goal
-	 */
-	rsm_msgs::GoalCompleted _exploration_goal_completed_srv;
+	rsm_msgs::GoalStatus _exploration_goal_completed_msg;
 
 	bool addWaypoint(rsm_msgs::AddWaypoint::Request &req,
 			rsm_msgs::AddWaypoint::Response &res);
@@ -180,7 +177,7 @@ private:
 	bool getReverseMode(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 	void publishReverseMode();
-	void callExplorationGoalCompleted();
+	void publishExplorationGoalCompleted();
 };
 
 }

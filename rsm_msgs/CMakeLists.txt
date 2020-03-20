@@ -15,6 +15,7 @@ add_message_files(
    Waypoint.msg
    WaypointArray.msg
    OperationMode.msg
+   GoalStatus.msg
 )
 
 add_service_files(
@@ -31,7 +32,6 @@ add_service_files(
   SetNavigationGoal.srv
   GetNavigationGoal.srv
   GoalCompleted.srv
-  GetRobotPose.srv
   SetOperationMode.srv
 )
 

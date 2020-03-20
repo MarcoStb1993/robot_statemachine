@@ -481,30 +481,6 @@ if (!set_navigation_goal_service.call(srv)) {
 ...
 ```
 
-In addition, a service provider for this plugin must offer the `explorationGoalCompleted` service which handles the navigation's
-result when trying to reach an exploration goal previously calculated. The service server is being told if the goal was successfully
-reached or aborted. Handling this event is shown in the code sample below.
-
-```cpp
-...
-ros::NodeHandle nh("rsm");
-ros::ServiceServer exploration_goal_completed_service = nh.advertiseService("explorationGoalCompleted",explorationGoalCompleted);
-...
-bool explorationGoalCompleted(
-		rsm_msgs::ExplorationGoalCompleted::Request &req,
-		rsm_msgs::ExplorationGoalCompleted::Response &res) {
-	if (req.goal_reached) {
-		// Handle successful exploration goal
-		res.message = "Exploration goal success handled";
-	} else {
-		// Handle failed exploration goal
-		res.message = "Exploration goal failure handled";
-	}
-	res.success = 1;
-	return true;
-}
-```
-
 Furthermore, if the Exploration is run in *Interrupt* mode, the additional service provider is required to publish a `goalObsolete`
 topic of type [std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html), publishing the value "true" if the goal has become
 obsolete.
@@ -658,6 +634,9 @@ List of all waypoints and their information
 
 **explorationMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
 The current exploration mode (true: interrupt, false: finish)
+
+**explorationGoalStatus** ([rsm_msgs/GoalStatus](../rsm_msgs/msg/GoalStatus.msg))  
+The currently active goal's status and pose
 
 **reverseMode** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
 Information if the robot is currently moving in reverse (true: reverse, false: forward)
