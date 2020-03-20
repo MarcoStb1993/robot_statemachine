@@ -9,7 +9,6 @@
 #include <rsm_core/StateInterface.h>
 #include <geometry_msgs/PoseArray.h>
 #include <rsm_msgs/SetNavigationGoal.h>
-#include <rsm_msgs/GetFailedGoals.h>
 #include <rsm_msgs/GetRobotPose.h>
 #include <tf/transform_listener.h>
 
@@ -80,24 +79,11 @@ public:
 	 */
 	void onInterrupt(int interrupt);
 
-	/**
-	 * @brief Called when new frontiers are received
-	 * @param frontiers List of poses containing all frontier centers
-	 */
-	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
-
-	/**
-	 * @brief Checks if a point is different from a previously failed goals including a small tolerance
-	 * @param Point that is checked against previously failed goals
-	 * @return Returns if the given point is different from the previously failed goals
-	 */
-	bool differentFromFailedGoals(geometry_msgs::Point point);
-
 private:
 
 	ros::NodeHandle _nh;
 	ros::Subscriber _frontiers_sub;
-	ros::ServiceClient _get_failed_goals_service;
+	ros::Subscriber _failed_goals_sub;
 	ros::ServiceClient _set_navigation_goal_service;
 	ros::ServiceClient _get_robot_pose_service;
 	ros::Timer _idle_timer;
@@ -105,7 +91,7 @@ private:
 	/**
 	 * List of previously failed goals
 	 */
-	std::vector<geometry_msgs::Pose> _failed_goals;
+	geometry_msgs::PoseArray _failed_goals;
 	/**
 	 * Chosen goal to be forwarded to navigation
 	 */
@@ -118,6 +104,10 @@ private:
 	 * Were frontiers received
 	 */
 	bool _frontiers_received;
+	/**
+	 * Were failed goals received
+	 */
+	bool _failed_goals_received;
 
 	/**
 	 * @brief Callback for when no goal was chosen in time and calculation likely failed
@@ -128,6 +118,26 @@ private:
 	 * Initiate transition to idle state
 	 */
 	void abortCalculateGoal();
+
+	/**
+	 * @brief Called when new frontiers are received
+	 * @param frontiers List of poses containing all frontier centers
+	 */
+	void frontiersCallback(const geometry_msgs::PoseArray::ConstPtr& frontiers);
+
+	/**
+	 * @brief Called when new failed goals are received
+	 * @param failed_goals List of poses containing all previously failed goals
+	 */
+	void failedGoalsCallback(
+			const geometry_msgs::PoseArray::ConstPtr& failed_goals);
+
+	/**
+	 * @brief Checks if a point is different from a previously failed goals including a small tolerance
+	 * @param Point that is checked against previously failed goals
+	 * @return Returns if the given point is different from the previously failed goals
+	 */
+	bool differentFromFailedGoals(geometry_msgs::Point point);
 };
 
 }

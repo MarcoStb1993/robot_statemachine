@@ -31,8 +31,6 @@ add_service_files(
   SetNavigationGoal.srv
   GetNavigationGoal.srv
   GoalCompleted.srv
-  AddFailedGoal.srv
-  GetFailedGoals.srv
   GetRobotPose.srv
   SetOperationMode.srv
 )

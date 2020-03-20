@@ -77,7 +77,7 @@ If not, it is published that the goal is obsolete. A tolerance for comparing the
 positions can be set with a parameter.
 
 Furthermore, goals that could not be reached during exploration, here named as
-failed goals, can be set, retrieved or reset. These serve as a way of blacklisting goals.
+failed goals, are saved and published. These serve as a way of blacklisting goals.
 This normally happens, when the navigation finishes. Then a service in the Additions Service
 Provider is called, that handles the outcome for the exploration.
 
@@ -141,6 +141,9 @@ Topic name for the autonomy command velocity
 **explorationGoals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
 List of all currently available exploration goals
 
+**failedGoals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
+List of all previously failed goals
+
 **kinect_controller/command** ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html))  
 Position the kinect revolute joint will move to
 
@@ -162,15 +165,6 @@ The current exploration mode (true: interrupt, false: finish)
 
 **setNavigationToReverse** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
 Needs to be implemented for reverse mode, just returns success
-
-**addFailedGoal** ([rsm_msgs/AddFailedGoal](../rsm_msgs/srv/AddFailedGoal.srv))  
-Add an unreachable goal to the list of all failed goals
-
-**getFailedGoals** ([rsm_msgs/GetFailedGoals](../rsm_msgs/srv/GetFailedGoals.srv))  
-Return list of all previously failed goals  
-
-**resetFailedGoals** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
-Deletes the list of previously failed goals
 
 **explorationGoalCompleted** ([rsm_msgs/ExplorationGoalCompleted](../rsm_msgs/srv/ExplorationGoalCompleted.srv))  
 Depending on the success of reaching the goal, clears the failed goals if it was reached or adds a new one if it was not

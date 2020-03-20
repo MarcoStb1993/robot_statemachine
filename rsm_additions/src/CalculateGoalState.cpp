@@ -12,12 +12,12 @@ CalculateGoalState::~CalculateGoalState() {
 void CalculateGoalState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("rsm");
-	_frontiers_sub = nh.subscribe<geometry_msgs::PoseArray>("explorationGoals", 10,
-			&CalculateGoalState::frontiersCallback, this);
-	_get_failed_goals_service = nh.serviceClient<
-			rsm_msgs::GetFailedGoals>("getFailedGoals");
-	_set_navigation_goal_service = nh.serviceClient<
-			rsm_msgs::SetNavigationGoal>("setNavigationGoal");
+	_frontiers_sub = nh.subscribe<geometry_msgs::PoseArray>("explorationGoals",
+			10, &CalculateGoalState::frontiersCallback, this);
+	_failed_goals_sub = nh.subscribe<geometry_msgs::PoseArray>("failedGoals", 10,
+			&CalculateGoalState::failedGoalsCallback, this);
+	_set_navigation_goal_service =
+			nh.serviceClient<rsm_msgs::SetNavigationGoal>("setNavigationGoal");
 	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
 			"getRobotPose");
 	_idle_timer = nh.createTimer(ros::Duration(5.0),
@@ -25,20 +25,15 @@ void CalculateGoalState::onSetup() {
 	//initialize variables
 	_name = "E: Calculate Goal";
 	_frontiers_received = false;
+	_failed_goals_received = false;
 }
 
 void CalculateGoalState::onEntry() {
 	//Request list of failed goals from Service Provider
-	rsm_msgs::GetFailedGoals srv;
-	if (_get_failed_goals_service.call(srv)) {
-		_failed_goals = srv.response.failedGoals.poses;
-	} else {
-		ROS_ERROR("Failed to call Get Failed Goals service");
-	}
 }
 
 void CalculateGoalState::onActive() {
-	if (_frontiers_received) {
+	if (_frontiers_received && _failed_goals_received) {
 		//Calculate frontier center closest to the robot
 		rsm_msgs::GetRobotPose srv;
 		if (_get_robot_pose_service.call(srv)) {
@@ -139,9 +134,15 @@ void CalculateGoalState::frontiersCallback(
 	_frontiers_received = true;
 }
 
+void CalculateGoalState::failedGoalsCallback(
+		const geometry_msgs::PoseArray::ConstPtr& failed_goals) {
+	_failed_goals = *failed_goals;
+	_failed_goals_received = true;
+}
+
 bool CalculateGoalState::differentFromFailedGoals(geometry_msgs::Point point) {
 	double tolerance = 0.05;
-	for (auto iterator : _failed_goals) {
+	for (auto iterator : _failed_goals.poses) {
 		double x_dif = abs(point.x - iterator.position.x);
 		double y_dif = abs(point.y - iterator.position.y);
 		if (x_dif <= tolerance && y_dif <= tolerance) {
@@ -165,5 +166,4 @@ void CalculateGoalState::abortCalculateGoal() {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(rsm::CalculateGoalState,
-		rsm::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::CalculateGoalState, rsm::BaseState)

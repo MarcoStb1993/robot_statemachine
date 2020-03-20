@@ -38,16 +38,12 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 		as->start();
 		frontiers_marker_array_subscriber = _nh.subscribe("explore/frontiers",
 				1, &AdditionsServiceProvider::frontierCallback, this);
-		exploration_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
+		_exploration_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
 				"explorationGoals", 1);
 		_exploration_mode_subscriber = nh.subscribe("explorationMode", 1,
 				&AdditionsServiceProvider::explorationModeCallback, this);
-		_add_failed_goal_service = nh.advertiseService("addFailedGoal",
-				&AdditionsServiceProvider::addFailedGoal, this);
-		_get_failed_goals_service = nh.advertiseService("getFailedGoals",
-				&AdditionsServiceProvider::getFailedGoals, this);
-		_reset_failed_goals_service = nh.advertiseService("resetFailedGoals",
-				&AdditionsServiceProvider::resetFailedGoals, this);
+		_failed_goals_publisher = nh.advertise<geometry_msgs::PoseArray>(
+				"failedGoals", 1);
 		_exploration_goal_completed_service = nh.advertiseService(
 				"explorationGoalCompleted",
 				&AdditionsServiceProvider::explorationGoalCompleted, this);
@@ -78,6 +74,7 @@ AdditionsServiceProvider::~AdditionsServiceProvider() {
 void AdditionsServiceProvider::publishTopics() {
 	if (_calculate_goal_plugin_used) {
 		publishExplorationGoals();
+		publishFailedGoals();
 	}
 	if (_exploration_mode) {
 		publishGoalObsolete();
@@ -111,37 +108,19 @@ void AdditionsServiceProvider::navigationGoalCallback(
 void AdditionsServiceProvider::publishExplorationGoals() {
 	_exploration_goals.header.frame_id = "map";
 	_exploration_goals.header.stamp = ros::Time::now();
-	exploration_goals_publisher.publish(_exploration_goals);
+	_exploration_goals_publisher.publish(_exploration_goals);
+}
+
+void AdditionsServiceProvider::publishFailedGoals() {
+	_failed_goals.header.frame_id = "map";
+	_failed_goals.header.stamp = ros::Time::now();
+	_failed_goals_publisher.publish(_failed_goals);
 }
 
 void AdditionsServiceProvider::publishGoalObsolete() {
 	std_msgs::Bool msg;
 	msg.data = _goal_obsolete;
 	_goal_obsolete_publisher.publish(msg);
-}
-
-bool AdditionsServiceProvider::addFailedGoal(
-		rsm_msgs::AddFailedGoal::Request &req,
-		rsm_msgs::AddFailedGoal::Response &res) {
-	_failed_goals.poses.push_back(req.failedGoal);
-	res.success = 1;
-	res.message = "Failed goal added";
-	return true;
-}
-
-bool AdditionsServiceProvider::getFailedGoals(
-		rsm_msgs::GetFailedGoals::Request &req,
-		rsm_msgs::GetFailedGoals::Response &res) {
-	res.failedGoals = _failed_goals;
-	return true;
-}
-
-bool AdditionsServiceProvider::resetFailedGoals(std_srvs::Trigger::Request &req,
-		std_srvs::Trigger::Response &res) {
-	_failed_goals.poses.clear();
-	res.success = 1;
-	res.message = "Failed goals reset";
-	return true;
 }
 
 bool AdditionsServiceProvider::explorationGoalCompleted(

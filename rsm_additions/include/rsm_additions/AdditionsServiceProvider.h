@@ -16,8 +16,6 @@
 
 #include <std_msgs/Bool.h>
 #include <rsm_msgs/GetNavigationGoal.h>
-#include <rsm_msgs/AddFailedGoal.h>
-#include <rsm_msgs/GetFailedGoals.h>
 #include <rsm_msgs/GoalCompleted.h>
 
 typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseActionServer;
@@ -44,12 +42,10 @@ private:
 	ros::Subscriber _reverse_mode_cmd_vel_subscriber;
 	ros::Publisher _reverse_mode_cmd_vel_publisher;
 
-	ros::ServiceServer _add_failed_goal_service;
-	ros::ServiceServer _get_failed_goals_service;
-	ros::ServiceServer _reset_failed_goals_service;
+	ros::Publisher _failed_goals_publisher;
 
 	ros::Subscriber frontiers_marker_array_subscriber;
-	ros::Publisher exploration_goals_publisher;
+	ros::Publisher _exploration_goals_publisher;
 	ros::ServiceClient _get_navigation_goal_service;
 	ros::Publisher _goal_obsolete_publisher;
 	ros::ServiceServer _exploration_goal_completed_service;
@@ -125,16 +121,14 @@ private:
 	 */
 	void publishExplorationGoals();
 	/**
+	 * Publish list of previously failed goals
+	 */
+	void publishFailedGoals();
+	/**
 	 * Publish if current exploration goal is obsolete if exploration mode is set to interrupt
 	 */
 	void publishGoalObsolete();
 
-	bool addFailedGoal(rsm_msgs::AddFailedGoal::Request &req,
-			rsm_msgs::AddFailedGoal::Response &res);
-	bool getFailedGoals(rsm_msgs::GetFailedGoals::Request &req,
-			rsm_msgs::GetFailedGoals::Response &res);
-	bool resetFailedGoals(std_srvs::Trigger::Request &req,
-			std_srvs::Trigger::Response &res);
 	bool explorationGoalCompleted(
 			rsm_msgs::GoalCompleted::Request &req,
 			rsm_msgs::GoalCompleted::Response &res);

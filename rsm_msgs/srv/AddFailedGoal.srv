@@ -1,4 +1,0 @@
-geometry_msgs/Pose failedGoal 		# Failed goal to be added
----
-bool success                        # Indicate successful run of triggered service
-string message                      # Informational, e.g. for error messages
