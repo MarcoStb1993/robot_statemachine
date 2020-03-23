@@ -12,7 +12,7 @@ void KinectMappingState::onSetup() {
 	_joint_states_subscriber = _nh.subscribe("joint_states", 10,
 			&KinectMappingState::jointStateCallback, this);
 	_kinect_joint_controller = _nh.advertise<std_msgs::Float64>(
-			"kinetic_controller/command", 1, true);
+			"kinect_controller/command", 1, true);
 	ros::NodeHandle nh("rsm");
 	_reset_kinect_position_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetKinectPosition");
@@ -35,9 +35,9 @@ void KinectMappingState::onActive() {
 			_message_send = false;
 		} else {
 			if (!_message_send) {
-				std_msgs::Float64 kinetic_command;
-				kinetic_command.data = KINECT_LEFT_LIMIT;
-				_kinect_joint_controller.publish(kinetic_command);
+				std_msgs::Float64 kinect_command;
+				kinect_command.data = KINECT_LEFT_LIMIT;
+				_kinect_joint_controller.publish(kinect_command);
 				ros::spinOnce();
 				_message_send = true;
 			}
@@ -51,9 +51,9 @@ void KinectMappingState::onActive() {
 			_message_send = false;
 		} else {
 			if (!_message_send) {
-				std_msgs::Float64 kinetic_command;
-				kinetic_command.data = KINECT_RIGHT_LIMIT;
-				_kinect_joint_controller.publish(kinetic_command);
+				std_msgs::Float64 kinect_command;
+				kinect_command.data = KINECT_RIGHT_LIMIT;
+				_kinect_joint_controller.publish(kinect_command);
 				_message_send = true;
 			}
 		}
@@ -67,9 +67,9 @@ void KinectMappingState::onActive() {
 			}
 		} else {
 			if (!_message_send) {
-				std_msgs::Float64 kinetic_command;
-				kinetic_command.data = KINECT_CENTER_POSITION;
-				_kinect_joint_controller.publish(kinetic_command);
+				std_msgs::Float64 kinect_command;
+				kinect_command.data = KINECT_CENTER_POSITION;
+				_kinect_joint_controller.publish(kinect_command);
 				_message_send = true;
 			}
 		}

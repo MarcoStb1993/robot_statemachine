@@ -52,7 +52,7 @@ private:
 	ros::Subscriber _exploration_mode_subscriber;
 
 	ros::ServiceServer _reset_kinect_position_serivce;
-	ros::Publisher _kinetic_joint_controller;
+	ros::Publisher _kinect_joint_controller;
 
 	/**
 	 * SimpleActionServer for making Explore Lite run and lead it to believe it talks to Move Base

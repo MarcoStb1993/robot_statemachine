@@ -1,7 +1,7 @@
-kinetic_joint_state_controller:
+kinect_joint_state_controller:
    type: joint_state_controller/JointStateController
    publish_rate: 30
    
-kinetic_controller:
+kinect_controller:
    type: position_controllers/JointPositionController 
    joint: camera_swivel

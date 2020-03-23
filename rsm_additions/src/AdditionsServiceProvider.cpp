@@ -58,8 +58,8 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 		_reset_kinect_position_serivce = nh.advertiseService(
 				"resetKinectPosition",
 				&AdditionsServiceProvider::resetKinectPosition, this);
-		_kinetic_joint_controller = _nh.advertise<std_msgs::Float64>(
-				"kinetic_controller/command", 1, true);
+		_kinect_joint_controller = _nh.advertise<std_msgs::Float64>(
+				"kinect_controller/command", 1, true);
 	}
 
 	_exploration_mode = 0;
@@ -192,9 +192,9 @@ bool AdditionsServiceProvider::navGoalIncludedInFrontiers() {
 
 bool AdditionsServiceProvider::resetKinectPosition(
 		std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-	std_msgs::Float64 kinetic_command;
-	kinetic_command.data = 0.0;	//center position of kinect camera
-	_kinetic_joint_controller.publish(kinetic_command);
+	std_msgs::Float64 kinect_command;
+	kinect_command.data = 0.0;	//center position of kinect camera
+	_kinect_joint_controller.publish(kinect_command);
 	return true;
 }
 }
