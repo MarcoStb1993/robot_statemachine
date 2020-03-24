@@ -7,6 +7,7 @@
 #include <rsm_core/EmergencyStopState.h>
 #include <rsm_core/TeleoperationState.h>
 #include <rsm_core/StateInterface.h>
+#include <rsm_msgs/GoalCompleted.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
 #include <std_srvs/Trigger.h>
@@ -94,6 +95,7 @@ private:
 	ros::Subscriber _joint_states_subscriber;
 	ros::Publisher _kinect_joint_controller;
 	ros::ServiceClient _reset_kinect_position_client;
+	ros::ServiceClient _navigation_goal_completed_service;
 
 	/**
 	 * Current state of swiveling the Kinect camera from left to right and back (0: to left, 1: left to right: 2: back to center)
@@ -107,6 +109,10 @@ private:
 	 * Move command sent to kinect controller
 	 */
 	bool _message_send;
+	/**
+	 * Was the mapping at the exploration goal successful or not
+	 */
+	int _navigation_completed_status;
 
 	/**
 	 * Callback for joint states to check if camera reached the desired position

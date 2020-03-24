@@ -16,10 +16,13 @@ void KinectMappingState::onSetup() {
 	ros::NodeHandle nh("rsm");
 	_reset_kinect_position_client = nh.serviceClient<std_srvs::Trigger>(
 			"resetKinectPosition");
+	_navigation_goal_completed_service = nh.serviceClient<
+			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
 	_name = "E: Kinect Mapping";
 	_swivel_state = -1;
 	_position_reached = false;
 	_message_send = false;
+	_navigation_completed_status = rsm_msgs::GoalStatus::ABORTED;
 }
 
 void KinectMappingState::onEntry() {
@@ -62,6 +65,7 @@ void KinectMappingState::onActive() {
 	case MOVE_TO_CENTER: {
 		if (_position_reached) {
 			if (!_interrupt_occured) {
+				_navigation_completed_status = rsm_msgs::GoalStatus::REACHED;
 				_stateinterface->transitionToVolatileState(
 						_stateinterface->getPluginState(CALCULATEGOAL_STATE));
 			}
@@ -87,6 +91,11 @@ void KinectMappingState::onExit() {
 		if (!_reset_kinect_position_client.call(srv)) {
 			ROS_ERROR("Failed to call Reset Kinect Position service");
 		}
+	}
+	rsm_msgs::GoalCompleted srv;
+	srv.request.status.goal_status = _navigation_completed_status;
+	if (!_navigation_goal_completed_service.call(srv)) {
+		ROS_ERROR("Failed to call Complete Navigation Goal service");
 	}
 }
 
@@ -163,5 +172,4 @@ void KinectMappingState::jointStateCallback(
 
 }
 
-PLUGINLIB_EXPORT_CLASS(rsm::KinectMappingState,
-		rsm::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::KinectMappingState, rsm::BaseState)

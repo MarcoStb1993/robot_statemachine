@@ -88,6 +88,20 @@ public:
 	void onInterrupt(int interrupt);
 
 private:
+
+	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+	boost::shared_ptr<MoveBaseClient> _move_base_client;
+
+	ros::NodeHandle _nh;
+	ros::ServiceClient _get_navigation_goal_service;
+	ros::ServiceClient _navigation_goal_completed_service;
+	ros::ServiceClient _get_robot_pose_service;
+	ros::ServiceClient _get_exploration_mode_service;
+	ros::ServiceClient _get_reverse_mode_service;
+	ros::Subscriber _get_goal_obsolete_subscriber;
+	ros::Subscriber _reverse_mode_subscriber;
+	ros::Timer _idle_timer;
+
 	/**
 	 * Navigation goal to reach
 	 */
@@ -128,19 +142,6 @@ private:
 	 * Was the navigation goal successfully reached or not or aborted
 	 */
 	int _navigation_completed_status;
-
-	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
-	boost::shared_ptr<MoveBaseClient> _move_base_client;
-
-	ros::NodeHandle _nh;
-	ros::ServiceClient _get_navigation_goal_service;
-	ros::ServiceClient _navigation_goal_completed_service;
-	ros::ServiceClient _get_robot_pose_service;
-	ros::ServiceClient _get_exploration_mode_service;
-	ros::ServiceClient _get_reverse_mode_service;
-	ros::Subscriber _get_goal_obsolete_subscriber;
-	ros::Subscriber _reverse_mode_subscriber;
-	ros::Timer _idle_timer;
 
 	/**
 	 * @brief Callback for idle timer

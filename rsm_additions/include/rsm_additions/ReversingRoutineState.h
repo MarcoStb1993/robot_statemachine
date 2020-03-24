@@ -8,6 +8,7 @@
 #include <rsm_core/WaypointFollowingState.h>
 #include <rsm_core/TeleoperationState.h>
 #include <rsm_core/StateInterface.h>
+#include <rsm_msgs/GoalCompleted.h>
 #include <std_srvs/SetBool.h>
 #include <std_srvs/Trigger.h>
 #include <std_srvs/Empty.h>
@@ -82,11 +83,16 @@ private:
 	ros::NodeHandle _nh;
 	ros::ServiceClient _set_reverse_moving_service;
 	ros::ServiceClient _get_reverse_moving_service;
+	ros::ServiceClient _navigation_goal_completed_service;
 
 	/**
 	 * Is the robot currently driving in reverse
 	 */
 	bool _reverse_mode_active;
+	/**
+	 * Was the routine at the waypoint goal successful or not
+	 */
+	int _navigation_completed_status;
 };
 
 }

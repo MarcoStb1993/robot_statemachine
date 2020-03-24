@@ -7,6 +7,7 @@
 #include <rsm_core/EmergencyStopState.h>
 #include <rsm_core/TeleoperationState.h>
 #include <rsm_core/StateInterface.h>
+#include <rsm_msgs/GoalCompleted.h>
 
 namespace rsm {
 
@@ -75,6 +76,14 @@ public:
 	 */
 	void onInterrupt(int interrupt);
 
+private:
+	ros::NodeHandle _nh;
+	ros::ServiceClient _navigation_goal_completed_service;
+
+	/**
+	 * Was the mapping at the exploration goal successful or not
+	 */
+	int _navigation_completed_status;
 };
 
 }

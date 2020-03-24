@@ -16,9 +16,12 @@ void ReversingRoutineState::onSetup() {
 			"setReverseMode");
 	_get_reverse_moving_service = nh.serviceClient<std_srvs::Trigger>(
 			"getReverseMode");
+	_navigation_goal_completed_service = nh.serviceClient<
+			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
 	//initialize variables
 	_name = "W: Reversing";
 	_reverse_mode_active = false;
+	_navigation_completed_status = rsm_msgs::GoalStatus::ABORTED;
 }
 
 void ReversingRoutineState::onEntry() {
@@ -29,6 +32,7 @@ void ReversingRoutineState::onEntry() {
 	} else {
 		ROS_ERROR("Failed to call Get Reverse Mode service");
 		if (!_interrupt_occured) {
+			_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
 			_stateinterface->transitionToVolatileState(
 					boost::make_shared<WaypointFollowingState>());
 		}
@@ -43,12 +47,18 @@ void ReversingRoutineState::onActive() {
 		ROS_ERROR("Failed to call Set Reverse Mode service");
 	}
 	if (!_interrupt_occured) {
+		_navigation_completed_status = rsm_msgs::GoalStatus::REACHED;
 		_stateinterface->transitionToVolatileState(
 				boost::make_shared<WaypointFollowingState>());
 	}
 }
 
 void ReversingRoutineState::onExit() {
+	rsm_msgs::GoalCompleted srv;
+	srv.request.status.goal_status = _navigation_completed_status;
+	if (!_navigation_goal_completed_service.call(srv)) {
+		ROS_ERROR("Failed to call Complete Navigation Goal service");
+	}
 }
 
 void ReversingRoutineState::onExplorationStart(bool &success,
@@ -98,5 +108,4 @@ void ReversingRoutineState::onInterrupt(int interrupt) {
 
 }
 
-PLUGINLIB_EXPORT_CLASS(rsm::ReversingRoutineState,
-		rsm::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::ReversingRoutineState, rsm::BaseState)
