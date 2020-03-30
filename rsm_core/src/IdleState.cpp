@@ -26,7 +26,7 @@ void IdleState::onExplorationStart(bool &success, std::string &message) {
 	message = "Exploration started";
 	if (!_interrupt_occured) {
 		_stateinterface->transitionToVolatileState(
-				_stateinterface->getPluginState(CALCULATEGOAL_STATE));
+				_stateinterface->getPluginState(MAPPING_STATE));
 	}
 }
 
