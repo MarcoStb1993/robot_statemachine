@@ -13,7 +13,7 @@
 	<arg name="joystick_topic" default="/joy" />
 	<arg name="calculate_goal_plugin" default="rsm::CalculateGoalState" />
 	<arg name="navigation_plugin" default="rsm::NavigationState" />
-	<arg name="mapping_plugin" default="rsm::KinectMappingState" />
+	<arg name="mapping_plugin" default="rsm::RealsenseMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 	<arg name="rviz" default="false" />
 

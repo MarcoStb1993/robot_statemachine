@@ -1,35 +1,35 @@
-#include <rsm_additions/KinectMappingState.h>
+#include <rsm_additions/RealsenseMappingState.h>
 
 namespace rsm {
 
-KinectMappingState::KinectMappingState() {
+RealsenseMappingState::RealsenseMappingState() {
 }
 
-KinectMappingState::~KinectMappingState() {
+RealsenseMappingState::~RealsenseMappingState() {
 }
 
-void KinectMappingState::onSetup() {
+void RealsenseMappingState::onSetup() {
 	_joint_states_subscriber = _nh.subscribe("joint_states", 10,
-			&KinectMappingState::jointStateCallback, this);
-	_kinect_joint_controller = _nh.advertise<std_msgs::Float64>(
-			"kinect_controller/command", 1, true);
+			&RealsenseMappingState::jointStateCallback, this);
+	_realsense_joint_controller = _nh.advertise<std_msgs::Float64>(
+			"realsense_controller/command", 1, true);
 	ros::NodeHandle nh("rsm");
-	_reset_kinect_position_client = nh.serviceClient<std_srvs::Trigger>(
-			"resetKinectPosition");
+	_reset_realsense_position_client = nh.serviceClient<std_srvs::Trigger>(
+			"resetRealsensePosition");
 	_navigation_goal_completed_service = nh.serviceClient<
 			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
-	_name = "E: Kinect Mapping";
+	_name = "E: RealSense Mapping";
 	_swivel_state = -1;
 	_position_reached = false;
 	_message_send = false;
 	_navigation_completed_status = rsm_msgs::GoalStatus::ABORTED;
 }
 
-void KinectMappingState::onEntry() {
+void RealsenseMappingState::onEntry() {
 	_swivel_state = MOVE_LEFT;
 }
 
-void KinectMappingState::onActive() {
+void RealsenseMappingState::onActive() {
 	switch (_swivel_state) {
 	case MOVE_LEFT: {
 		if (_position_reached) {
@@ -38,9 +38,9 @@ void KinectMappingState::onActive() {
 			_message_send = false;
 		} else {
 			if (!_message_send) {
-				std_msgs::Float64 kinect_command;
-				kinect_command.data = KINECT_LEFT_LIMIT;
-				_kinect_joint_controller.publish(kinect_command);
+				std_msgs::Float64 realsense_command;
+				realsense_command.data = REALSENSE_LEFT_LIMIT;
+				_realsense_joint_controller.publish(realsense_command);
 				ros::spinOnce();
 				_message_send = true;
 			}
@@ -54,9 +54,9 @@ void KinectMappingState::onActive() {
 			_message_send = false;
 		} else {
 			if (!_message_send) {
-				std_msgs::Float64 kinect_command;
-				kinect_command.data = KINECT_RIGHT_LIMIT;
-				_kinect_joint_controller.publish(kinect_command);
+				std_msgs::Float64 realsense_command;
+				realsense_command.data = REALSENSE_RIGHT_LIMIT;
+				_realsense_joint_controller.publish(realsense_command);
 				_message_send = true;
 			}
 		}
@@ -71,9 +71,9 @@ void KinectMappingState::onActive() {
 			}
 		} else {
 			if (!_message_send) {
-				std_msgs::Float64 kinect_command;
-				kinect_command.data = KINECT_CENTER_POSITION;
-				_kinect_joint_controller.publish(kinect_command);
+				std_msgs::Float64 realsense_command;
+				realsense_command.data = REALSENSE_CENTER_POSITION;
+				_realsense_joint_controller.publish(realsense_command);
 				_message_send = true;
 			}
 		}
@@ -85,11 +85,11 @@ void KinectMappingState::onActive() {
 	}
 }
 
-void KinectMappingState::onExit() {
+void RealsenseMappingState::onExit() {
 	if (!_position_reached) {
 		std_srvs::Trigger srv;
-		if (!_reset_kinect_position_client.call(srv)) {
-			ROS_ERROR("Failed to call Reset Kinect Position service");
+		if (!_reset_realsense_position_client.call(srv)) {
+			ROS_ERROR("Failed to call Reset Realsense Position service");
 		}
 	}
 	rsm_msgs::GoalCompleted srv;
@@ -99,32 +99,32 @@ void KinectMappingState::onExit() {
 	}
 }
 
-void KinectMappingState::onExplorationStart(bool &success,
+void RealsenseMappingState::onExplorationStart(bool &success,
 		std::string &message) {
 	success = false;
 	message = "Exploration running";
 }
 
-void KinectMappingState::onExplorationStop(bool &success,
+void RealsenseMappingState::onExplorationStop(bool &success,
 		std::string &message) {
 	success = true;
 	message = "Exploration stopped";
 	_stateinterface->transitionToVolatileState(boost::make_shared<IdleState>());
 }
 
-void KinectMappingState::onWaypointFollowingStart(bool &success,
+void RealsenseMappingState::onWaypointFollowingStart(bool &success,
 		std::string &message) {
 	success = false;
 	message = "Exploration running";
 }
 
-void KinectMappingState::onWaypointFollowingStop(bool &success,
+void RealsenseMappingState::onWaypointFollowingStop(bool &success,
 		std::string &message) {
 	success = false;
 	message = "Exploration running";
 }
 
-void KinectMappingState::onInterrupt(int interrupt) {
+void RealsenseMappingState::onInterrupt(int interrupt) {
 	switch (interrupt) {
 	case EMERGENCY_STOP_INTERRUPT:
 		_stateinterface->transitionToVolatileState(
@@ -144,25 +144,25 @@ void KinectMappingState::onInterrupt(int interrupt) {
 	}
 }
 
-void KinectMappingState::jointStateCallback(
+void RealsenseMappingState::jointStateCallback(
 		sensor_msgs::JointState::ConstPtr joint_state) {
 	switch (_swivel_state) {
 	case MOVE_LEFT: {
-		if (joint_state->position[0] >= KINECT_LEFT_LIMIT - POS_TOLERANCE) {
+		if (joint_state->position[0] >= REALSENSE_LEFT_LIMIT - POS_TOLERANCE) {
 			_position_reached = true;
 		}
 		break;
 	}
 	case MOVE_RIGHT: {
-		if (joint_state->position[0] <= KINECT_RIGHT_LIMIT + POS_TOLERANCE) {
+		if (joint_state->position[0] <= REALSENSE_RIGHT_LIMIT + POS_TOLERANCE) {
 			_position_reached = true;
 		}
 		break;
 	}
 	case MOVE_TO_CENTER: {
-		if (joint_state->position[0] >= KINECT_CENTER_POSITION - POS_TOLERANCE
+		if (joint_state->position[0] >= REALSENSE_CENTER_POSITION - POS_TOLERANCE
 				&& joint_state->position[0]
-						<= KINECT_CENTER_POSITION + POS_TOLERANCE) {
+						<= REALSENSE_CENTER_POSITION + POS_TOLERANCE) {
 			_position_reached = true;
 		}
 		break;
@@ -172,4 +172,4 @@ void KinectMappingState::jointStateCallback(
 
 }
 
-PLUGINLIB_EXPORT_CLASS(rsm::KinectMappingState, rsm::BaseState)
+PLUGINLIB_EXPORT_CLASS(rsm::RealsenseMappingState, rsm::BaseState)

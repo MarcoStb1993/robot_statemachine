@@ -41,14 +41,14 @@
 		<!-- Load controller configuration -->
 		<rosparam command="load"
 			file="$(find husky_control)/config/control.yaml" />
-		<!-- Load kinect controller config -->
+		<!-- Load realsense controller config -->
 		<rosparam command="load"
 			file="$(find rsm_additions)/config/gazebo_sim/urdf/config.yaml" />
 
 		<!-- Spawn controllers -->
 		<node name="base_controller_spawner" pkg="controller_manager"
 			type="spawner"
-			args="husky_joint_publisher husky_velocity_controller kinect_joint_state_controller kinect_controller" />
+			args="husky_joint_publisher husky_velocity_controller realsense_joint_state_controller realsense_controller" />
 
 		<!-- Start EKF for localization -->
 		<node pkg="robot_localization" type="ekf_localization_node"

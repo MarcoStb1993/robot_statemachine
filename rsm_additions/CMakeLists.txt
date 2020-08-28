@@ -31,7 +31,7 @@ add_library(rsm_plugins
     src/CalculateGoalState.cpp
     src/NavigationState.cpp
     src/MappingDummyState.cpp
-    src/KinectMappingState.cpp
+    src/RealsenseMappingState.cpp
     src/ReversingRoutineState.cpp)
 
 add_executable(bootUpNode src/BootUpNode.cpp)

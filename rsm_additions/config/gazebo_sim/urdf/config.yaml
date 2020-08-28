@@ -1,7 +1,7 @@
-kinect_joint_state_controller:
+realsense_joint_state_controller:
    type: joint_state_controller/JointStateController
    publish_rate: 30
    
-kinect_controller:
+realsense_controller:
    type: position_controllers/JointPositionController 
    joint: camera_swivel

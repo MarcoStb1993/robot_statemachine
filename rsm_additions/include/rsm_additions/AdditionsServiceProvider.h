@@ -51,8 +51,8 @@ private:
 	ros::Subscriber _exploration_goal_subscriber;
 	ros::Subscriber _exploration_mode_subscriber;
 
-	ros::ServiceServer _reset_kinect_position_serivce;
-	ros::Publisher _kinect_joint_controller;
+	ros::ServiceServer _reset_realsense_position_serivce;
+	ros::Publisher _realsense_joint_controller;
 
 	/**
 	 * SimpleActionServer for making Explore Lite run and lead it to believe it talks to Move Base
@@ -147,7 +147,7 @@ private:
 	 */
 	bool navGoalIncludedInFrontiers();
 
-	bool resetKinectPosition(std_srvs::Trigger::Request &req,
+	bool resetRealsensePosition(std_srvs::Trigger::Request &req,
 			std_srvs::Trigger::Response &res);
 };
 

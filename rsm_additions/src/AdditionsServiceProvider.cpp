@@ -54,12 +54,12 @@ AdditionsServiceProvider::AdditionsServiceProvider() :
 
 	std::string mapping_plugin;
 	private_nh.param<std::string>("mapping_plugin", mapping_plugin, "");
-	if (mapping_plugin.compare("rsm::KinectMappingState") == 0) {
-		_reset_kinect_position_serivce = nh.advertiseService(
-				"resetKinectPosition",
-				&AdditionsServiceProvider::resetKinectPosition, this);
-		_kinect_joint_controller = _nh.advertise<std_msgs::Float64>(
-				"kinect_controller/command", 1, true);
+	if (mapping_plugin.compare("rsm::RealsenseMappingState") == 0) {
+		_reset_realsense_position_serivce = nh.advertiseService(
+				"resetRealsensePosition",
+				&AdditionsServiceProvider::resetRealsensePosition, this);
+		_realsense_joint_controller = _nh.advertise<std_msgs::Float64>(
+				"realsense_controller/command", 1, true);
 	}
 
 	_exploration_mode = 0;
@@ -190,11 +190,11 @@ bool AdditionsServiceProvider::navGoalIncludedInFrontiers() {
 	return false;
 }
 
-bool AdditionsServiceProvider::resetKinectPosition(
+bool AdditionsServiceProvider::resetRealsensePosition(
 		std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-	std_msgs::Float64 kinect_command;
-	kinect_command.data = 0.0;	//center position of kinect camera
-	_kinect_joint_controller.publish(kinect_command);
+	std_msgs::Float64 realsense_command;
+	realsense_command.data = 0.0;	//center position of realsense camera
+	_realsense_joint_controller.publish(realsense_command);
 	return true;
 }
 }

@@ -29,11 +29,11 @@
 	<xacro:arg name="laser_rpy"
 		default="$(optenv HUSKY_LMS1XX_RPY 0.0 0.0 0.0)" />
 
-	<xacro:arg name="kinect_enabled" default="true" />
-	<xacro:arg name="kinect_xyz"
-		default="$(optenv HUSKY_KINECT_XYZ 0 0 0)" />
-	<xacro:arg name="kinect_rpy"
-		default="$(optenv HUSKY_KINECT_RPY 0 0.18 3.14)" />
+	<xacro:arg name="realsense_enabled" default="true" />
+	<xacro:arg name="realsense_xyz"
+		default="$(optenv HUSKY_REALSENSE_XYZ 0 0 0)" />
+	<xacro:arg name="realsense_rpy"
+		default="$(optenv HUSKY_REALSENSE_RPY 0 0.18 3.14)" />
 
 	<xacro:property name="husky_front_bumper_extend"
 		value="$(optenv HUSKY_FRONT_BUMPER_EXTEND 0)" />
@@ -50,7 +50,7 @@
 		filename="$(find husky_description)/urdf/wheel.urdf.xacro" />
 
 	<xacro:include
-		filename="$(find rsm_additions)/config/gazebo_sim/urdf/kinect_camera.urdf.xacro" />
+		filename="$(find rsm_additions)/config/gazebo_sim/urdf/intel_realsense.urdf.xacro" />
 	<xacro:include
 		filename="$(find husky_description)/urdf/accessories/sick_lms1xx_mount.urdf.xacro" />
 	<xacro:include
@@ -174,18 +174,36 @@
 
 	</xacro:if>
 
-	<xacro:if value="$(arg kinect_enabled)">
+	<xacro:if value="$(arg realsense_enabled)">
 
 		<xacro:sensor_arch prefix="" parent="top_plate_link">
 			<origin xyz="-0.35 0 0.51" rpy="0 0 -3.14" />
 		</xacro:sensor_arch>
 
+		<link name="realsense_mountpoint">
+			<visual>
+				<geometry>
+					<box size="0.01 0.01 0.01" />
+				</geometry>
+			</visual>
+			<collision>
+				<geometry>
+					<box size="0.01 0.01 0.01" />
+				</geometry>
+			</collision>
+			<inertial>
+				<mass value="0.01" />
+				<inertia ixx="1e-3" ixy="1e-3" ixz="1e-3" iyy="1e-3"
+					iyz="1e-3" izz="1e-3" />
+			</inertial>
+		</link>
+
 		<joint name="camera_swivel" type="revolute">
 			<axis xyz="0 0 1" />
-			<limit upper="1.3" lower="-1.3" velocity="0.87" effort="1"/>
-			<origin xyz="$(arg kinect_xyz)" rpy="$(arg kinect_rpy)" />
+			<limit upper="1.3" lower="-1.3" velocity="0.87" effort="1" />
+			<origin xyz="$(arg realsense_xyz)" rpy="$(arg realsense_rpy)" />
 			<parent link="sensor_arch_mount_link" />
-			<child link="camera_link" />
+			<child link="realsense_mountpoint" />
 		</joint>
 
 		<transmission name="camera_swivel_trans">
@@ -198,8 +216,8 @@
 			</joint>
 		</transmission>
 
-		<xacro:kinect_camera prefix="camera"
-			robot_namespace="$(arg robot_namespace)" />
+		<xacro:intel_realsense_mount
+			prefix="camera" topic="camera" parent_link="realsense_mountpoint" />
 	</xacro:if>
 
 	<gazebo>

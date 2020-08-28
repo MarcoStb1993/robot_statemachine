@@ -11,9 +11,9 @@
 		base_class_type="rsm::BaseState">
 		<description>This is a dummy mapping state, without functions.</description>
 	</class>
-	<class type="rsm::KinectMappingState"
+	<class type="rsm::RealsenseMappingState"
 		base_class_type="rsm::BaseState">
-		<description>This state moves a Kinect depth camera from left to right and back, mapping the area.</description>
+		<description>This state moves a RealSense depth camera from left to right and back, mapping the area.</description>
 	</class>
 	<class type="rsm::ReversingRoutineState"
 		base_class_type="rsm::BaseState">

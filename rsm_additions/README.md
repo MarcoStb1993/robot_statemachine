@@ -50,16 +50,16 @@ is activated or deactivated, the goal is cancelled and sent to the reverse navig
 
 ### Mapping State
 
-There are two mapping plugins included. The first state is just a dummy state while the latter is swiveling a simulated kinect camera from left to right around a revoluting joint.
+There are two mapping plugins included. The first state is just a dummy state while the latter is swiveling a simulated Intel RealSense camera from left to right around a revoluting joint.
 
 #### Mapping Dummy State
 
 The Mapping Dummy State is just transitioning back to the Calculate Goal State as
 specific mapping procedures are only relevant for the particular robot.
 
-#### Kinect Mapping State
+#### RealSense Mapping State
 
-Swivels a kinect camera mounted on a joint revoluting around the z-axis from left to right and back to it's centered position to map the surrounding area. This only works for the implemented Gazebo simulation as it publishes commands to the joint the kinect is mounted on.
+Swivels an Intel RealSense camera mounted on a joint revoluting around the z-axis from left to right and back to it's centered position to map the surrounding area. This only works for the implemented Gazebo simulation as it publishes commands to the joint the RealSense is mounted on.
 
 ### Reversing Routine State
 
@@ -86,7 +86,7 @@ provides a service that is called when reverse mode should be activated. Since n
 needs to be changed in the configuration to change to reverse mode, this service just 
 replies that it was successful.
 
-If the kinect mapping is interrupted, a service is provided that moves the camera back to it's centered
+If the Realsense mapping is interrupted, a service is provided that moves the camera back to it's centered
 position while the RSM is continuing.
 
 ## Examples
@@ -143,8 +143,8 @@ List of all currently available exploration goals
 **failedGoals** ([geometry_msgs/PoseArray](http://docs.ros.org/api/geometry_msgs/html/msg/PoseArray.html))  
 List of all previously failed goals
 
-**kinect_controller/command** ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html))  
-Position the kinect revolute joint will move to
+**realsense_controller/command** ([std_msgs/Float64](http://docs.ros.org/api/std_msgs/html/msg/Float64.html))  
+Position the Realsense revolute joint will move to
 
 **goalObsolete** ([std_msgs/Bool](http://docs.ros.org/api/std_msgs/html/msg/Bool.html))  
 Information if the current goal is still viable (only active is exploration mode is set to *Interrupt*)

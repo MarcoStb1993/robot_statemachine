@@ -174,7 +174,7 @@ The nodes can of course be started separately though it is easier to use the lau
 
 To demonstrate the RSM and get used to it's controls, the [RSM additions package](../rsm_additions#rsm-additions) offers two launch files that start a simulation including a complete robot and environment to start right away.
 
-The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before. Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the RSM has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
+The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before (If you have installed ROS with `ros-melodic-desktop-full`, it is already included). Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the RSM has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
 
 ![Simulations](../images/simulations.png)
 
@@ -182,6 +182,30 @@ Both simulations use the plugins implemented in [RSM additions](../rsm_additions
 * [gmapping](http://wiki.ros.org/gmapping) for SLAM
 * [ROS navigation stack](http://wiki.ros.org/navigation) for the [Navigation State](../rsm_additions#navigation-state)
 * [explore lite](http://wiki.ros.org/explore_lite) for the [Calculate Goal State](../rsm_additions#calculate-goal-state)
+
+Follow these steps for installation (this tutorial assumes you are using [catkin_tools](https://catkin-tools.readthedocs.io/en/latest/installing.html), if you don't, replace `catkin build ...` with `catkin make`):
+
+```
+sudo apt install ros-melodic-gmapping ros-melodic-navigation
+cd /path/to/your/catkin_ws/src
+git clone https://github.com/hrnr/m-explore.git
+catkin build explore_lite
+```
+
+To install the Husky simulation, run the following command in a terminal:
+
+```
+sudo apt install ros-melodic-husky-simulator
+```
+
+For the stdr simulator, follow these instructions (without qt4 the build will fail):
+
+```
+sudo apt install qt4-default
+cd /path/to/your/catkin_ws/src
+git clone https://github.com/stdr-simulator-ros-pkg/stdr_simulator.git
+catkin build stdr_simulator
+```
 
 When the above prerequisites are met, the simulations can be launched with the following commands including a pre-configured RViz display. If you do not want to start RViz, just leave out the `rviz:=true`. 
 
