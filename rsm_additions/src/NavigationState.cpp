@@ -11,26 +11,29 @@ NavigationState::~NavigationState() {
 void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle nh("rsm");
-	_get_navigation_goal_service =
-			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
-	_navigation_goal_completed_service = nh.serviceClient<
-			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
-	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
-			"getRobotPose");
-	_get_reverse_mode_service = nh.serviceClient<std_srvs::Trigger>(
-			"getReverseMode");
-	_reverse_mode_subscriber = nh.subscribe<std_msgs::Bool>("reverseMode", 10,
-			&NavigationState::reverseModeCallback, this);
-	_get_exploration_mode_service = nh.serviceClient<std_srvs::Trigger>(
-			"getExplorationMode");
+	_get_navigation_goal_service = nh.serviceClient
+			< rsm_msgs::GetNavigationGoal > ("getNavigationGoal");
+	_navigation_goal_completed_service = nh.serviceClient
+			< rsm_msgs::GoalCompleted > ("navigationGoalCompleted");
+	_get_robot_pose_service = nh.serviceClient < rsm_msgs::GetRobotPose
+			> ("getRobotPose");
+	_get_reverse_mode_service = nh.serviceClient < std_srvs::Trigger
+			> ("getReverseMode");
+	_reverse_mode_subscriber = nh.subscribe < std_msgs::Bool
+			> ("reverseMode", 10, &NavigationState::reverseModeCallback, this);
+	_get_exploration_mode_service = nh.serviceClient < std_srvs::Trigger
+			> ("getExplorationMode");
+	_operation_mode_subscriber = nh.subscribe<rsm_msgs::OperationMode>(
+			"operationMode", 1, &NavigationState::operationModeCallback, this);
 	_idle_timer = _nh.createTimer(ros::Duration(15.0),
-			&NavigationState::timerCallback, this, true, false);
+			&NavigationState::timerCallback, this, false, false);
 	//initialize variables
 	_name = "Navigation";
 	_navigation_mode = -1;
 	_goal_active = false;
 	_reverse_mode = false;
 	_exploration_mode = -1;
+	_robot_did_move = false;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 	_navigation_completed_status = rsm_msgs::GoalStatus::ACTIVE;
 }
@@ -291,7 +294,7 @@ void NavigationState::onInterrupt(int interrupt) {
 	}
 }
 
-void NavigationState::timerCallback(const ros::TimerEvent& event) {
+void NavigationState::timerCallback(const ros::TimerEvent &event) {
 	ROS_ERROR("Navigation aborted because robot appears to be stuck");
 	abortNavigation();
 }
@@ -315,6 +318,9 @@ void NavigationState::comparePose() {
 					_idle_timer.start();
 				} else {
 					_idle_timer.stop();
+					if (!_robot_did_move && _last_pose.getRotation().w() != 0.0) { //not initial
+						_robot_did_move = true;
+					}
 				}
 				_last_pose = current_pose;
 				_comparison_counter = 0;
@@ -328,17 +334,17 @@ void NavigationState::comparePose() {
 }
 
 void NavigationState::goalObsoleteCallback(
-		const std_msgs::Bool::ConstPtr& msg) {
+		const std_msgs::Bool::ConstPtr &msg) {
 	if (msg->data && !_interrupt_occured) {
 		_navigation_completed_status = rsm_msgs::GoalStatus::ABORTED;
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(
-				MAPPING_STATE));
+						_robot_did_move ? MAPPING_STATE : CALCULATEGOAL_STATE));
 	}
 }
 
 void NavigationState::reverseModeCallback(
-		const std_msgs::Bool::ConstPtr& reverse_mode) {
+		const std_msgs::Bool::ConstPtr &reverse_mode) {
 	if (_reverse_mode != reverse_mode->data) {
 		if (_goal_active) {
 			_move_base_client->cancelGoal();
@@ -355,7 +361,7 @@ void NavigationState::reverseModeCallback(
 }
 
 void NavigationState::operationModeCallback(
-		const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
+		const rsm_msgs::OperationMode::ConstPtr &operation_mode) {
 	_operation_mode = operation_mode->mode;
 }
 

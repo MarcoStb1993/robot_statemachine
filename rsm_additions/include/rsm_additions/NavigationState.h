@@ -100,6 +100,7 @@ private:
 	ros::ServiceClient _get_reverse_mode_service;
 	ros::Subscriber _get_goal_obsolete_subscriber;
 	ros::Subscriber _reverse_mode_subscriber;
+	ros::Subscriber _operation_mode_subscriber;
 	ros::Timer _idle_timer;
 
 	/**
@@ -142,6 +143,10 @@ private:
 	 * Was the navigation goal successfully reached or not or aborted
 	 */
 	int _navigation_completed_status;
+	/**
+	 * Did the robot move at all while this state was active
+	 */
+	bool _robot_did_move;
 
 	/**
 	 * @brief Callback for idle timer
