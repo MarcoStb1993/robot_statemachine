@@ -17,8 +17,6 @@
 #include <tf/transform_datatypes.h>
 #include <std_msgs/Bool.h>
 
-#define POSE_TOLERANCE 0.05
-
 namespace rsm {
 
 /**
@@ -147,6 +145,14 @@ private:
 	 * Did the robot move at all while this state was active
 	 */
 	bool _robot_did_move;
+	/**
+	 * Tolerance in m or rad that, if the robot's pose difference is below, still make the robot count as stationary
+	 */
+	double _pose_tolerance;
+	/**
+	 * Time in s that the robot can remain stationary before navigation counts as aborted because the robot is stuck
+	 */
+	double _idle_timer_duration;
 
 	/**
 	 * @brief Callback for idle timer

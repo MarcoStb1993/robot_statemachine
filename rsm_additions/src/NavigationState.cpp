@@ -10,6 +10,10 @@ NavigationState::~NavigationState() {
 
 void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
+	ros::NodeHandle private_nh("~");
+	private_nh.param("pose_tolerance", _pose_tolerance, 0.01);
+	private_nh.param("idle_timer_duration", _idle_timer_duration, 15.0);
+
 	ros::NodeHandle nh("rsm");
 	_get_navigation_goal_service = nh.serviceClient
 			< rsm_msgs::GetNavigationGoal > ("getNavigationGoal");
@@ -23,9 +27,10 @@ void NavigationState::onSetup() {
 			> ("reverseMode", 10, &NavigationState::reverseModeCallback, this);
 	_get_exploration_mode_service = nh.serviceClient < std_srvs::Trigger
 			> ("getExplorationMode");
-	_operation_mode_subscriber = nh.subscribe<rsm_msgs::OperationMode>(
-			"operationMode", 1, &NavigationState::operationModeCallback, this);
-	_idle_timer = _nh.createTimer(ros::Duration(15.0),
+	_operation_mode_subscriber =
+			nh.subscribe < rsm_msgs::OperationMode
+					> ("operationMode", 1, &NavigationState::operationModeCallback, this);
+	_idle_timer = _nh.createTimer(ros::Duration(_idle_timer_duration),
 			&NavigationState::timerCallback, this, false, false);
 	//initialize variables
 	_name = "Navigation";
@@ -93,7 +98,8 @@ void NavigationState::onEntry() {
 		}
 	}
 	//Start timer for checking navigation being stuck for too long (15 secs) without proper message from Move Base
-	_idle_timer.start();
+	//ROS_WARN_STREAM("Navigation Idle timer started");
+	//_idle_timer.start();
 }
 
 void NavigationState::onActive() {
@@ -301,24 +307,26 @@ void NavigationState::timerCallback(const ros::TimerEvent &event) {
 
 void NavigationState::comparePose() {
 	if (_operation_mode == rsm_msgs::OperationMode::AUTONOMOUS) {
-		if (_comparison_counter++ >= 5) { //only compare poses every 5th call to reduce load
+		if (_comparison_counter++ >= 10) { //only compare poses every 5th call to reduce load
 			tf::Pose current_pose;
 			rsm_msgs::GetRobotPose srv;
 			if (_get_robot_pose_service.call(srv)) {
 				tf::poseMsgToTF(srv.response.pose, current_pose);
 				tf::Pose pose_difference = current_pose.inverseTimes(
 						_last_pose);
-				if (pose_difference.getOrigin().x() < POSE_TOLERANCE
-						&& pose_difference.getOrigin().y() < POSE_TOLERANCE
-						&& pose_difference.getOrigin().z() < POSE_TOLERANCE
-						&& pose_difference.getRotation().x() == 0.0
-						&& pose_difference.getRotation().y() == 0.0
-						&& pose_difference.getRotation().z() == 0.0
-						&& pose_difference.getRotation().w() == 1.0) {
+				if (pose_difference.getOrigin().x() < _pose_tolerance
+						&& pose_difference.getOrigin().y() < _pose_tolerance
+						&& pose_difference.getOrigin().z() < _pose_tolerance
+						&& pose_difference.getRotation().x() < _pose_tolerance
+						&& pose_difference.getRotation().y() < _pose_tolerance
+						&& pose_difference.getRotation().z() < _pose_tolerance
+						&& pose_difference.getRotation().w()
+								< _pose_tolerance) {
 					_idle_timer.start();
 				} else {
 					_idle_timer.stop();
-					if (!_robot_did_move && _last_pose.getRotation().w() != 0.0) { //not initial
+					if (!_robot_did_move
+							&& _last_pose.getRotation().w() != 0.0) { //not initial
 						_robot_did_move = true;
 					}
 				}
