@@ -100,6 +100,7 @@ private:
 	ros::Subscriber _reverse_mode_subscriber;
 	ros::Subscriber _operation_mode_subscriber;
 	ros::Timer _idle_timer;
+	ros::Timer _unstuck_timer;
 
 	/**
 	 * Navigation goal to reach
@@ -153,12 +154,25 @@ private:
 	 * Time in s that the robot can remain stationary before navigation counts as aborted because the robot is stuck
 	 */
 	double _idle_timer_duration;
+	/**
+	 * Time that navigation can try to unstuck the robot with switched mode
+	 */
+	double _unstuck_timer_duration;
+	/**
+	 * Is switched mode used at the moment to unstuck robot
+	 */
+	bool _unstucking_robot;
 
 	/**
 	 * @brief Callback for idle timer
 	 * @param event
 	 */
-	void timerCallback(const ros::TimerEvent& event);
+	void idleTimerCallback(const ros::TimerEvent& event);
+	/**
+	 * @brief Callback for switched mode navigation to unstuck robot
+	 * @param event
+	 */
+	void unstuckTimerCallback(const ros::TimerEvent& event);
 	/**
 	 * Callback for checking if the current exploration goal is still viable or already obsolete,
 	 * only checked for exploration mode 'interrupting"
