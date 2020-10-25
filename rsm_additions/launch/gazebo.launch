@@ -50,12 +50,12 @@
 			type="spawner"
 			args="husky_joint_publisher husky_velocity_controller realsense_joint_state_controller realsense_controller" />
 
-		<!-- Start EKF for localization -->
+		<!-- Start EKF for localization >
 		<node pkg="robot_localization" type="ekf_localization_node"
 			name="ekf_localization">
 			<rosparam command="load"
 				file="$(find rsm_additions)/config/gazebo_sim/localization.yaml" />
-		</node>
+		</node-->
 
 		<node pkg="interactive_marker_twist_server" type="marker_server"
 			name="twist_marker_server" output="screen" />
