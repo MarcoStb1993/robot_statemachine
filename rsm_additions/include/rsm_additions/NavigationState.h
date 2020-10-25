@@ -163,6 +163,8 @@ private:
 	 */
 	bool _unstucking_robot;
 
+	bool _idle_timer_active;
+
 	/**
 	 * @brief Callback for idle timer
 	 * @param event

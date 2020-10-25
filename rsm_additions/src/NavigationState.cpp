@@ -16,21 +16,20 @@ void NavigationState::onSetup() {
 	private_nh.param("unstuck_timer_duration", _unstuck_timer_duration, 5.0);
 
 	ros::NodeHandle nh("rsm");
-	_get_navigation_goal_service = nh.serviceClient
-			< rsm_msgs::GetNavigationGoal > ("getNavigationGoal");
-	_navigation_goal_completed_service = nh.serviceClient
-			< rsm_msgs::GoalCompleted > ("navigationGoalCompleted");
-	_get_robot_pose_service = nh.serviceClient < rsm_msgs::GetRobotPose
-			> ("getRobotPose");
-	_get_reverse_mode_service = nh.serviceClient < std_srvs::Trigger
-			> ("getReverseMode");
-	_reverse_mode_subscriber = nh.subscribe < std_msgs::Bool
-			> ("reverseMode", 10, &NavigationState::reverseModeCallback, this);
-	_get_exploration_mode_service = nh.serviceClient < std_srvs::Trigger
-			> ("getExplorationMode");
-	_operation_mode_subscriber =
-			nh.subscribe < rsm_msgs::OperationMode
-					> ("operationMode", 1, &NavigationState::operationModeCallback, this);
+	_get_navigation_goal_service =
+			nh.serviceClient<rsm_msgs::GetNavigationGoal>("getNavigationGoal");
+	_navigation_goal_completed_service = nh.serviceClient<
+			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
+	_get_robot_pose_service = nh.serviceClient<rsm_msgs::GetRobotPose>(
+			"getRobotPose");
+	_get_reverse_mode_service = nh.serviceClient<std_srvs::Trigger>(
+			"getReverseMode");
+	_reverse_mode_subscriber = nh.subscribe<std_msgs::Bool>("reverseMode", 10,
+			&NavigationState::reverseModeCallback, this);
+	_get_exploration_mode_service = nh.serviceClient<std_srvs::Trigger>(
+			"getExplorationMode");
+	_operation_mode_subscriber = nh.subscribe<rsm_msgs::OperationMode>(
+			"operationMode", 1, &NavigationState::operationModeCallback, this);
 	_idle_timer = _nh.createTimer(ros::Duration(_idle_timer_duration),
 			&NavigationState::idleTimerCallback, this, false, false);
 	_unstuck_timer = _nh.createTimer(ros::Duration(_unstuck_timer_duration),
@@ -144,6 +143,7 @@ void NavigationState::onActive() {
 					if (!_interrupt_occured) {
 						if (!_unstucking_robot) {
 							//try reverse navigation
+							ROS_ERROR_STREAM("Try to unstuck robot by using reversed move base");
 							if (_goal_active) {
 								_move_base_client->cancelGoal();
 							}
@@ -195,6 +195,7 @@ void NavigationState::onActive() {
 			goal.target_pose.pose = _nav_goal;
 			_move_base_client->sendGoal(goal);
 			_goal_active = true;
+			_idle_timer.start();
 		}
 	}
 }
@@ -343,7 +344,7 @@ void NavigationState::unstuckTimerCallback(const ros::TimerEvent &event) {
 
 void NavigationState::comparePose() {
 	if (_operation_mode == rsm_msgs::OperationMode::AUTONOMOUS) {
-		if (_comparison_counter++ >= 10) { //only compare poses every 5th call to reduce load
+		if (_comparison_counter++ >= 10) { //only compare poses every 10th call to reduce load
 			tf::Pose current_pose;
 			rsm_msgs::GetRobotPose srv;
 			if (_get_robot_pose_service.call(srv)) {
@@ -355,9 +356,7 @@ void NavigationState::comparePose() {
 						&& pose_difference.getOrigin().z() < _pose_tolerance
 						&& pose_difference.getRotation().x() < _pose_tolerance
 						&& pose_difference.getRotation().y() < _pose_tolerance
-						&& pose_difference.getRotation().z() < _pose_tolerance
-						&& pose_difference.getRotation().w()
-								< _pose_tolerance) {
+						&& pose_difference.getRotation().z() < _pose_tolerance) {
 					_idle_timer.start();
 				} else {
 					_idle_timer.stop();
