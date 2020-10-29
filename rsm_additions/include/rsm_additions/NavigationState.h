@@ -162,8 +162,10 @@ private:
 	 * Is switched mode used at the moment to unstuck robot
 	 */
 	bool _unstucking_robot;
-
-	bool _idle_timer_active;
+	/**
+	 * If the idle timer when called should end exploration/waypoint following or just declare goal as failed (true=end,false=fail)
+	 */
+	bool _idle_timer_behavior;
 
 	/**
 	 * @brief Callback for idle timer

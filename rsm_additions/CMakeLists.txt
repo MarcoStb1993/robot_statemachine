@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
 )
 
+
 catkin_package(
 
 )
@@ -54,7 +55,7 @@ target_link_libraries(bootUpNode
   )
   target_link_libraries(gazeboTfNode
   ${catkin_LIBRARIES}
-  )
+  )  
 
 add_dependencies(rsm_plugins ${catkin_EXPORTED_TARGETS})
 add_dependencies(bootUpNode ${catkin_EXPORTED_TARGETS})

@@ -13,8 +13,8 @@ StateInterface::StateInterface() :
 			"rsm::MappingDummyState");
 
 	ros::NodeHandle nh("rsm");
-	_operation_mode_sub = nh.subscribe<rsm_msgs::OperationMode>(
-			"operationMode", 1, &StateInterface::operationModeCallback, this);
+	_operation_mode_sub = nh.subscribe<rsm_msgs::OperationMode>("operationMode",
+			1, &StateInterface::operationModeCallback, this);
 	_simple_goal_sub = nh.subscribe<geometry_msgs::PoseStamped>("simpleGoal", 1,
 			&StateInterface::simpleGoalCallback, this);
 	_start_stop_exploration_service = nh.advertiseService(
@@ -28,8 +28,8 @@ StateInterface::StateInterface() :
 	_state_info_publisher = nh.advertise<std_msgs::String>("stateInfo", 10);
 	_state_info_service = nh.advertiseService("stateInfo",
 			&StateInterface::stateInfoService, this);
-	_set_navigation_goal_client = nh.serviceClient<
-			rsm_msgs::SetNavigationGoal>("setNavigationGoal");
+	_set_navigation_goal_client = nh.serviceClient<rsm_msgs::SetNavigationGoal>(
+			"setNavigationGoal");
 
 	_current_state = NULL;
 	_next_state = NULL;
@@ -77,20 +77,19 @@ boost::shared_ptr<rsm::BaseState> StateInterface::getPluginState(
 			break;
 		}
 		}
-	} catch (const std::exception& e) {
+	} catch (const std::exception &e) {
 		ROS_ERROR("Plugin state could not be created, return to Idle State");
 		return boost::make_shared<IdleState>();
 	}
 }
 
 void StateInterface::awake() {
-// check 1st time awake
+	// check 1st time awake
 	if (!_current_state && _next_state) {
 		_current_state = _next_state;
 		_current_state->onEntry();
 		_next_state = NULL;
 	}
-
 	if (_current_state) {
 		_current_state->onActive();
 
@@ -105,7 +104,7 @@ void StateInterface::awake() {
 	{
 		// do transition to next state
 		_current_state = _next_state;
-		_next_state = NULL;
+		_next_state.reset();
 		_current_state->onEntry();
 		std_msgs::String state_info;
 		state_info.data = _current_state->getName();
@@ -128,7 +127,7 @@ void StateInterface::transitionToVolatileState(
 }
 
 void StateInterface::operationModeCallback(
-		const rsm_msgs::OperationMode::ConstPtr& operation_mode) {
+		const rsm_msgs::OperationMode::ConstPtr &operation_mode) {
 	if (operation_mode->emergencyStop) {
 		_on_interrupt = true;
 		if (_current_state) {
@@ -150,7 +149,7 @@ void StateInterface::operationModeCallback(
 }
 
 void StateInterface::simpleGoalCallback(
-		const geometry_msgs::PoseStamped::ConstPtr& goal) {
+		const geometry_msgs::PoseStamped::ConstPtr &goal) {
 	_on_interrupt = true;
 	if (_current_state) {
 		_current_state->onInterrupt(SIMPLE_GOAL_INTERRUPT);
@@ -204,7 +203,7 @@ bool StateInterface::startStopWaypointFollowingService(
 
 bool StateInterface::stop2dNavGoal(std_srvs::Trigger::Request &req,
 		std_srvs::Trigger::Response &res) {
-	if(_current_state){
+	if (_current_state) {
 		_current_state->onInterrupt(SIMPLE_GOAL_STOP_INTERRUPT);
 	}
 	return true;

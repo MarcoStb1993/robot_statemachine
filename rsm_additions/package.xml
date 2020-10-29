@@ -56,7 +56,7 @@
 	<exec_depend>tf2</exec_depend>
 	<build_depend>tf2_ros</build_depend>
 	<build_export_depend>tf2_ros</build_export_depend>
-	<exec_depend>tf2_ros</exec_depend>
+	<exec_depend>tf2_ros</exec_depend>	
 
 	<export>
 		<rsm_core plugin="${prefix}/rsm_plugins.xml" />

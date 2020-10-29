@@ -14,6 +14,7 @@ void NavigationState::onSetup() {
 	private_nh.param("pose_tolerance", _pose_tolerance, 0.01);
 	private_nh.param("idle_timer_duration", _idle_timer_duration, 15.0);
 	private_nh.param("unstuck_timer_duration", _unstuck_timer_duration, 5.0);
+	private_nh.param("idle_timer_behavior", _idle_timer_behavior, false);
 
 	ros::NodeHandle nh("rsm");
 	_get_navigation_goal_service =
@@ -143,7 +144,8 @@ void NavigationState::onActive() {
 					if (!_interrupt_occured) {
 						if (!_unstucking_robot) {
 							//try reverse navigation
-							ROS_ERROR_STREAM("Try to unstuck robot by using reversed move base");
+							ROS_INFO_STREAM(
+									"Try to unstuck robot by using reversed move base");
 							if (_goal_active) {
 								_move_base_client->cancelGoal();
 							}
@@ -327,7 +329,28 @@ void NavigationState::onInterrupt(int interrupt) {
 
 void NavigationState::idleTimerCallback(const ros::TimerEvent &event) {
 	ROS_ERROR("Navigation aborted because robot appears to be stuck");
-	abortNavigation();
+	if (_idle_timer_behavior) {	//end navigation
+		abortNavigation();
+	} else { //declare goal as failed
+		_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
+		switch (_navigation_mode) {
+		case EXPLORATION: {
+			_stateinterface->transitionToVolatileState(
+					_stateinterface->getPluginState(
+					CALCULATEGOAL_STATE));
+			break;
+		}
+		case WAYPOINT_FOLLOWING: {
+			_stateinterface->transitionToVolatileState(
+					boost::make_shared<WaypointFollowingState>());
+			break;
+		}
+		default: {
+			abortNavigation();
+			break;
+		}
+		}
+	}
 }
 
 void NavigationState::unstuckTimerCallback(const ros::TimerEvent &event) {
@@ -356,7 +379,8 @@ void NavigationState::comparePose() {
 						&& pose_difference.getOrigin().z() < _pose_tolerance
 						&& pose_difference.getRotation().x() < _pose_tolerance
 						&& pose_difference.getRotation().y() < _pose_tolerance
-						&& pose_difference.getRotation().z() < _pose_tolerance) {
+						&& pose_difference.getRotation().z()
+								< _pose_tolerance) {
 					_idle_timer.start();
 				} else {
 					_idle_timer.stop();

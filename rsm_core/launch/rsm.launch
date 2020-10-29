@@ -15,7 +15,7 @@
 	"
 	<arg name="waypoint_routines" default="[]" />
 
-	<node pkg="rsm_core" type="rsmNode" name="rsmNode" output="screen">
+	<node pkg="rsm_core" type="rsmNode" name="rsmNode" output="screen" >
 		<param name="update_frequency" type="double"
 			value="$(arg update_frequency)" />
 		<param name="calculate_goal_plugin" type="string"
