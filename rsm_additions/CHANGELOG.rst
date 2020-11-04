@@ -2,8 +2,8 @@
 Changelog for package rsm_additions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2020-11-04)
+------------------
 * Added parameter for navigation behavior on idle timer callback and
   gazeboToTf changed to ground plane
 * Fixes for navigation idle timer

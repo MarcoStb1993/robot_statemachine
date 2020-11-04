@@ -2,8 +2,8 @@
 Changelog for package robot_statemachine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2020-11-04)
+------------------
 * Removed double maintainer tags
 * Contributors: MarcoStb1993
 

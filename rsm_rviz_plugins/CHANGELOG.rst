@@ -2,8 +2,8 @@
 Changelog for package rsm_rviz_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2020-11-04)
+------------------
 * Now starts exploration with mapping state
 * Added prefix to state name to identify autonomy behavior
 * Removed double maintainer tags

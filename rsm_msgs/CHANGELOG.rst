@@ -2,8 +2,8 @@
 Changelog for package rsm_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2020-11-04)
+------------------
 * Put GetRobotPose service back in
 * Exploration Goal Status is now published as a topic to prevent service deadlocks
 * Removed failed goal services and added a publisher
