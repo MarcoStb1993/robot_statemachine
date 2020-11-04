@@ -2,6 +2,14 @@
 Changelog for package rsm_rviz_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Now starts exploration with mapping state
+* Added prefix to state name to identify autonomy behavior
+* Removed double maintainer tags
+* Debounced operation mode buttons
+* Contributors: MarcoStb1993
+
 1.1.3 (2019-08-29)
 ------------------
 * Added all dependencies to CMakeLists and package.xml, that were missing previously
