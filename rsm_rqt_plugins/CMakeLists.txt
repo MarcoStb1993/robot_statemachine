@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   rsm_msgs
   std_msgs
   std_srvs
-  qtbase5-dev
 )
 
 set(CMAKE_AUTORCC ON)

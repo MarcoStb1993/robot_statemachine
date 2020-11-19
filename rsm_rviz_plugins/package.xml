@@ -43,8 +43,6 @@
 	<build_export_depend>tf</build_export_depend>
 	<exec_depend>tf</exec_depend>	
 	<build_depend>qtbase5-dev</build_depend>
-	<build_export_depend>qtbase5-dev</build_export_depend>
-	<exec_depend>qtbase5-dev</exec_depend>
 	
 	<export>
 		<rviz plugin="${prefix}/rsm_rviz_plugins.xml" />

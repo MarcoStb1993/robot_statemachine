@@ -34,8 +34,6 @@
 	<build_export_depend>std_srvs</build_export_depend>
 	<exec_depend>std_srvs</exec_depend>
 	<build_depend>qtbase5-dev</build_depend>
-	<build_export_depend>qtbase5-dev</build_export_depend>
-	<exec_depend>qtbase5-dev</exec_depend>
 
 	<export>
 		<rqt_gui plugin="${prefix}/rsm_rqt_plugins.xml" />
