@@ -10,12 +10,13 @@ find_package(catkin REQUIRED COMPONENTS
   rsm_msgs
   std_msgs
   std_srvs
+  qtbase5-dev
 )
 
 set(CMAKE_AUTORCC ON)
 find_package(cmake_modules REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS} include)
 
 ###################################
 ## catkin specific configuration ##
