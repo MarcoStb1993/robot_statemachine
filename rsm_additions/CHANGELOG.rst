@@ -2,6 +2,12 @@
 Changelog for package rsm_additions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add nav_msgs dependency
+* Add nav msgs dependency
+* Contributors: MarcoStb1993
+
 1.2.0 (2020-11-04)
 ------------------
 * Added parameter for navigation behavior on idle timer callback and

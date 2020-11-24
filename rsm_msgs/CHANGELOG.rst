@@ -2,6 +2,9 @@
 Changelog for package rsm_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 1.2.0 (2020-11-04)
 ------------------
 * Put GetRobotPose service back in

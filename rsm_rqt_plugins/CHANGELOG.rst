@@ -2,6 +2,12 @@
 Changelog for package rsm_rqt_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Next try fixing qt dependencies
+* (Hopefully) fixed missing qt5 build errors
+* Contributors: Marco Steinbrink
+
 1.2.0 (2020-11-04)
 ------------------
 * Added prefix to state name to identify autonomy behavior
