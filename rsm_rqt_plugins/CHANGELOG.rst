@@ -2,8 +2,8 @@
 Changelog for package rsm_rqt_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2020-11-24)
+------------------
 * Next try fixing qt dependencies
 * (Hopefully) fixed missing qt5 build errors
 * Contributors: Marco Steinbrink

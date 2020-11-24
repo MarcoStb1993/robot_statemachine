@@ -2,8 +2,8 @@
 Changelog for package rsm_additions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2020-11-24)
+------------------
 * Add nav_msgs dependency
 * Add nav msgs dependency
 * Contributors: MarcoStb1993
