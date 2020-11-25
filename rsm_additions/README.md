@@ -217,7 +217,7 @@ Sets the plugin's name for the mapping state.
 **~exploration_goal_tolerance** (double, default: 0.05)  
 Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached
 
-###gazeboToTfNode
+### gazeboToTfNode
 
 Mocks robot localization in gazebo simulation by retrieving it directly from gazebo
 
