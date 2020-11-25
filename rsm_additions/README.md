@@ -100,7 +100,7 @@ This class mocks the robot's localization in a simulated map by retrieving it di
 
 Requires to include the following code snippet in the robot's URDF to work (This publishes a ROS message with the robot's position under the topic "ground_truth"):
 
-```
+```xml
 <gazebo>
     <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
     <alwaysOn>true</alwaysOn>
