@@ -48,6 +48,9 @@ to a reverse base frame. When driving in reverse, all output command velocities 
 negated by the [Additions Service Provider](#additions-service-provider). If the reverse mode
 is activated or deactivated, the goal is cancelled and sent to the reverse navigation.
 
+Furthermore, if the robot got stuck during navigation and the respective parameter was set, reverse driving can be
+used to try to unstuck the robot.
+
 ### Mapping State
 
 There are two mapping plugins included. The first state is just a dummy state while the latter is swiveling a simulated Intel RealSense camera from left to right around a revoluting joint.
@@ -69,7 +72,9 @@ before and vice versa.
 
 ### Additions Service Provider
 
-This data handler class retrieved the frontiers published by [explore lite](http://wiki.ros.org/explore_lite) 
+This data handler class provides services for the calcualte goal, navigation, mapping and reversing routine states. The respective services are only initialised if the corresponding state is active.
+
+It retrieves the frontiers published by [explore lite](http://wiki.ros.org/explore_lite) 
 for visualization, extracts each frontier's center and republishes them as possible 
 exploration goals. In case, the exploration mode is set to *Interrupt*, it is also
 checked if the current navigation goal is still in the list of exploration goals.
@@ -88,6 +93,27 @@ replies that it was successful.
 
 If the Realsense mapping is interrupted, a service is provided that moves the camera back to it's centered
 position while the RSM is continuing.
+
+### Gazebo To TF
+
+This class mocks the robot's localization in a simulated map by retrieving it directly from gazebo. This can be used to replace error prone odometry or SLAM if something else needs to be tested.
+
+Requires to include the following code snippet in the robot's URDF to work (This publishes a ROS message with the robot's position under the topic "ground_truth"):
+
+```
+<gazebo>
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+    <alwaysOn>true</alwaysOn>
+    <updateRate>50.0</updateRate>
+    <bodyName>base_footprint</bodyName>
+    <topicName>ground_truth/state</topicName>
+    <gaussianNoise>0.01</gaussianNoise>
+    <frameName>world</frameName>
+    <xyzOffsets>0 0 0</xyzOffsets>
+    <rpyOffsets>0 0 0</rpyOffsets>
+</plugin>
+</gazebo>
+```
 
 ## Examples
 
@@ -168,6 +194,9 @@ The currently active goal's status and pose
 **setNavigationToReverse** ([std_srvs/SetBool](http://docs.ros.org/api/std_srvs/html/srv/SetBool.html))  
 Needs to be implemented for reverse mode, just returns success
 
+**resetRealsensePosition** ([std_srvs/Trigger](http://docs.ros.org/api/std_srvs/html/srv/Trigger.html))  
+Moves RealSense camera back to centered position
+
 #### Parameters
 
 **~update_frequency** (float, default: 20)  
@@ -187,3 +216,28 @@ Sets the plugin's name for the mapping state.
 
 **~exploration_goal_tolerance** (double, default: 0.05)  
 Distance in all directions in meters that the robot's current position can differ from an exploration goal to still count it as reached
+
+###gazeboToTfNode
+
+Mocks robot localization in gazebo simulation by retrieving it directly from gazebo
+
+#### Subscribed Topics
+
+**<odom_topic>** ([nav_msgs/Odometry](http://docs.ros.org/en/melodic/api/nav_msgs/html/msg/Odometry.html))  
+Position of the robot in gazebo simulation
+
+#### Parameters
+
+**~odom_topic** (string, default: "/ground_truth/state")  
+Topic name of odometry provided by gazebo
+
+**~map_frame** (string, default: "map")  
+Name of the map frame
+
+**~robot_frame** (string, default: "robot_footprint")  
+Name of the robot frame
+
+#### Provided tf Transforms
+
+**<map_frame> -> <robot_frame>**
+Transform between robot and map frame  
