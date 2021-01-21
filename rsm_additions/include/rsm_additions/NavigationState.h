@@ -163,6 +163,10 @@ private:
 	 */
 	bool _unstucking_robot;
 	/**
+	 * Was the mode switch already tried for this goal
+	 */
+	bool _unstucking_executed;
+	/**
 	 * If the idle timer when called should end exploration/waypoint following or just declare goal as failed (true=end,false=fail)
 	 */
 	bool _idle_timer_behavior;

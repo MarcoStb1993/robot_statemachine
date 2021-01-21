@@ -12,9 +12,15 @@ void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle private_nh("~");
 	private_nh.param("pose_tolerance", _pose_tolerance, 0.01);
-	private_nh.param("idle_timer_duration", _idle_timer_duration, 15.0);
+	private_nh.param("idle_timer_duration", _idle_timer_duration, 10.0);
 	private_nh.param("unstuck_timer_duration", _unstuck_timer_duration, 5.0);
 	private_nh.param("idle_timer_behavior", _idle_timer_behavior, false);
+
+	if (_idle_timer_duration < _unstuck_timer_duration) {
+		ROS_WARN(
+				"Idle timer duration must be longer than unstuck timer duration, setting the former to the latter + 1s!");
+		_idle_timer_duration = _unstuck_timer_duration + 1.0;
+	}
 
 	ros::NodeHandle nh("rsm");
 	_get_navigation_goal_service =
@@ -44,6 +50,7 @@ void NavigationState::onSetup() {
 	_robot_did_move = false;
 	_operation_mode = rsm_msgs::OperationMode::STOPPED;
 	_navigation_completed_status = rsm_msgs::GoalStatus::ACTIVE;
+	_unstucking_executed = false;
 	_unstucking_robot = false;
 }
 
@@ -144,7 +151,7 @@ void NavigationState::onActive() {
 					if (!_interrupt_occured) {
 						if (!_unstucking_robot) {
 							//try reverse navigation
-							ROS_INFO_STREAM(
+							ROS_WARN_STREAM(
 									"Try to unstuck robot by using reversed move base");
 							if (_goal_active) {
 								_move_base_client->cancelGoal();
@@ -328,27 +335,45 @@ void NavigationState::onInterrupt(int interrupt) {
 }
 
 void NavigationState::idleTimerCallback(const ros::TimerEvent &event) {
-	ROS_ERROR("Navigation aborted because robot appears to be stuck");
-	if (_idle_timer_behavior) {	//end navigation
-		abortNavigation();
-	} else { //declare goal as failed
-		_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
-		switch (_navigation_mode) {
-		case EXPLORATION: {
-			_stateinterface->transitionToVolatileState(
-					_stateinterface->getPluginState(
-					CALCULATEGOAL_STATE));
-			break;
+	ROS_WARN("Navigation aborted because robot appears to be stuck");
+	if (!_unstucking_executed && !_unstucking_robot) {
+		//try reverse navigation
+		ROS_WARN("Try to unstuck robot by using reversed move base");
+		if (_goal_active) {
+			_move_base_client->cancelGoal();
 		}
-		case WAYPOINT_FOLLOWING: {
-			_stateinterface->transitionToVolatileState(
-					boost::make_shared<WaypointFollowingState>());
-			break;
+		_goal_active = false;
+		if (_reverse_mode) {
+			_move_base_client.reset(new MoveBaseClient("move_base", true));
+		} else {
+			_move_base_client.reset(
+					new MoveBaseClient("move_base_reverse", true));
 		}
-		default: {
+		_unstuck_timer.start();
+		_unstucking_robot = true;
+		_idle_timer.start();
+	} else {
+		if (_idle_timer_behavior) {	//end navigation
 			abortNavigation();
-			break;
-		}
+		} else { //declare goal as failed
+			_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
+			switch (_navigation_mode) {
+			case EXPLORATION: {
+				_stateinterface->transitionToVolatileState(
+						_stateinterface->getPluginState(
+						CALCULATEGOAL_STATE));
+				break;
+			}
+			case WAYPOINT_FOLLOWING: {
+				_stateinterface->transitionToVolatileState(
+						boost::make_shared<WaypointFollowingState>());
+				break;
+			}
+			default: {
+				abortNavigation();
+				break;
+			}
+			}
 		}
 	}
 }
@@ -363,6 +388,8 @@ void NavigationState::unstuckTimerCallback(const ros::TimerEvent &event) {
 	} else {
 		_move_base_client.reset(new MoveBaseClient("move_base", true));
 	}
+	_unstucking_robot = false;
+	_unstucking_executed = true;
 }
 
 void NavigationState::comparePose() {
