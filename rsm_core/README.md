@@ -172,13 +172,17 @@ The nodes can of course be started separately though it is easier to use the lau
 
 ### Launch simulation
 
-To demonstrate the RSM and get used to it's controls, the [RSM additions package](../rsm_additions#rsm-additions) offers two launch files that start a simulation including a complete robot and environment to start right away.
+To demonstrate the RSM and get used to it's controls, the [RSM additions package](../rsm_additions#rsm-additions) offers three launch files that start a simulation including a complete robot and environment to start right away.
 
-The first simulation uses the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before (If you have installed ROS with `ros-melodic-desktop-full`, it is already included). Furthermore, it depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. The second simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the RSM has to offer, stick with the stdr simulator. Screenshots from both simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
+The first two simulations use the 3D [Gazebo](http://gazebosim.org/) simulator which has to be [installed](http://gazebosim.org/tutorials?cat=install) before (If you have installed ROS with `ros-melodic-desktop-full`, it is already included).
+
+If you want to simulate a [TurtleBot3 Burger](https://emanual.robotis.com/docs/en/platform/turtlebot3/overview), your system requires the following two meta-packages: [turtlebot3](http://wiki.ros.org/turtlebot3) and [turtlebot3_simulations](http://wiki.ros.org/turtlebot3_simulations). The [Clearpath Robotics Husky](https://clearpathrobotics.com/husky-unmanned-ground-vehicle-robot/) simulation depends on the [husky simulator package](http://wiki.ros.org/husky_simulator) which includes the robot to be simulated. Both TurtleBot3 and Husky had their URDFs customized to add a front-facing simulated RealSense depth camera. For the Husky it comes on an arch with a swivelling joint as a mount. Therefore, when running the exploration, the Mapping State actually moves the camera around to increase the perceived area. 
+
+The third simulation depends on the [stdr simulator package](http://wiki.ros.org/stdr_simulator) which is solely in 2D and offers a much less CPU-intensive alternative to Gazebo. If your machine is not very powerful or you just want to have a quick peek at what the RSM has to offer, stick with the stdr simulator. Screenshots from two simulations can be seen below, [Gazebo](http://gazebosim.org/) first and [stdr simulator](http://wiki.ros.org/stdr_simulator) last, the simulation on the left and RViz on the right. 
 
 ![Simulations](../images/simulations.png)
 
-Both simulations use the plugins implemented in [RSM additions](../rsm_additions#rsm-additions) which need the following packages to be installed:
+All simulations use the plugins implemented in [RSM additions](../rsm_additions#rsm-additions) which need the following packages to be installed:
 * [gmapping](http://wiki.ros.org/gmapping) for SLAM
 * [ROS navigation stack](http://wiki.ros.org/navigation) for the [Navigation State](../rsm_additions#navigation-state)
 * [explore lite](http://wiki.ros.org/explore_lite) for the [Calculate Goal State](../rsm_additions#calculate-goal-state)
@@ -190,6 +194,13 @@ sudo apt install ros-melodic-gmapping ros-melodic-navigation
 cd /path/to/your/catkin_ws/src
 git clone https://github.com/hrnr/m-explore.git
 catkin build explore_lite
+```
+
+To install all dependencies for the TurtleBot3 Burger simulation, run these commands in a terminal:
+
+```
+sudo apt install ros-melodic-turtlebot3
+sudo apt install ros-melodic-turtlebot3-simulations
 ```
 
 To install the Husky simulation, run the following command in a terminal:
@@ -207,18 +218,24 @@ git clone https://github.com/stdr-simulator-ros-pkg/stdr_simulator.git
 catkin build stdr_simulator
 ```
 
-When the above prerequisites are met, the simulations can be launched with the following commands including a pre-configured RViz display. If you do not want to start RViz, just leave out the `rviz:=true`. 
+When the above prerequisites are met, the simulations can be launched with the following commands including a pre-configured RViz display. If you do not want to start RViz, just add  `rviz:=false`. 
 
-For gazebo:
+For gazebo with the TurtleBot3 Burger robot:
   
 ```
-roslaunch rsm_additions simulation_gazebo.launch rviz:=true
+roslaunch rsm_additions simulation_turtlebot3.launch
+```
+
+For gazebo with the Husky UGV:
+  
+```
+roslaunch rsm_additions simulation_husky.launch
 ```
 
 For the stdr simulator:
   
 ```
-roslaunch rsm_additions simulation_stdr.launch rviz:=true
+roslaunch rsm_additions simulation_stdr.launch
 ```
 
 ### GUI introduction
