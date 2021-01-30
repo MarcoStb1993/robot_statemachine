@@ -1,0 +1,40 @@
+<!-- Gazebo launch files for world and TurtleBot3 robot -->
+
+<launch>
+	<arg name="teleop_enabled" default="false" />
+	<arg name="world_file"
+		default="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world" />
+	<arg name="robot_namespace" default="/" />
+
+	<!-- World launch -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(arg world_file)" />
+		<arg name="paused" value="false" />
+		<arg name="use_sim_time" value="true" />
+		<arg name="gui" value="true" />
+		<arg name="headless" value="false" />
+		<arg name="debug" value="false" />
+	</include>
+
+	<!-- Robot starting position in world -->
+	<arg name="x" default="-2.0" />
+	<arg name="y" default="-0.5" />
+	<arg name="z" default="0.0" />
+	<arg name="yaw" default="0.0" />
+
+	<group ns="$(arg robot_namespace)">
+		<!-- Load robot description -->
+		<param name="robot_description"
+			command="$(find xacro)/xacro --inorder $(find rsm_additions)/urdf/turtlebot3_burger.urdf.xacro" />
+
+		<node pkg="robot_state_publisher" type="robot_state_publisher"
+			name="robot_state_publisher" />
+
+		<node if="$(arg teleop_enabled)" pkg="turtlebot3_teleop"
+			type="turtlebot3_teleop_key" name="turtlebot3_teleop_keyboard" />
+
+		<!-- Spawn robot in gazebo -->
+		<node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"
+			args="-urdf -model turtlebot3_burger -x $(arg x) -y $(arg y) -z $(arg z) -Y $(arg yaw) -param robot_description" />
+	</group>
+</launch>

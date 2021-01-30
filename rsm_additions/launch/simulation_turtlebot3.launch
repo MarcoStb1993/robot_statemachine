@@ -1,9 +1,10 @@
-<!-- Simulation of Husky UGV in Gazebo running Robot Statemachine with GMapping 
+<!-- Simulation of TurtleBot3 in Gazebo running Robot Statemachine with GMapping 
 	and Explore Lite -->
 
 <launch>
 	<arg name="world"
-		default="$(find husky_gazebo)/worlds/clearpath_playpen.world" />
+		default="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world" />
+	<arg name="teleop_enabled" default="false" />
 	<arg name="robot_frame" default="base_footprint" />
 	<arg name="autonomy_cmd_vel_topic" default="/autonomy/cmd_vel" />
 	<arg name="teleoperation_cmd_vel_topic"
@@ -13,12 +14,14 @@
 	<arg name="joystick_topic" default="/joy" />
 	<arg name="calculate_goal_plugin" default="rsm::CalculateGoalState" />
 	<arg name="navigation_plugin" default="rsm::NavigationState" />
-	<arg name="mapping_plugin" default="rsm::RealsenseMappingState" />
+	<arg name="mapping_plugin" default="rsm::MappingDummyState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
-	<arg name="rviz" default="false" />
+	<arg name="rviz" default="true" />
 
-	<include file="$(find rsm_additions)/launch/gazebo.launch">
+	<include
+		file="$(find rsm_additions)/launch/gazebo_turtlebot3.launch">
 		<arg name="world_file" value="$(arg world)" />
+		<arg name="teleop_enabled" default="$(arg teleop_enabled)" />
 	</include>
 
 	<include file="$(find rsm_core)/launch/rsm.launch">
@@ -30,7 +33,8 @@
 			value="$(arg teleoperation_cmd_vel_topic)" />
 		<arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
 		<arg name="joystick_used" default="$(arg joystick_used)" />
-		<arg name="joystick_topic" default="$(arg joystick_topic)" />
+		<arg name="joystick_topic" default="$(arg 
+		joystick_topic)" />
 		<arg name="calculate_goal_plugin"
 			value="$(arg calculate_goal_plugin)" />
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
@@ -55,62 +59,63 @@
 		<param name="exploration_goal_tolerance" type="double"
 			value="0.05" />
 	</node>
-	
-	<!-- Fake odom from gazebo -->
-	<node pkg="rsm_additions" type="gazeboTfNode" name="gazeboTfNode"
-		output="screen">
-		<param name="robot_frame" value="$(arg robot_frame)" />
-		<param name="map_frame" value="odom" />
-		<param name="odom_topic" value="/ground_truth/state" />
-	</node>	
 
-	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping"
-		output="screen">
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
 		<param name="base_frame" value="$(arg robot_frame)" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"
-		name="move_base" output="screen">
+		name="move_base">
+		<param name="base_local_planner"
+			value="dwa_local_planner/DWAPlannerROS" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/costmap_common_params_burger.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find 
+		rsm_additions)/config/gazebo_sim/navigation_turtlebot3/costmap_common_params_burger.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_local.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/local_costmap_params.yaml"
 			command="load" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_global.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/global_costmap_params.yaml"
 			command="load" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/planner.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/move_base_params.yaml"
+			command="load" />
+		<rosparam
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/dwa_local_planner_params_burger.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
-			value="$(arg 
-		robot_frame)" />
+			value="$(arg robot_frame)" />
 		<param name="local_costmap/robot_base_frame"
-			value="$(arg 
-		robot_frame)" />
+			value="$(arg robot_frame)" />
 		<remap from="/cmd_vel" to="$(arg autonomy_cmd_vel_topic)" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"
-		name="move_base_reverse" output="screen">
+		name="move_base_reverse">
+		<param name="base_local_planner"
+			value="dwa_local_planner/DWAPlannerROS" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/costmap_common_params_burger.yaml"
 			command="load" ns="global_costmap" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_common.yaml"
+			file="$(find 
+		rsm_additions)/config/gazebo_sim/navigation_turtlebot3/costmap_common_params_burger.yaml"
 			command="load" ns="local_costmap" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_local.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/local_costmap_params.yaml"
 			command="load" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/costmap_global.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/global_costmap_params.yaml"
 			command="load" />
 		<rosparam
-			file="$(find rsm_additions)/config/gazebo_sim/planner.yaml"
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/move_base_params.yaml"
+			command="load" />
+		<rosparam
+			file="$(find rsm_additions)/config/gazebo_sim/navigation_turtlebot3/dwa_local_planner_params_burger.yaml"
 			command="load" />
 		<param name="global_costmap/robot_base_frame"
 			value="$(arg robot_frame)_reverse" />
@@ -127,7 +132,8 @@
 
 	<node pkg="tf" type="static_transform_publisher"
 		name="base_footprint_reverse"
-		args="0 0 0 3.1415 0 0             $(arg robot_frame)         $(arg robot_frame)_reverse		10" />
+		args="0 0 
+		0 3.1415 0 0 $(arg robot_frame) $(arg robot_frame)_reverse 10" />
 
 	<!-- Explore Lite -->
 	<node pkg="explore_lite" type="explore" respawn="false"
@@ -148,7 +154,7 @@
 
 	<!-- RViz für Exploration -->
 	<node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz"
-		args="-d $(find rsm_additions)/config/gazebo_sim/gazebo_simulation.rviz">
+		args="-d $(find rsm_additions)/config/gazebo_sim/turtlebot3_simulation.rviz">
 		<remap from="/move_base_simple/goal" to="/rsm/simpleGoal" />
 	</node>
 	<include if="$(arg rviz)"

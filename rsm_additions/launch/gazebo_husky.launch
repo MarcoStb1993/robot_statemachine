@@ -1,4 +1,4 @@
-<!-- Gazebo launch files for world and robot -->
+<!-- Gazebo launch files for world and Clearpath Robotics Husky robot -->
 
 <launch>
 	<arg name="world_file"
@@ -32,7 +32,7 @@
 
 		<!-- Load robot description -->
 		<param name="robot_description"
-			command="$(find xacro)/xacro '$(find rsm_additions)/config/gazebo_sim/urdf/husky.urdf.xacro'
+			command="$(find xacro)/xacro '$(find rsm_additions)/urdf/husky.urdf.xacro'
 		    --inorder
 		    robot_namespace:=$(arg robot_namespace)
 		    urdf_extras:=$(arg urdf_extras)
@@ -43,7 +43,7 @@
 			file="$(find husky_control)/config/control.yaml" />
 		<!-- Load realsense controller config -->
 		<rosparam command="load"
-			file="$(find rsm_additions)/config/gazebo_sim/urdf/config.yaml" />
+			file="$(find rsm_additions)/config/gazebo_sim/realsense_swivel_config.yaml" />
 
 		<!-- Spawn controllers -->
 		<node name="base_controller_spawner" pkg="controller_manager"
