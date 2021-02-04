@@ -1,6 +1,6 @@
 local_costmap:
   global_frame: odom
-  static_map: false
+  robot_base_frame: base_footprint
   rolling_window: true
   width: 6.0
   height: 6.0

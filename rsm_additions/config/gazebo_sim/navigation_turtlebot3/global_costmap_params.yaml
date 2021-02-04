@@ -1,12 +1,7 @@
 global_costmap:
   global_frame: map
   robot_base_frame: base_footprint
-
-  update_frequency: 4.0
-  publish_frequency: 3.0
-  transform_tolerance: 0.5
-
-  static_map: true
+  width: 100
   
   plugins:
     - {name: static_layer, type: 'costmap_2d::StaticLayer'}

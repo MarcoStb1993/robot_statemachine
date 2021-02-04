@@ -1,6 +1,6 @@
 global_costmap:
   global_frame: map
-  static_map: true
+  robot_base_frame: base_footprint
   width: 100
 
   plugins:
