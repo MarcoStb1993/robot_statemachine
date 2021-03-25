@@ -2,6 +2,7 @@ global_costmap:
   global_frame: map
   robot_base_frame: base_footprint
   width: 100
+  height: 100
   
   plugins:
     - {name: static_layer, type: 'costmap_2d::StaticLayer'}
