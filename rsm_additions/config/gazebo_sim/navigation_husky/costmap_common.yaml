@@ -12,12 +12,9 @@ raytrace_range: 6.0
 
 #layer definitions
 
-
 obstacle_layer:
-    observation_sources: laser #camera
+    observation_sources: laser
     laser: {sensor_frame: base_laser, data_type: LaserScan, topic: scan, clearing: true, marking: true}
-#   laser: {sensor_frame: lms_front_scan_frame, data_type: LaserScan, topic: lms_front/scan, clearing: true, marking: true}
-#    camera: {sensor_frame: camera_link, data_type: PointCloud2, topic: camera/depth/points, clearing: true, min_obstacle_height: 0.25}
 
 inflation_layer:
     inflation_radius: 1.0

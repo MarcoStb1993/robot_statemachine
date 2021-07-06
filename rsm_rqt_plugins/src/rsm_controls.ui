@@ -180,6 +180,9 @@ color: rgba(255,255,255,1);</string>
           </item>
           <item>
            <widget class="QComboBox" name="exploration_mode_box">
+            <property name="currentIndex">
+             <number>1</number>
+            </property>
             <item>
              <property name="text">
               <string>Finish</string>

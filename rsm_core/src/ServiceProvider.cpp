@@ -71,7 +71,7 @@ ServiceProvider::ServiceProvider() {
 	_navigation_mode = -1;
 	_waypoint_position = -1;
 
-	_exploration_mode = 0;
+	_exploration_mode = 1;
 
 	_reverse_mode_active = false;
 }
