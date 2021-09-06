@@ -83,6 +83,7 @@ private:
 	ros::Subscriber _tilt_scan_subscriber;
 	ros::ServiceClient _start_tilt_scan_client;
 	ros::ServiceClient _navigation_goal_completed_service;
+	ros::Timer _tilt_scan_timeout;
 
 	/**
 	 * Did the tilt scan finish
@@ -98,6 +99,11 @@ private:
 	 * @param cloud Point cloud message
 	 */
 	void tiltScanCallback(sensor_msgs::PointCloud2::ConstPtr cloud);
+
+	/**
+	 * Callback for the timer to detect a tilt scan timeout 
+	 */
+	void timerCallback(const ros::TimerEvent& event);
 };
 
 }

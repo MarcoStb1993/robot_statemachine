@@ -37,11 +37,14 @@ namespace rsm
 			_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
 			_stateinterface->transitionToVolatileState(_stateinterface->getPluginState(CALCULATEGOAL_STATE));
 		}
+		else
+		{
+			_tilt_scan_timeout = _nh.createTimer(ros::Duration(5.0), &TiltScannerMappingState::timerCallback, this);
+		}
 	}
 
 	void TiltScannerMappingState::onActive()
 	{
-		
 	}
 
 	void TiltScannerMappingState::onExit()
@@ -108,6 +111,13 @@ namespace rsm
 	void TiltScannerMappingState::tiltScanCallback(sensor_msgs::PointCloud2::ConstPtr cloud)
 	{
 		_navigation_completed_status = rsm_msgs::GoalStatus::REACHED;
+		_stateinterface->transitionToVolatileState(
+			_stateinterface->getPluginState(CALCULATEGOAL_STATE));
+	}
+
+	void TiltScannerMappingState::timerCallback(const ros::TimerEvent &event)
+	{
+		_navigation_completed_status = rsm_msgs::GoalStatus::FAILED;
 		_stateinterface->transitionToVolatileState(
 			_stateinterface->getPluginState(CALCULATEGOAL_STATE));
 	}
