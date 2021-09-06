@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   tf2_ros
   nav_msgs
+  ohm_tilt_scanner_3d
 )
 
 
@@ -36,6 +37,7 @@ add_library(rsm_plugins
     src/NavigationState.cpp
     src/MappingDummyState.cpp
     src/RealsenseMappingState.cpp
+    src/TiltScannerMappingState.cpp
     src/ReversingRoutineState.cpp)
 
 add_executable(bootUpNode src/BootUpNode.cpp)

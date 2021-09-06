@@ -15,6 +15,10 @@
 		base_class_type="rsm::BaseState">
 		<description>This state moves a RealSense depth camera from left to right and back, mapping the area.</description>
 	</class>
+	<class type="rsm::TiltScannerMappingState"
+		base_class_type="rsm::BaseState">
+		<description>This state moves the tilting scanner of Schroedi.</description>
+	</class>
 	<class type="rsm::ReversingRoutineState"
 		base_class_type="rsm::BaseState">
 		<description>This is a routine state that toggles the reverse mode..</description>
