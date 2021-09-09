@@ -9,7 +9,7 @@
 	<arg name="joystick_topic" default="/joy" />
 	<arg name="goal_plugin" default="rsm::CalculateGoalState" />
 	<arg name="navigation_plugin" default="rsm::NavigationState" />
-	<arg name="mapping_plugin" default="rsm::MappingDummyState" />
+	<arg name="mapping_plugin" default="rsm::TiltScannerMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
 
 	<include file="$(find rsm_core)/launch/rsm.launch">
@@ -26,7 +26,6 @@
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
-		<arg name="exploration_goal_tolerance" value="0.05" />
 	</include>
 
 	<node pkg="rsm_additions" type="bootUpNode" name="bootUpNode"

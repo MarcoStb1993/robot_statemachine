@@ -15,9 +15,9 @@ namespace rsm
 	{
 		_tilt_scan_subscriber = _nh.subscribe("cloud2", 10,
 											  &TiltScannerMappingState::tiltScanCallback, this);
-		ros::NodeHandle nh("rsm");
-		_start_tilt_scan_client = nh.serviceClient<ohm_tilt_scanner_3d::SrvScanParams>(
+		_start_tilt_scan_client = _nh.serviceClient<ohm_tilt_scanner_3d::SrvScanParams>(
 			"scanparamsSrv");
+		ros::NodeHandle nh("rsm");
 		_navigation_goal_completed_service = nh.serviceClient<
 			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
 		_name = "E: Tilt Scanner 3D Mapping";
