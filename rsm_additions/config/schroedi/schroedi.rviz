@@ -201,12 +201,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: costmap
       Draw Behind: false
-      Enabled: false
+      Enabled: true
       Name: Local Costmap
       Topic: /move_base/local_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: costmap
@@ -351,7 +351,7 @@ Visualization Manager:
       Marker Topic: /explore/frontiers
       Name: MarkerArray
       Namespaces:
-        {}
+        frontiers: true
       Queue Size: 100
       Value: true
     - Class: rviz/InteractiveMarkers
@@ -492,7 +492,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.43856143951416
+      Distance: 5.082546234130859
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -507,10 +507,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7753981351852417
+      Pitch: 0.9253981113433838
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.8803997039794922
+      Yaw: 0.9503996968269348
     Saved: ~
 Window Geometry:
   Displays:
