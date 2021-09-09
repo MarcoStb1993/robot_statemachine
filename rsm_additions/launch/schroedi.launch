@@ -2,9 +2,9 @@
 
 <launch>
 	<arg name="robot_frame" default="base_footprint" />
-	<arg name="autonomy_cmd_vel_topic" default="/autonomy/vel/cmd" />
+	<arg name="autonomy_cmd_vel_topic" default="/vel/autonomy" />
 	<arg name="teleoperation_cmd_vel_topic" default="/vel/teleop" />
-	<arg name="cmd_vel_topic" default="/vel/autonomy" />
+	<arg name="cmd_vel_topic" default="/vel/cmd" />
 	<arg name="joystick_used" default="true" />
 	<arg name="joystick_topic" default="/joy" />
 	<arg name="calculate_goal_plugin" default="rsm::CalculateGoalState" />
