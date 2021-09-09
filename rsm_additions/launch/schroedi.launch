@@ -7,7 +7,7 @@
 	<arg name="cmd_vel_topic" default="/vel/autonomy" />
 	<arg name="joystick_used" default="true" />
 	<arg name="joystick_topic" default="/joy" />
-	<arg name="goal_plugin" default="rsm::CalculateGoalState" />
+	<arg name="calculate_goal_plugin" default="rsm::CalculateGoalState" />
 	<arg name="navigation_plugin" default="rsm::NavigationState" />
 	<arg name="mapping_plugin" default="rsm::TiltScannerMappingState" />
 	<arg name="waypoint_routines" default="['Reversing']" />
@@ -22,7 +22,7 @@
 		<arg name="cmd_vel_topic" value="$(arg cmd_vel_topic)" />
 		<arg name="joystick_used" default="$(arg joystick_used)" />
 		<arg name="joystick_topic" default="$(arg joystick_topic)" />
-		<arg name="calculate_goal_plugin" value="$(arg goal_plugin)" />
+		<arg name="calculate_goal_plugin" value="$(arg calculate_goal_plugin)" />
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
