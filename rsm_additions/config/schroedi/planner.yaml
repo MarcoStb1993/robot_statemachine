@@ -28,12 +28,12 @@ DWAPlannerROS:
   latch_xy_goal_tolerance: false
 
   # # Forward Simulation Parameters
-  # sim_time: 2.0
-  # sim_granularity: 0.02
-  # vx_samples: 6
-  # vy_samples: 0
-  # vtheta_samples: 20
-  # penalize_negative_x: true
+  sim_time: 4.0
+  sim_granularity: 0.025
+  vx_samples: 20
+  vy_samples: 0
+  vtheta_samples: 40
+  penalize_negative_x: true
 
   # # Trajectory scoring parameters
   # path_distance_bias: 32.0 # The weighting for how much the controller should stay close to the path it was given
