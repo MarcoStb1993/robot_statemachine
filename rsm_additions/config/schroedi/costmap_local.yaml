@@ -5,6 +5,6 @@ local_costmap:
   height: 6.0
 
   plugins:
-    #- {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
+    - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
     - {name: static_layer, type: 'costmap_2d::StaticLayer'}
     - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
