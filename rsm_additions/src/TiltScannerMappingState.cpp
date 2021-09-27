@@ -59,8 +59,10 @@ namespace rsm
 	{
 		if(_sensor_head_state == at_left){
 			publishSensorHeadPanVel(-PAN_VELOCITY);
+			_sensor_head_state = moving_right;
 		} else if (_sensor_head_state == at_right){
 			publishSensorHeadPanPos(0.0);
+			_sensor_head_state = return_to_start;
 		}
 	}
 
@@ -152,16 +154,16 @@ namespace rsm
 
 	void TiltScannerMappingState::sensorHeadPanPosCallback(std_msgs::Float32::ConstPtr pos){
 		if(_sensor_head_state == moving_left && pos->data >= 1.57 ){
-			publishSensorHeadPanVel(0);
+			publishSensorHeadPanVel(0.0);
 			_sensor_head_state = at_left;
 		} else if(_sensor_head_state == moving_right && pos->data <= -1.57 ){
-			publishSensorHeadPanVel(0);
+			publishSensorHeadPanVel(0.0);
 			_sensor_head_state = at_right;
 		}
 	}
 
 	void TiltScannerMappingState::sensorHeadTiltPosCallback(std_msgs::Float32::ConstPtr pos){
-		if(pos->data != 0)
+		if(abs(pos->data) <= 0.01) //~0.57 degrees variation from horizontal
 			publishSensorHeadTiltPos(0.0);
 	}
 
