@@ -97,18 +97,109 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
+        GR_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        GR_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         Link Tree Style: Links in Alphabetic Order
+        TCP_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        TCP_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        TCP_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        chassi:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        flipper_front_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        flipper_front_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        flipper_rear_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        flipper_rear_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        schwenkplattform:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        static_flipper_front_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        static_flipper_front_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        static_flipper_rear_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        static_flipper_rear_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
@@ -219,10 +310,16 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        base_footprint:
-          base_footprint_reverse:
-            {}
-          base_link:
+        map:
+          base_footprint:
+            base_footprint_reverse:
+              {}
+            base_link:
+              motor:
+                laser:
+                  {}
+              sensor_imu:
+                {}
             chassi:
               schwenkplattform:
                 link_1:
@@ -242,11 +339,6 @@ Visualization Manager:
                     sensor_head/pitch/base:
                       sensor_head/pitch/rotated:
                         {}
-            motor:
-              laser:
-                {}
-            sensor_imu:
-              {}
             static_flipper_front_left:
               flipper_front_left:
                 {}
@@ -259,8 +351,6 @@ Visualization Manager:
             static_flipper_rear_right:
               flipper_rear_right:
                 {}
-        map:
-          {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -558,7 +648,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.580199241638184
+      Distance: 4.697611331939697
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

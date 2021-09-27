@@ -46,6 +46,7 @@ add_executable(additionsServiceProviderNode
 	src/AdditionsServiceProvider.cpp)
 add_executable(gazeboTfNode src/GazeboTfNode.cpp
 	src/GazeboToTf.cpp)
+add_executable(odomFromPose src/OdomFromPose.cpp)
 
 target_link_libraries(rsm_plugins
   ${catkin_LIBRARIES}
@@ -58,12 +59,16 @@ target_link_libraries(bootUpNode
   )
   target_link_libraries(gazeboTfNode
   ${catkin_LIBRARIES}
-  )  
+  ) 
+  target_link_libraries(odomFromPose
+  ${catkin_LIBRARIES}
+  )   
 
 add_dependencies(rsm_plugins ${catkin_EXPORTED_TARGETS})
 add_dependencies(bootUpNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(additionsServiceProviderNode ${catkin_EXPORTED_TARGETS})
 add_dependencies(gazeboTfNode ${catkin_EXPORTED_TARGETS})
+add_dependencies(odomFromPose ${catkin_EXPORTED_TARGETS})
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
