@@ -4,6 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 192
@@ -88,7 +89,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: /scan_republished
+      Topic: /scan
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -160,6 +161,8 @@ Visualization Manager:
           Value: false
         base_footprint:
           Value: true
+        base_footprint_reverse:
+          Value: true
         base_link:
           Value: true
         chassi:
@@ -216,45 +219,48 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          base_footprint:
-            base_link:
-              chassi:
-                schwenkplattform:
-                  link_1:
-                    link_2:
-                      link_3:
-                        TCP_1:
-                          TCP_2:
-                            TCP_3:
-                              GR_1:
-                                {}
-                              GR_2:
-                                {}
-                  sensor_head/yaw/base:
-                    sensor_head/yaw/rotated:
-                      sensor_head/driver_cam:
+        base_footprint:
+          base_footprint_reverse:
+            {}
+          base_link:
+            chassi:
+              schwenkplattform:
+                link_1:
+                  link_2:
+                    link_3:
+                      TCP_1:
+                        TCP_2:
+                          TCP_3:
+                            GR_1:
+                              {}
+                            GR_2:
+                              {}
+                sensor_head/yaw/base:
+                  sensor_head/yaw/rotated:
+                    sensor_head/driver_cam:
+                      {}
+                    sensor_head/pitch/base:
+                      sensor_head/pitch/rotated:
                         {}
-                      sensor_head/pitch/base:
-                        sensor_head/pitch/rotated:
-                          {}
-              motor:
-                laser:
-                  {}
-              sensor_imu:
+            motor:
+              laser:
                 {}
-              static_flipper_front_left:
-                flipper_front_left:
-                  {}
-              static_flipper_front_right:
-                flipper_front_right:
-                  {}
-              static_flipper_rear_left:
-                flipper_rear_left:
-                  {}
-              static_flipper_rear_right:
-                flipper_rear_right:
-                  {}
+            sensor_imu:
+              {}
+            static_flipper_front_left:
+              flipper_front_left:
+                {}
+            static_flipper_front_right:
+              flipper_front_right:
+                {}
+            static_flipper_rear_left:
+              flipper_rear_left:
+                {}
+            static_flipper_rear_right:
+              flipper_rear_right:
+                {}
+        map:
+          {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -552,7 +558,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.6629459857940674
+      Distance: 6.580199241638184
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

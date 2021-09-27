@@ -17,6 +17,15 @@ namespace rsm
 											  &TiltScannerMappingState::tiltScanCallback, this);
 		_start_tilt_scan_client = _nh.serviceClient<ohm_tilt_scanner_3d::SrvScanParams>(
 			"scanparamsSrv");
+		_sensor_head_pan_pos_subscriber = _nh.subscribe("pan/pos/present", 10, &TiltScannerMappingState::sensorHeadPanPosCallback, this);
+		_sensor_head_tilt_pos_subscriber = _nh.subscribe("tilt/pos/present", 10, &TiltScannerMappingState::sensorHeadTiltPosCallback, this);
+
+		_sensor_head_pan_vel_publisher = _nh.advertise<std_msgs::Float32>("pan/speed/des", 10);
+		_sensor_head_pan_pos_publisher = _nh.advertise<std_msgs::Float32>("pan/pos/des", 10);
+		_sensor_head_tilt_pos_publisher = _nh.advertise<std_msgs::Float32>("til/pos/des", 10);
+
+		_sensor_head_state = at_start;
+
 		ros::NodeHandle nh("rsm");
 		_navigation_goal_completed_service = nh.serviceClient<
 			rsm_msgs::GoalCompleted>("navigationGoalCompleted");
@@ -27,8 +36,11 @@ namespace rsm
 
 	void TiltScannerMappingState::onEntry()
 	{
+		publishSensorHeadPanVel(PAN_VELOCITY);
+		_sensor_head_state = moving_left;
+
 		ohm_tilt_scanner_3d::SrvScanParams srv;
-		srv.request.speed = 40;
+		srv.request.speed = 30;
 		srv.request.startPosition = 90;
 		srv.request.endPosition = 170;
 		if (!_start_tilt_scan_client.call(srv))
@@ -39,12 +51,17 @@ namespace rsm
 		}
 		else
 		{
-			_tilt_scan_timeout = _nh.createTimer(ros::Duration(5.0), &TiltScannerMappingState::timerCallback, this);
+			_tilt_scan_timeout = _nh.createTimer(ros::Duration(8.0), &TiltScannerMappingState::timerCallback, this);
 		}
 	}
 
 	void TiltScannerMappingState::onActive()
 	{
+		if(_sensor_head_state == at_left){
+			publishSensorHeadPanVel(-PAN_VELOCITY);
+		} else if (_sensor_head_state == at_right){
+			publishSensorHeadPanPos(0.0);
+		}
 	}
 
 	void TiltScannerMappingState::onExit()
@@ -108,11 +125,44 @@ namespace rsm
 		}
 	}
 
+	void TiltScannerMappingState::publishSensorHeadPanVel(float vel){
+		std_msgs::Float32 pan_speed;
+		pan_speed.data = vel;
+		_sensor_head_pan_vel_publisher.publish(pan_speed);
+	}
+
+	void TiltScannerMappingState::publishSensorHeadPanPos(float pos){
+		std_msgs::Float32 pan_pos;
+		pan_pos.data = pos;
+		_sensor_head_pan_pos_publisher.publish(pan_pos);
+	}
+
+	void TiltScannerMappingState::publishSensorHeadTiltPos(float pos){
+		std_msgs::Float32 tilt_pos;
+		tilt_pos.data = pos;
+		_sensor_head_tilt_pos_publisher.publish(tilt_pos);
+	}
+
 	void TiltScannerMappingState::tiltScanCallback(sensor_msgs::PointCloud2::ConstPtr cloud)
 	{
 		_navigation_completed_status = rsm_msgs::GoalStatus::REACHED;
 		_stateinterface->transitionToVolatileState(
 			_stateinterface->getPluginState(CALCULATEGOAL_STATE));
+	}
+
+	void TiltScannerMappingState::sensorHeadPanPosCallback(std_msgs::Float32::ConstPtr pos){
+		if(_sensor_head_state == moving_left && pos->data >= 1.57 ){
+			publishSensorHeadPanVel(0);
+			_sensor_head_state = at_left;
+		} else if(_sensor_head_state == moving_right && pos->data <= -1.57 ){
+			publishSensorHeadPanVel(0);
+			_sensor_head_state = at_right;
+		}
+	}
+
+	void TiltScannerMappingState::sensorHeadTiltPosCallback(std_msgs::Float32::ConstPtr pos){
+		if(pos->data != 0)
+			publishSensorHeadTiltPos(0.0);
 	}
 
 	void TiltScannerMappingState::timerCallback(const ros::TimerEvent &event)
