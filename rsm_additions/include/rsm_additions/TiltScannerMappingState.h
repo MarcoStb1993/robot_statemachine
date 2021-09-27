@@ -12,7 +12,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Float32.h>
 
-#define PAN_VELOCITY 0.05 // rad/s
+#define PAN_VELOCITY 0.15 // rad/s
 
 namespace rsm
 {
