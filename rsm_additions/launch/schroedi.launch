@@ -13,7 +13,7 @@
 	<arg name="waypoint_routines" default="['Reversing']" />
 
 	<include file="$(find rsm_core)/launch/rsm.launch">
-		<arg name="update_frequency" value="20" />
+		<arg name="update_frequency" value="5" />
 		<arg name="robot_frame" value="$(arg robot_frame)" />
 		<arg name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
@@ -35,7 +35,7 @@
 
 	<node pkg="rsm_additions" type="additionsServiceProviderNode"
 		name="additionsServiceProviderNode">
-		<param name="update_frequency" value="20" />
+		<param name="update_frequency" value="5" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
@@ -44,6 +44,12 @@
 			value="$(arg calculate_goal_plugin)" />
 		<param name="exploration_goal_tolerance" type="double"
 			value="0.05" />
+	</node>
+
+
+  <node pkg="rsm_additions" type="odomFromPose" name="odom_from_pose" >
+		<param name="publish_transform" value="false" />
+		<param name="use_scanmatcher" value="true" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"
@@ -70,6 +76,7 @@
 			value="$(arg 
 		robot_frame)" />
 		<remap from="/cmd_vel" to="$(arg autonomy_cmd_vel_topic)" />
+		<remap from="/odom" to="/scan/odom" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"
@@ -100,6 +107,7 @@
 		<remap from="move_base/feedback" to="move_base_reverse/feedback" />
 		<remap from="move_base/status" to="move_base_reverse/status" />
 		<remap from="move_base/result" to="move_base_reverse/result" />
+		<remap from="/odom" to="/scan/odom" />
 	</node>
 
 	<node pkg="tf" type="static_transform_publisher"
