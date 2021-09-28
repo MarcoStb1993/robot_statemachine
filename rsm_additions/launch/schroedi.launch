@@ -26,6 +26,7 @@
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
+		<arg name="teleoperation_idle_timer" value="1.0" />
 	</include>
 
 	<node pkg="rsm_additions" type="bootUpNode" name="bootUpNode"
@@ -54,6 +55,7 @@
 
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base" output="screen">
+		<param name="GlobalPlanner/use_dijkstra " value="true" />
 		<rosparam
 			file="$(find rsm_additions)/config/schroedi/costmap_common.yaml"
 			command="load" ns="global_costmap" />
@@ -81,6 +83,7 @@
 
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base_reverse" output="screen">
+		<param name="GlobalPlanner/use_dijkstra " value="true" />
 		<rosparam
 			file="$(find rsm_additions)/config/schroedi/costmap_common.yaml"
 			command="load" ns="global_costmap" />
