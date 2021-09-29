@@ -184,7 +184,6 @@ namespace rsm
 
 	void TiltScannerMappingState::sensorHeadTiltPosCallback(std_msgs::Float32::ConstPtr pos)
 	{
-		ROS_ERROR_STREAM("sensor head tilt pos current: " << pos->data);
 		if (abs(pos->data) >= 0.01) //~0.57 degrees variation from horizontal
 			publishSensorHeadTiltPos(0.0);
 	}
