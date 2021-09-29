@@ -49,33 +49,11 @@ void publish_odom(ros::Publisher odom_pub, tf::TransformBroadcaster odom_broadca
 
     double vx, vy, vth;
     //calculate velocities from position difference
-    if (cmd_vel[2] != 0)
-    {
-        // calculate vx from circular path, vy=0
-        if (cmd_vel[0] != 0 && delta_th != 0)
-        {
-            vx = (sqrt(delta_x * delta_x + delta_y * delta_y) * delta_th) / (2 * sin(delta_th / 2) * dt);
-            if (cmd_vel[0] < 0)
-            {
-                vx *= -1;
-            }
-        }
-        else
-        {
-            vx = (cos(th) * delta_x - sin(th) * delta_y) / dt;
-        }
-        vy = 0;
-        vth = delta_th / dt;
-    }
-    else
-    {
-        // calculate vx and vy from position difference (expect vth to be 0)
-        double cos_th = cos(th);
-        double sin_th = sin(th);
-        vx = (cos_th * delta_x - sin_th * delta_y) / dt;
-        vy = (sin_th * delta_x + cos_th * delta_y) / dt;
-        vth = delta_th / dt;
-    }
+    double cos_th = cos(th);
+    double sin_th = sin(th);
+    vx = (cos_th * delta_x - sin_th * delta_y) / dt;
+    vy = (sin_th * delta_x + cos_th * delta_y) / dt;
+    vth = delta_th / dt;
 
     nav_msgs::Odometry odom;
     geometry_msgs::Quaternion odom_quat;
