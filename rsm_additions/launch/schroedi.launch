@@ -13,7 +13,7 @@
 	<arg name="waypoint_routines" default="['Reversing']" />
 
 	<include file="$(find rsm_core)/launch/rsm.launch">
-		<arg name="update_frequency" value="20" />
+		<arg name="update_frequency" value="5" />
 		<arg name="robot_frame" value="$(arg robot_frame)" />
 		<arg name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
@@ -26,6 +26,7 @@
 		<arg name="navigation_plugin" value="$(arg navigation_plugin)" />
 		<arg name="mapping_plugin" value="$(arg mapping_plugin)" />
 		<arg name="waypoint_routines" value="$(arg waypoint_routines)" />
+		<arg name="teleoperation_idle_timer" value="1.0" />
 	</include>
 
 	<node pkg="rsm_additions" type="bootUpNode" name="bootUpNode"
@@ -35,7 +36,7 @@
 
 	<node pkg="rsm_additions" type="additionsServiceProviderNode"
 		name="additionsServiceProviderNode">
-		<param name="update_frequency" value="20" />
+		<param name="update_frequency" value="5" />
 		<param name="autonomy_cmd_vel_topic"
 			value="$(arg autonomy_cmd_vel_topic)" />
 		<param name="navigation_plugin" value="$(arg navigation_plugin)" />
@@ -46,8 +47,15 @@
 			value="0.05" />
 	</node>
 
+
+  <node pkg="rsm_additions" type="odomFromPose" name="odom_from_pose" >
+		<param name="publish_transform" value="false" />
+		<param name="use_scanmatcher" value="true" />
+	</node>
+
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base" output="screen">
+		<param name="GlobalPlanner/use_dijkstra " value="true" />
 		<rosparam
 			file="$(find rsm_additions)/config/schroedi/costmap_common.yaml"
 			command="load" ns="global_costmap" />
@@ -70,10 +78,12 @@
 			value="$(arg 
 		robot_frame)" />
 		<remap from="/cmd_vel" to="$(arg autonomy_cmd_vel_topic)" />
+		<remap from="/odom" to="/scan/odom" />
 	</node>
 
 	<node pkg="move_base" type="move_base" respawn="false"
 		name="move_base_reverse" output="screen">
+		<param name="GlobalPlanner/use_dijkstra " value="true" />
 		<rosparam
 			file="$(find rsm_additions)/config/schroedi/costmap_common.yaml"
 			command="load" ns="global_costmap" />
@@ -100,6 +110,7 @@
 		<remap from="move_base/feedback" to="move_base_reverse/feedback" />
 		<remap from="move_base/status" to="move_base_reverse/status" />
 		<remap from="move_base/result" to="move_base_reverse/result" />
+		<remap from="/odom" to="/scan/odom" />
 	</node>
 
 	<node pkg="tf" type="static_transform_publisher"
