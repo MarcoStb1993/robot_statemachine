@@ -8,7 +8,7 @@
 #include <rsm_core/TeleoperationState.h>
 #include <rsm_core/StateInterface.h>
 #include <rsm_msgs/GoalCompleted.h>
-#include <ohm_tilt_scanner_3d/SrvScanParams.h>
+#include <ohm_sensors_msgs/StartTiltScan3D.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Float32.h>
 

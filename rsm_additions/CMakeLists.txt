@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   tf2_ros
   nav_msgs
-  ohm_tilt_scanner_3d
+  ohm_sensors_msgs
 )
 
 

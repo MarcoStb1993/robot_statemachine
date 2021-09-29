@@ -15,7 +15,7 @@ namespace rsm
 	{
 		_tilt_scan_subscriber = _nh.subscribe("cloud2", 10,
 											  &TiltScannerMappingState::tiltScanCallback, this);
-		_start_tilt_scan_client = _nh.serviceClient<ohm_tilt_scanner_3d::SrvScanParams>(
+		_start_tilt_scan_client = _nh.serviceClient<ohm_sensors_msgs::StartTiltScan3D>(
 			"scanparamsSrv");
 		_sensor_head_pan_pos_subscriber = _nh.subscribe("pan/pos/present", 10, &TiltScannerMappingState::sensorHeadPanPosCallback, this);
 		_sensor_head_tilt_pos_subscriber = _nh.subscribe("tilt/pos/present", 10, &TiltScannerMappingState::sensorHeadTiltPosCallback, this);
@@ -39,7 +39,7 @@ namespace rsm
 		publishSensorHeadPanVel(PAN_VELOCITY);
 		_sensor_head_state = moving_left;
 
-		ohm_tilt_scanner_3d::SrvScanParams srv;
+		ohm_sensors_msgs::StartTiltScan3D srv;
 		srv.request.speed = 30;
 		srv.request.startPosition = 90;
 		srv.request.endPosition = 180;

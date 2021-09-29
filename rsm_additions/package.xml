@@ -56,13 +56,13 @@
 	<exec_depend>tf2</exec_depend>
 	<build_depend>tf2_ros</build_depend>
 	<build_export_depend>tf2_ros</build_export_depend>
-	<exec_depend>tf2_ros</exec_depend>	
+	<exec_depend>tf2_ros</exec_depend>
 	<build_depend>nav_msgs</build_depend>
 	<build_export_depend>nav_msgs</build_export_depend>
 	<exec_depend>nav_msgs</exec_depend>
-	<build_depend>ohm_tilt_scanner_3d</build_depend>
-	<build_export_depend>ohm_tilt_scanner_3d</build_export_depend>
-	<exec_depend>ohm_tilt_scanner_3d</exec_depend>
+	<build_depend>ohm_sensors_msgs</build_depend>
+	<build_export_depend>ohm_sensors_msgs</build_export_depend>
+	<exec_depend>ohm_sensors_msgs</exec_depend>
 
 	<export>
 		<rsm_core plugin="${prefix}/rsm_plugins.xml" />
