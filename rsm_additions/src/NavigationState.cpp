@@ -11,7 +11,7 @@ NavigationState::~NavigationState() {
 void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle private_nh("~");
-	private_nh.param("pose_tolerance", _pose_tolerance, 0.01);
+	private_nh.param("pose_tolerance", _pose_tolerance, 0.5);
 	private_nh.param("idle_timer_duration", _idle_timer_duration, 10.0);
 	private_nh.param("unstuck_timer_duration", _unstuck_timer_duration, 5.0);
 	private_nh.param("idle_timer_behavior", _idle_timer_behavior, false);
@@ -108,9 +108,6 @@ void NavigationState::onEntry() {
 			abortNavigation();
 		}
 	}
-	//Start timer for checking navigation being stuck for too long (15 secs) without proper message from Move Base
-	//ROS_WARN_STREAM("Navigation Idle timer started");
-	//_idle_timer.start();
 }
 
 void NavigationState::onActive() {
@@ -192,9 +189,6 @@ void NavigationState::onActive() {
 						}
 					}
 				}
-			} else {
-				//Check if robot moved for navigation failure check
-				comparePose();
 			}
 		} else {
 			//Initialize goal
@@ -204,6 +198,17 @@ void NavigationState::onActive() {
 			goal.target_pose.pose = _nav_goal;
 			_move_base_client->sendGoal(goal);
 			_goal_active = true;
+			rsm_msgs::GetRobotPose srv;
+			if (_get_robot_pose_service.call(srv)) {
+				tf::Pose current_pose;
+				tf::poseMsgToTF(srv.response.pose, current_pose);
+				tf::Matrix3x3 m(current_pose.getRotation());
+				double roll, pitch, yaw;
+				m.getRPY(roll, pitch, yaw);
+				_last_position = current_pose.getOrigin();
+				_last_yaw = yaw;
+			}
+			//Start timer for checking navigation being stuck for too long without proper message from Move Base
 			_idle_timer.start();
 		}
 	}
@@ -335,6 +340,12 @@ void NavigationState::onInterrupt(int interrupt) {
 }
 
 void NavigationState::idleTimerCallback(const ros::TimerEvent &event) {
+	ROS_INFO_STREAM("Idle timer callback");
+	if (comparePose()) { //restart timer if robot did move
+		_idle_timer.stop();
+		_idle_timer.start();
+		return;
+	}
 	ROS_WARN("Navigation aborted because robot appears to be stuck");
 	if (!_unstucking_executed && !_unstucking_robot) {
 		//try reverse navigation
@@ -392,44 +403,39 @@ void NavigationState::unstuckTimerCallback(const ros::TimerEvent &event) {
 	_unstucking_executed = true;
 }
 
-void NavigationState::comparePose() {
+bool NavigationState::comparePose() {
 	if (_operation_mode == rsm_msgs::OperationMode::AUTONOMOUS) {
-		if (_comparison_counter++ >= 10) { //only compare poses every 10th call to reduce load
-			tf::Pose current_pose;
-			rsm_msgs::GetRobotPose srv;
-			if (_get_robot_pose_service.call(srv)) {
-				tf::poseMsgToTF(srv.response.pose, current_pose);
-				tf::Pose pose_difference = current_pose.inverseTimes(
-						_last_pose);
-				if (pose_difference.getOrigin().x() < _pose_tolerance
-						&& pose_difference.getOrigin().y() < _pose_tolerance
-						&& pose_difference.getOrigin().z() < _pose_tolerance
-						&& pose_difference.getRotation().x() < _pose_tolerance
-						&& pose_difference.getRotation().y() < _pose_tolerance
-						&& pose_difference.getRotation().z()
-								< _pose_tolerance) {
-					_idle_timer.start();
-				} else {
-					_idle_timer.stop();
-					if (!_robot_did_move
-							&& _last_pose.getRotation().w() != 0.0) { //not initial
-						_robot_did_move = true;
-					}
-				}
-				_last_pose = current_pose;
-				_comparison_counter = 0;
+		tf::Pose current_pose;
+		rsm_msgs::GetRobotPose srv;
+		if (_get_robot_pose_service.call(srv)) {
+			tf::poseMsgToTF(srv.response.pose, current_pose);
+			tf::Matrix3x3 m(current_pose.getRotation());
+			double roll, pitch, yaw;
+			m.getRPY(roll, pitch, yaw);
+			if (std::abs(current_pose.getOrigin().x() - _last_position.x())
+					> _pose_tolerance
+					|| std::abs(
+							current_pose.getOrigin().y() - _last_position.y())
+							> _pose_tolerance
+					|| std::abs(yaw - _last_yaw) < _pose_tolerance) {
+				_robot_did_move = true;
+				_last_position = current_pose.getOrigin();
+				_last_yaw = yaw;
+				return true;
 			} else {
-				ROS_ERROR("Failed to call Get Robot Pose service");
+				return false;
 			}
+		} else {
+			ROS_ERROR("Failed to call Get Robot Pose service");
 		}
-	} else {
-		_idle_timer.stop();
 	}
+	return true;
 }
 
 void NavigationState::goalObsoleteCallback(
 		const std_msgs::Bool::ConstPtr &msg) {
 	if (msg->data && !_interrupt_occured) {
+		comparePose(); //check if robot moved
 		_navigation_completed_status = rsm_msgs::GoalStatus::ABORTED;
 		_stateinterface->transitionToVolatileState(
 				_stateinterface->getPluginState(

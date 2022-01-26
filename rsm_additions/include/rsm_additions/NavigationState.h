@@ -119,13 +119,13 @@ private:
 	 */
 	std::string _routine;
 	/**
-	 * Last pose of the robot
+	 * Last position of the robot
 	 */
-	tf::Pose _last_pose;
+	tf::Vector3 _last_position;
 	/**
-	 * Counter for comparing last with current pose only every 5th call
+	 * Last yaw orientation of the robot
 	 */
-	int _comparison_counter;
+	double _last_yaw;
 	/**
 	 * Mode of exploration (0=complete goal, 1=interrupt goal when frontier vanished)
 	 */
@@ -204,9 +204,10 @@ private:
 	 */
 	void abortNavigation();
 	/**
-	 * Check if the robot's pose changed and reset idle timer if it did, restart it if not
+	 * Check if the robot's pose changed since the start of navigation or since the last comparison
+	 * @return If the robot's pose changed
 	 */
-	void comparePose();
+	bool comparePose();
 };
 
 }
