@@ -340,7 +340,6 @@ void NavigationState::onInterrupt(int interrupt) {
 }
 
 void NavigationState::idleTimerCallback(const ros::TimerEvent &event) {
-	ROS_INFO_STREAM("Idle timer callback");
 	if (comparePose()) { //restart timer if robot did move
 		_idle_timer.stop();
 		_idle_timer.start();
