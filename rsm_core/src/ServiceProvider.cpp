@@ -165,7 +165,7 @@ bool ServiceProvider::waypointUnreachable(
 
 bool ServiceProvider::resetWaypoints(std_srvs::Trigger::Request &req,
 		std_srvs::Trigger::Response &res) {
-	for (auto& it : _waypoint_array.waypoints) {
+	for (auto &it : _waypoint_array.waypoints) {
 		it.visited = false;
 		it.unreachable = false;
 	}
@@ -239,7 +239,15 @@ bool ServiceProvider::NavigationGoalCompleted(
 		rsm_msgs::GoalCompleted::Response &res) {
 	switch (_navigation_mode) {
 	case 0: { //Exploration
-		_exploration_goal_completed_msg.goal_status = req.status.goal_status;
+		if (req.navigation_status
+				|| _exploration_goal_completed_msg.goal_status
+						== rsm_msgs::GoalStatus::ACTIVE
+				|| (req.status.goal_status == rsm_msgs::GoalStatus::ABORTED
+						&& _exploration_goal_completed_msg.goal_status
+								== rsm_msgs::GoalStatus::REACHED)) //only take mapping state if succeeded or aborted during mapping
+
+			_exploration_goal_completed_msg.goal_status =
+					req.status.goal_status;
 		res.message = "Exploration goal completed";
 		break;
 	}

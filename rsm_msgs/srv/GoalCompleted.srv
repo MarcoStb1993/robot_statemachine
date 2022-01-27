@@ -1,4 +1,5 @@
 rsm_msgs/GoalStatus status			# Goal status
+bool navigation_status				# If goal status originates from navigation state (true) or other (false)
 ---
 bool success                        # Indicate successful run of triggered service
 string message                      # Informational, e.g. for error messages
