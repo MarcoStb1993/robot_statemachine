@@ -29,8 +29,6 @@ void MappingDummyState::onActive() {
 }
 
 void MappingDummyState::onExit() {
-	ROS_INFO_STREAM(
-			"Mapping exit with status "<< (int)_navigation_completed_status);
 	rsm_msgs::GoalCompleted srv;
 	srv.request.status.goal_status = _navigation_completed_status;
 	srv.request.navigation_status = false;
