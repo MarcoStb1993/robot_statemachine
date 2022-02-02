@@ -11,7 +11,7 @@ NavigationState::~NavigationState() {
 void NavigationState::onSetup() {
 	//initialize services, publisher and subscriber
 	ros::NodeHandle private_nh("~");
-	private_nh.param("pose_tolerance", _pose_tolerance, 0.5);
+	private_nh.param("pose_tolerance", _pose_tolerance, 0.1);
 	private_nh.param("idle_timer_duration", _idle_timer_duration, 10.0);
 	private_nh.param("unstuck_timer_duration", _unstuck_timer_duration, 5.0);
 	private_nh.param("idle_timer_behavior", _idle_timer_behavior, false);
