@@ -205,7 +205,7 @@ private:
 	void abortNavigation();
 	/**
 	 * Check if the robot's pose changed since the start of navigation or since the last comparison
-	 * @return If the robot's pose changed
+	 * @return True if the robot's pose changed or the operation mode is not autonomous
 	 */
 	bool comparePose();
 };

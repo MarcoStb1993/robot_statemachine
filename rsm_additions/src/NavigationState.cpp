@@ -190,8 +190,7 @@ void NavigationState::onActive() {
 					}
 				}
 			}
-		} else {
-			//Initialize goal
+		} else { //Initialize goal
 			move_base_msgs::MoveBaseGoal goal;
 			goal.target_pose.header.frame_id = "map";
 			goal.target_pose.header.stamp = ros::Time::now();
@@ -346,7 +345,6 @@ void NavigationState::idleTimerCallback(const ros::TimerEvent &event) {
 		_idle_timer.start();
 		return;
 	}
-	ROS_WARN("Navigation aborted because robot appears to be stuck");
 	if (!_unstucking_executed && !_unstucking_robot) {
 		//try reverse navigation
 		ROS_WARN("Try to unstuck robot by using reversed move base");
@@ -364,6 +362,7 @@ void NavigationState::idleTimerCallback(const ros::TimerEvent &event) {
 		_unstucking_robot = true;
 		_idle_timer.start();
 	} else {
+		ROS_WARN("Navigation aborted because robot appears to be stuck");
 		if (_idle_timer_behavior) {	//end navigation
 			abortNavigation();
 		} else { //declare goal as failed
@@ -412,12 +411,12 @@ bool NavigationState::comparePose() {
 			tf::Matrix3x3 m(current_pose.getRotation());
 			double roll, pitch, yaw;
 			m.getRPY(roll, pitch, yaw);
-			if (std::abs(current_pose.getOrigin().x() - _last_position.x())
+			if (std::abs(current_pose.getOrigin().y() - _last_position.y())
 					> _pose_tolerance
 					|| std::abs(
 							current_pose.getOrigin().y() - _last_position.y())
 							> _pose_tolerance
-					|| std::abs(yaw - _last_yaw) < _pose_tolerance) {
+					|| std::abs(yaw - _last_yaw) > _pose_tolerance) {
 				_robot_did_move = true;
 				_last_position = current_pose.getOrigin();
 				_last_yaw = yaw;
