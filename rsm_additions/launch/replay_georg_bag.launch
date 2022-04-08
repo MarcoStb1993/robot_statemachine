@@ -1,0 +1,29 @@
+<!-- Launches RViz and a bag including visualization nodes -->
+<launch>
+    <node pkg="rosbag" type="play" name="rosbag_play" args="--clock /home/marco/Documents/bags/office7_2022-04-08-11-15-02.bag" />
+
+    <!-- Octomap -->
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <param name="resolution" value="0.1" />
+        <param name="frame_id" type="string" value="map" />
+        <param name="sensor_model/min_range" value="0.5" />
+        <param name="sensor_model/max_range" value="100.0" />
+        <param name="latch" value="false" />
+        <param name="filter_ground" value="false" />
+        <remap from="cloud_in" to="/puck_rear/crop_box_out" />
+        <param name="publish_free_space" value="true" />
+    </node>
+
+    <node pkg="rrg_nbv_exploration" type="rneVisualizationNode" name="rneVisualizationNode" output="screen">
+        <param name="robot_radius" type="double" value="0.39" />
+        <param name="grid_map_occupied" type="int" value="90" />
+        <param name="show_gain_info" type="bool" value="false" />
+        <param name="show_distance_info" type="bool" value="false" />
+        <param name="show_traversability_info" type="bool" value="false" />
+        <param name="show_heading_info" type="bool" value="false" />
+        <param name="show_radius_info" type="bool" value="false" />
+        <param name="show_cost_info" type="bool" value="false" />
+    </node>
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rsm_additions)/config/georg_commander.rviz" />
+</launch>

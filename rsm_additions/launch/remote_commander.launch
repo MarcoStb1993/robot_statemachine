@@ -1,0 +1,26 @@
+<!-- Launches RViz and joy to control a robot remotely with the Robot Statemachine -->
+
+<launch>
+    <arg name="joy" default="false" />
+
+    <node if="$(arg joy)" pkg="joy" type="joy_node" name="joy_node">
+        <param name="dev" type="string" value="/dev/input/js0" />
+        <param name="autorepeat_rate" type="double" value="20.0" />
+    </node>
+
+    <!-- Teleop -->
+    <node pkg="undromeda" type="teleopNode" name="teleopNode">
+        <param name="joy_topic" type="string" value="/joy" />
+        <param name="vel_topic" type="string" value="/vel/teleop" />
+        <param name="angular_scale" type="double" value="1.0" />
+        <param name="linear_scale" type="double" value="1.0" />
+        <param name="simulation" type="bool" value="false" />
+    </node>
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rsm_additions)/config/georg_commander.rviz">
+        <remap from="/move_base_simple/goal" to="/rsm/simpleGoal" />
+    </node>
+    <include file="$(find rsm_rviz_plugins)/launch/rsm_rviz_plugins.launch">
+        <arg name="update_frequency" value="20" />
+    </include>
+</launch>
